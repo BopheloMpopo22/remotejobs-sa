@@ -232,7 +232,6 @@ const JobList: React.FC<JobListProps> = ({ jobs, loading, error }) => {
       <div className="jobs-grid">
         {jobs.map((job) => {
           const directUrl = getDirectJobUrl(job.redirect_url);
-          const jobSource = getJobSource(job.redirect_url);
 
           return (
             <div key={job.id} className="job-card">
