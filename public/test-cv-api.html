@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CV Generator API Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .test-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+      .test-section h3 {
+        margin-top: 0;
+        color: #333;
+      }
+      button {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 10px 5px;
+      }
+      button:hover {
+        background: #059669;
+      }
+      .result {
+        margin-top: 15px;
+        padding: 15px;
+        border-radius: 6px;
+        font-family: monospace;
+        white-space: pre-wrap;
+      }
+      .success {
+        background: #d1fae5;
+        border: 1px solid #10b981;
+        color: #065f46;
+      }
+      .error {
+        background: #fee2e2;
+        border: 1px solid #ef4444;
+        color: #991b1b;
+      }
+      .loading {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        color: #92400e;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 Backend API Tests</h1>
+      <p>
+        Test the database connection and API endpoints for your Remote Jobs SA
+        application.
+      </p>
+
+      <div class="test-section">
+        <h3>1. Database Connection Test</h3>
+        <p>Test if Supabase database is connected properly.</p>
+        <button onclick="testDatabase()">Test Database Connection</button>
+        <div id="db-result" class="result" style="display: none"></div>
+      </div>
+
+      <div class="test-section">
+        <h3>2. CV Generator API Test</h3>
+        <p>Test the CV Generator endpoint with sample data.</p>
+        <button onclick="testCVGenerator()">Test CV Generator API</button>
+        <div id="cv-result" class="result" style="display: none"></div>
+      </div>
+
+      <div class="test-section">
+        <h3>3. Job Assistant API Test</h3>
+        <p>Test the Job Assistant endpoint with sample data.</p>
+        <button onclick="testJobAssistant()">Test Job Assistant API</button>
+        <div id="job-result" class="result" style="display: none"></div>
+      </div>
+
+      <div class="test-section">
+        <h3>4. Check Database Records</h3>
+        <p>View all records in the database tables.</p>
+        <button onclick="checkRecords()">Check Database Records</button>
+        <div id="records-result" class="result" style="display: none"></div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = window.location.origin;
+
+      function showResult(elementId, data, isError = false) {
+        const element = document.getElementById(elementId);
+        element.style.display = "block";
+        element.className = `result ${isError ? "error" : "success"}`;
+        element.textContent = JSON.stringify(data, null, 2);
+      }
+
+      function showLoading(elementId) {
+        const element = document.getElementById(elementId);
+        element.style.display = "block";
+        element.className = "result loading";
+        element.textContent = "Testing... Please wait...";
+      }
+
+      async function testDatabase() {
+        showLoading("db-result");
+        try {
+          const response = await fetch(`${API_BASE}/api/test-db`);
+          const data = await response.json();
+          showResult("db-result", data, !response.ok);
+        } catch (error) {
+          showResult("db-result", { error: error.message }, true);
+        }
+      }
+
+      async function testCVGenerator() {
+        showLoading("cv-result");
+        try {
+          const testData = {
+            cvData: {
+              personalInfo: {
+                fullName: "John Doe",
+                email: "john.doe@example.com",
+                phone: "+27 123 456 789",
+                location: "Cape Town, South Africa",
+                linkedin: "linkedin.com/in/johndoe",
+                portfolio: "johndoe.dev",
+              },
+              summary:
+                "Experienced software developer with 5+ years in web development.",
+              experience: [
+                {
+                  company: "Tech Company",
+                  position: "Senior Developer",
+                  startDate: "2022-01",
+                  endDate: "2024-01",
+                  current: false,
+                  description:
+                    "Led development of web applications using React and Node.js",
+                },
+              ],
+              education: [
+                {
+                  institution: "University of Cape Town",
+                  degree: "Bachelor of Science",
+                  field: "Computer Science",
+                  graduationYear: "2019",
+                },
+              ],
+              skills: ["JavaScript", "React", "Node.js", "Python"],
+              languages: ["English", "Afrikaans"],
+            },
+            userEmail: "john.doe@example.com",
+          };
+
+          const response = await fetch(`${API_BASE}/api/cv-generator`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(testData),
+          });
+          const data = await response.json();
+          showResult("cv-result", data, !response.ok);
+        } catch (error) {
+          showResult("cv-result", { error: error.message }, true);
+        }
+      }
+
+      async function testJobAssistant() {
+        showLoading("job-result");
+        try {
+          const testData = {
+            fullName: "Jane Smith",
+            email: "jane.smith@example.com",
+            phone: "+27 987 654 321",
+            location: "Johannesburg, South Africa",
+            desiredPosition: "Frontend Developer",
+            experience: "3-5 years",
+            salary: "R40000-R60000",
+            remotePreference: "Hybrid",
+            industries: ["Technology/IT", "Finance"],
+            additionalNotes:
+              "Looking for remote opportunities in React development",
+            cvFileName: "jane_smith_cv.pdf",
+          };
+
+          const response = await fetch(`${API_BASE}/api/job-assistant`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(testData),
+          });
+          const data = await response.json();
+          showResult("job-result", data, !response.ok);
+        } catch (error) {
+          showResult("job-result", { error: error.message }, true);
+        }
+      }
+
+      async function checkRecords() {
+        showLoading("records-result");
+        try {
+          const response = await fetch(`${API_BASE}/api/test-db`);
+          const data = await response.json();
+          showResult("records-result", data, !response.ok);
+        } catch (error) {
+          showResult("records-result", { error: error.message }, true);
+        }
+      }
+    </script>
+  </body>
+</html>
