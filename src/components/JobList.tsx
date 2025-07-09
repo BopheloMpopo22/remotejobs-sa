@@ -114,40 +114,6 @@ const JobList: React.FC<JobListProps> = ({ jobs, loading, error }) => {
     }
   };
 
-  // Function to get job source name
-  const getJobSource = (redirectUrl: string): string => {
-    try {
-      const directUrl = getDirectJobUrl(redirectUrl);
-      const url = new URL(directUrl);
-
-      // Extract domain name for display
-      const domain = url.hostname.replace("www.", "");
-
-      // Map common job sites to friendly names
-      const siteNames: { [key: string]: string } = {
-        "linkedin.com": "LinkedIn",
-        "indeed.com": "Indeed",
-        "glassdoor.com": "Glassdoor",
-        "careerbuilder.com": "CareerBuilder",
-        "monster.com": "Monster",
-        "ziprecruiter.com": "ZipRecruiter",
-        "simplyhired.com": "SimplyHired",
-        "dice.com": "Dice",
-        "stackoverflow.com": "Stack Overflow",
-        "weworkremotely.com": "We Work Remotely",
-        "remote.co": "Remote.co",
-        "angel.co": "AngelList",
-        "adzuna.co.za": "Adzuna",
-        "adzuna.co.uk": "Adzuna",
-        "adzuna.com": "Adzuna",
-      };
-
-      return siteNames[domain] || domain;
-    } catch (error) {
-      return "Job Site";
-    }
-  };
-
   if (loading) {
     return (
       <div className="jobs-container">
