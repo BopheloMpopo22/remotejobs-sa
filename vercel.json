@@ -5,6 +5,9 @@
     },
     "api/job-assistant.js": {
       "runtime": "nodejs18.x"
+    },
+    "api/test-db.js": {
+      "runtime": "nodejs18.x"
     }
   },
   "env": {
