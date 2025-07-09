@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "api/cv-generator.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/job-assistant.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "env": {
+    "VITE_SUPABASE_URL": "@vite_supabase_url",
+    "VITE_SUPABASE_ANON_KEY": "@vite_supabase_anon_key"
+  }
+}

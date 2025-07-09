@@ -68,14 +68,42 @@ const JobAssistant: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real implementation, this would send to your backend
-    // For now, we'll just show a success message
-    setSubmitted(true);
 
-    // Simulate sending email (in real app, this would be handled by backend)
-    console.log("Job Assistant Application:", formData);
+    try {
+      const response = await fetch("/api/job-assistant", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          location: formData.location,
+          desiredPosition: formData.desiredPosition,
+          experience: formData.experience,
+          salary: formData.salary,
+          remotePreference: formData.remotePreference,
+          industries: formData.industries,
+          additionalNotes: formData.additionalNotes,
+          cvFileName: formData.cvFileName,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit application");
+      }
+
+      const result = await response.json();
+      console.log("Application submitted with ID:", result.applicationId);
+
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      alert("Error submitting application. Please try again.");
+    }
   };
 
   if (submitted) {
