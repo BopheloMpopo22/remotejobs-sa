@@ -1,13 +1,1 @@
-{
-  "functions": {
-    "api/cv-generator.js": {
-      "runtime": "@vercel/node@3.0.0"
-    },
-    "api/job-assistant.js": {
-      "runtime": "@vercel/node@3.0.0"
-    },
-    "api/test-db.js": {
-      "runtime": "@vercel/node@3.0.0"
-    }
-  }
-}
+{}
