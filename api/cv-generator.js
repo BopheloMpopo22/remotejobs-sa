@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import puppeteer from "puppeteer";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
@@ -38,7 +39,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { cvData, userEmail, pdfData, pdfFileName } = req.body;
+    const { cvData, userEmail } = req.body;
 
     if (!cvData || !userEmail) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -48,57 +49,214 @@ export default async function handler(req, res) {
 
     let pdfFileUrl = null;
 
-    // Upload PDF file to Supabase Storage if provided
-    if (pdfData && pdfFileName) {
-      try {
-        console.log("Uploading generated PDF to Supabase Storage...");
-        console.log("PDF file name:", pdfFileName);
-        console.log("PDF data length:", pdfData.length);
+    // Generate PDF on server side
+    try {
+      console.log("Generating PDF on server side...");
 
-        // Convert base64 to buffer
-        const fileBuffer = Buffer.from(pdfData.split(",")[1], "base64");
-        console.log("PDF buffer size:", fileBuffer.length);
+      // Create HTML content for PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>${cvData.personalInfo.fullName} - CV</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+            .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+            .header-content { display: flex; align-items: center; gap: 30px; }
+            .photo { flex-shrink: 0; }
+            .info { flex-grow: 1; }
+            .name { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; }
+            .contact { font-size: 1.1em; color: #666; }
+            .section { margin-bottom: 30px; }
+            .section-title { font-size: 1.5em; font-weight: bold; border-bottom: 1px solid #ccc; margin-bottom: 15px; padding-bottom: 5px; }
+            .experience-item, .education-item { margin-bottom: 20px; }
+            .job-title { font-weight: bold; font-size: 1.1em; }
+            .company { font-weight: bold; color: #333; }
+            .date { color: #666; font-style: italic; }
+            .description { margin-top: 10px; }
+            .skills-list, .languages-list { display: flex; flex-wrap: wrap; gap: 10px; }
+            .skill, .language { background: #f0f0f0; padding: 5px 10px; border-radius: 15px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="header-content">
+              ${
+                cvData.personalInfo.photo
+                  ? `<div class="photo"><img src="${cvData.personalInfo.photo}" alt="Profile Photo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;"></div>`
+                  : ""
+              }
+              <div class="info">
+                <div class="name">${cvData.personalInfo.fullName}</div>
+                <div class="contact">
+                  ${cvData.personalInfo.email}<br>
+                  ${cvData.personalInfo.phone}<br>
+                  ${cvData.personalInfo.location}<br>
+                  ${
+                    cvData.personalInfo.linkedin
+                      ? `LinkedIn: ${cvData.personalInfo.linkedin}<br>`
+                      : ""
+                  }
+                  ${
+                    cvData.personalInfo.portfolio
+                      ? `Portfolio: ${cvData.personalInfo.portfolio}`
+                      : ""
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
 
-        // Generate unique filename
-        const timestamp = Date.now();
-        const uniqueFileName = `${timestamp}_${pdfFileName}`;
-        console.log("Unique PDF filename:", uniqueFileName);
+          ${
+            cvData.summary
+              ? `
+          <div class="section">
+            <div class="section-title">Professional Summary</div>
+            <p>${cvData.summary}</p>
+          </div>
+          `
+              : ""
+          }
 
-        // Upload to Supabase Storage
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("cv-files")
-          .upload(uniqueFileName, fileBuffer, {
-            contentType: "application/pdf",
-            cacheControl: "3600",
-            upsert: false,
-          });
+          ${
+            cvData.experience.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title">Professional Experience</div>
+            ${cvData.experience
+              .map(
+                (exp) => `
+              <div class="experience-item">
+                <div class="job-title">${exp.position}</div>
+                <div class="company">${exp.company}</div>
+                <div class="date">${exp.startDate} - ${
+                  exp.current ? "Present" : exp.endDate
+                }</div>
+                <div class="description">${exp.description}</div>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+          `
+              : ""
+          }
 
-        if (uploadError) {
-          console.error("Storage upload error:", uploadError);
-          return res.status(500).json({
-            error: "Failed to upload PDF file",
-            details: uploadError.message,
-          });
-        }
+          ${
+            cvData.education.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title">Education</div>
+            ${cvData.education
+              .map(
+                (edu) => `
+              <div class="education-item">
+                <div class="job-title">${edu.degree} in ${edu.field}</div>
+                <div class="company">${edu.institution}</div>
+                <div class="date">${edu.graduationYear}</div>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+          `
+              : ""
+          }
 
-        console.log("PDF upload successful, upload data:", uploadData);
+          ${
+            cvData.skills.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title">Skills</div>
+            <div class="skills-list">
+              ${cvData.skills
+                .map((skill) => `<span class="skill">${skill}</span>`)
+                .join("")}
+            </div>
+          </div>
+          `
+              : ""
+          }
 
-        // Get public URL for the uploaded file
-        const { data: urlData } = supabase.storage
-          .from("cv-files")
-          .getPublicUrl(uniqueFileName);
+          ${
+            cvData.languages.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title">Languages</div>
+            <div class="languages-list">
+              ${cvData.languages
+                .map((lang) => `<span class="language">${lang}</span>`)
+                .join("")}
+            </div>
+          </div>
+          `
+              : ""
+          }
+        </body>
+        </html>
+      `;
 
-        pdfFileUrl = urlData.publicUrl;
-        console.log("PDF file uploaded successfully:", pdfFileUrl);
-      } catch (uploadError) {
-        console.error("PDF file upload error:", uploadError);
+      // Generate PDF using Puppeteer
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      });
+
+      const page = await browser.newPage();
+      await page.setContent(htmlContent);
+
+      const pdfBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: {
+          top: "20mm",
+          right: "20mm",
+          bottom: "20mm",
+          left: "20mm",
+        },
+      });
+
+      await browser.close();
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const pdfFileName = `${timestamp}_${cvData.personalInfo.fullName.replace(
+        /\s+/g,
+        "_"
+      )}_CV.pdf`;
+
+      console.log("PDF generated, uploading to storage...");
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("cv-files")
+        .upload(pdfFileName, pdfBuffer, {
+          contentType: "application/pdf",
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Storage upload error:", uploadError);
         return res.status(500).json({
           error: "Failed to upload PDF file",
           details: uploadError.message,
         });
       }
-    } else {
-      console.log("No PDF file data provided");
+
+      console.log("PDF upload successful, upload data:", uploadData);
+
+      // Get public URL for the uploaded file
+      const { data: urlData } = supabase.storage
+        .from("cv-files")
+        .getPublicUrl(pdfFileName);
+
+      pdfFileUrl = urlData.publicUrl;
+      console.log("PDF file uploaded successfully:", pdfFileUrl);
+    } catch (pdfError) {
+      console.error("PDF generation error:", pdfError);
+      // Continue without PDF if generation fails
     }
 
     // Store CV data in Supabase
