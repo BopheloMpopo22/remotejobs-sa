@@ -159,6 +159,8 @@ const CVGenerator: React.FC = () => {
 
   const generatePDF = async () => {
     try {
+      console.log("Starting PDF generation...");
+
       const cvHTML = `
         <!DOCTYPE html>
         <html>
@@ -302,6 +304,8 @@ const CVGenerator: React.FC = () => {
         </html>
       `;
 
+      console.log("HTML generated, creating temporary div...");
+
       // Create a temporary div to render the HTML
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = cvHTML;
@@ -309,19 +313,33 @@ const CVGenerator: React.FC = () => {
       tempDiv.style.left = "-9999px";
       tempDiv.style.top = "0";
       tempDiv.style.width = "800px";
+      tempDiv.style.backgroundColor = "white";
       document.body.appendChild(tempDiv);
 
-      // Convert HTML to canvas
+      console.log("Converting HTML to canvas...");
+
+      // Convert HTML to canvas with better error handling
       const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         width: 800,
         height: tempDiv.scrollHeight,
+        backgroundColor: "#ffffff",
+        logging: true, // Enable logging for debugging
       });
+
+      console.log(
+        "Canvas created, dimensions:",
+        canvas.width,
+        "x",
+        canvas.height
+      );
 
       // Remove the temporary div
       document.body.removeChild(tempDiv);
+
+      console.log("Creating PDF...");
 
       // Create PDF
       const imgData = canvas.toDataURL("image/png");
@@ -342,6 +360,8 @@ const CVGenerator: React.FC = () => {
         pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
       }
+
+      console.log("PDF created, converting to base64...");
 
       // Convert PDF to base64 for storage
       const pdfBase64 = pdf.output("datauristring");
@@ -367,7 +387,11 @@ const CVGenerator: React.FC = () => {
       });
 
       if (!saveResponse.ok) {
-        throw new Error("Failed to save CV data");
+        const errorData = await saveResponse.json();
+        console.error("API Error:", errorData);
+        throw new Error(
+          `Failed to save CV data: ${errorData.error || "Unknown error"}`
+        );
       }
 
       const saveResult = await saveResponse.json();
@@ -383,7 +407,14 @@ const CVGenerator: React.FC = () => {
       );
     } catch (error) {
       console.error("Error generating CV:", error);
-      alert("Error generating CV. Please try again.");
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      alert(
+        `Error generating CV: ${errorMessage}. Falling back to HTML version.`
+      );
+
+      // Fallback to HTML generation
+      generateHTML();
     }
   };
 
