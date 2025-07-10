@@ -50,6 +50,8 @@ export default async function handler(req, res) {
       industries,
       additionalNotes,
       cvFileName,
+      cvFileData, // Base64 encoded file data
+      cvFileType, // MIME type of the file
     } = req.body;
 
     if (!fullName || !email || !desiredPosition) {
@@ -57,6 +59,64 @@ export default async function handler(req, res) {
     }
 
     console.log("Attempting to insert job assistant application...");
+
+    let cvFileUrl = null;
+
+    // Upload CV file to Supabase Storage if provided
+    if (cvFileData && cvFileName) {
+      try {
+        console.log("Uploading CV file to Supabase Storage...");
+        console.log("File name:", cvFileName);
+        console.log("File type:", cvFileType);
+        console.log("File data length:", cvFileData.length);
+
+        // Convert base64 to buffer
+        const fileBuffer = Buffer.from(cvFileData.split(",")[1], "base64");
+        console.log("File buffer size:", fileBuffer.length);
+
+        // Generate unique filename
+        const timestamp = Date.now();
+        const uniqueFileName = `${timestamp}_${cvFileName}`;
+        console.log("Unique filename:", uniqueFileName);
+
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("cv-files")
+          .upload(uniqueFileName, fileBuffer, {
+            contentType: cvFileType || "application/pdf",
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (uploadError) {
+          console.error("Storage upload error:", uploadError);
+          return res.status(500).json({
+            error: "Failed to upload CV file",
+            details: uploadError.message,
+          });
+        }
+
+        console.log("Upload successful, upload data:", uploadData);
+
+        // Get public URL for the uploaded file
+        const { data: urlData } = supabase.storage
+          .from("cv-files")
+          .getPublicUrl(uniqueFileName);
+
+        cvFileUrl = urlData.publicUrl;
+        console.log("CV file uploaded successfully:", cvFileUrl);
+      } catch (uploadError) {
+        console.error("File upload error:", uploadError);
+        return res.status(500).json({
+          error: "Failed to upload CV file",
+          details: uploadError.message,
+        });
+      }
+    } else {
+      console.log("No CV file data provided");
+      console.log("cvFileData exists:", !!cvFileData);
+      console.log("cvFileName exists:", !!cvFileName);
+    }
 
     // Store job assistant application in Supabase
     const { data, error } = await supabase
@@ -74,6 +134,7 @@ export default async function handler(req, res) {
           industries: industries || [],
           additional_notes: additionalNotes || null,
           cv_file_name: cvFileName || null,
+          cv_file_url: cvFileUrl, // Store the public URL
           status: "pending",
           created_at: new Date().toISOString(),
           applications_sent: 0,
@@ -98,6 +159,7 @@ export default async function handler(req, res) {
       success: true,
       message: "Job assistant application submitted successfully",
       applicationId: data[0].id,
+      cvFileUrl: cvFileUrl, // Return the file URL
     });
   } catch (error) {
     console.error("Job Assistant API error:", error);

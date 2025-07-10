@@ -72,38 +72,78 @@ const JobAssistant: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/job-assistant", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          location: formData.location,
-          desiredPosition: formData.desiredPosition,
-          experience: formData.experience,
-          salary: formData.salary,
-          remotePreference: formData.remotePreference,
-          industries: formData.industries,
-          additionalNotes: formData.additionalNotes,
-          cvFileName: formData.cvFileName,
-        }),
-      });
+      // Prepare form data
+      const formDataToSend: any = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        location: formData.location,
+        desiredPosition: formData.desiredPosition,
+        experience: formData.experience,
+        salary: formData.salary,
+        remotePreference: formData.remotePreference,
+        industries: formData.industries,
+        additionalNotes: formData.additionalNotes,
+        cvFileName: formData.cvFileName,
+      };
 
-      if (!response.ok) {
-        throw new Error("Failed to submit application");
+      // If CV file is uploaded, convert it to base64
+      if (formData.cvFile) {
+        console.log(
+          "CV file found:",
+          formData.cvFile.name,
+          formData.cvFile.size,
+          formData.cvFile.type
+        );
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const base64Data = event.target?.result as string;
+          console.log("File converted to base64, length:", base64Data.length);
+
+          // Add file data to form data
+          formDataToSend.cvFileData = base64Data;
+          formDataToSend.cvFileType =
+            formData.cvFile?.type || "application/pdf";
+
+          console.log("Sending form data with file:", {
+            cvFileName: formDataToSend.cvFileName,
+            cvFileType: formDataToSend.cvFileType,
+            hasFileData: !!formDataToSend.cvFileData,
+          });
+
+          // Send the complete data
+          await sendFormData(formDataToSend);
+        };
+        reader.readAsDataURL(formData.cvFile);
+      } else {
+        console.log("No CV file uploaded");
+        // No file uploaded, send data directly
+        await sendFormData(formDataToSend);
       }
-
-      const result = await response.json();
-      console.log("Application submitted with ID:", result.applicationId);
-
-      setSubmitted(true);
     } catch (error) {
       console.error("Error submitting application:", error);
       alert("Error submitting application. Please try again.");
     }
+  };
+
+  const sendFormData = async (data: any) => {
+    const response = await fetch("/api/job-assistant", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to submit application");
+    }
+
+    const result = await response.json();
+    console.log("Application submitted with ID:", result.applicationId);
+    console.log("CV file URL:", result.cvFileUrl);
+
+    setSubmitted(true);
   };
 
   if (submitted) {
