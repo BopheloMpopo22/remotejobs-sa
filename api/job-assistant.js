@@ -10,9 +10,17 @@ console.log("SUPABASE_ANON_KEY:", supabaseKey ? "SET" : "NOT SET");
 
 if (!supabaseUrl || !supabaseKey) {
   console.error("Missing Supabase environment variables");
+  throw new Error("Missing Supabase environment variables");
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+let supabase;
+try {
+  supabase = createClient(supabaseUrl, supabaseKey);
+  console.log("Supabase client created successfully");
+} catch (error) {
+  console.error("Error creating Supabase client:", error);
+  throw error;
+}
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -48,6 +56,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    console.log("Attempting to insert job assistant application...");
+
     // Store job assistant application in Supabase
     const { data, error } = await supabase
       .from("job_assistant_applications")
@@ -74,8 +84,12 @@ export default async function handler(req, res) {
 
     if (error) {
       console.error("Supabase error:", error);
-      return res.status(500).json({ error: "Failed to save application" });
+      return res
+        .status(500)
+        .json({ error: "Failed to save application", details: error.message });
     }
+
+    console.log("Job assistant application saved successfully:", data);
 
     // Send welcome email (we'll implement this later)
     // await sendWelcomeEmail(email, fullName);
@@ -87,6 +101,8 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error("Job Assistant API error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return res
+      .status(500)
+      .json({ error: "Internal server error", details: error.message });
   }
 }

@@ -10,9 +10,17 @@ console.log("SUPABASE_ANON_KEY:", supabaseKey ? "SET" : "NOT SET");
 
 if (!supabaseUrl || !supabaseKey) {
   console.error("Missing Supabase environment variables");
+  throw new Error("Missing Supabase environment variables");
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+let supabase;
+try {
+  supabase = createClient(supabaseUrl, supabaseKey);
+  console.log("Supabase client created successfully");
+} catch (error) {
+  console.error("Error creating Supabase client:", error);
+  throw error;
+}
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -36,6 +44,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    console.log("Attempting to insert CV data...");
+
     // Store CV data in Supabase
     const { data, error } = await supabase
       .from("cv_generations")
@@ -51,8 +61,12 @@ export default async function handler(req, res) {
 
     if (error) {
       console.error("Supabase error:", error);
-      return res.status(500).json({ error: "Failed to save CV data" });
+      return res
+        .status(500)
+        .json({ error: "Failed to save CV data", details: error.message });
     }
+
+    console.log("CV data saved successfully:", data);
 
     // Send confirmation email (we'll implement this later)
     // await sendCVConfirmationEmail(userEmail, cvData.personalInfo.fullName);
@@ -64,6 +78,8 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error("CV Generator API error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return res
+      .status(500)
+      .json({ error: "Internal server error", details: error.message });
   }
 }
