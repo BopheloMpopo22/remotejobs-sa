@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS cv_generations (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_email TEXT NOT NULL,
   cv_data JSONB NOT NULL,
-  pdf_file_url TEXT, -- Public URL to the generated PDF file
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   status TEXT DEFAULT 'completed',

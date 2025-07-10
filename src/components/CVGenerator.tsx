@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface CVData {
   personalInfo: {
@@ -157,9 +159,7 @@ const CVGenerator: React.FC = () => {
 
   const generatePDF = async () => {
     try {
-      console.log("Starting CV generation...");
-
-      // Save CV data to backend (PDF will be generated on server)
+      // First, save CV data to backend
       const saveResponse = await fetch("/api/cv-generator", {
         method: "POST",
         headers: {
@@ -172,41 +172,207 @@ const CVGenerator: React.FC = () => {
       });
 
       if (!saveResponse.ok) {
-        const errorData = await saveResponse.json();
-        console.error("API Error:", errorData);
-        throw new Error(
-          `Failed to save CV data: ${errorData.error || "Unknown error"}`
-        );
+        throw new Error("Failed to save CV data");
       }
 
       const saveResult = await saveResponse.json();
       console.log("CV saved with ID:", saveResult.cvId);
-      console.log("PDF file URL:", saveResult.pdfFileUrl);
+
+      const cvHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>${cvData.personalInfo.fullName} - CV</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+            .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+            .header-content { display: flex; align-items: center; gap: 30px; }
+            .photo { flex-shrink: 0; }
+            .info { flex-grow: 1; }
+            .name { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; }
+            .contact { font-size: 1.1em; color: #666; }
+            .section { margin-bottom: 30px; }
+            .section-title { font-size: 1.5em; font-weight: bold; border-bottom: 1px solid #ccc; margin-bottom: 15px; padding-bottom: 5px; }
+            .experience-item, .education-item { margin-bottom: 20px; }
+            .job-title { font-weight: bold; font-size: 1.1em; }
+            .company { font-weight: bold; color: #333; }
+            .date { color: #666; font-style: italic; }
+            .description { margin-top: 10px; }
+            .skills-list, .languages-list { display: flex; flex-wrap: wrap; gap: 10px; }
+            .skill, .language { background: #f0f0f0; padding: 5px 10px; border-radius: 15px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="header-content">
+              ${
+                cvData.personalInfo.photo
+                  ? `<div class="photo"><img src="${cvData.personalInfo.photo}" alt="Profile Photo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;"></div>`
+                  : ""
+              }
+              <div class="info">
+                <div class="name">${cvData.personalInfo.fullName}</div>
+                <div class="contact">
+                  ${cvData.personalInfo.email}<br>
+                  ${cvData.personalInfo.phone}<br>
+                  ${cvData.personalInfo.location}<br>
+                  ${
+                    cvData.personalInfo.linkedin
+                      ? `LinkedIn: ${cvData.personalInfo.linkedin}<br>`
+                      : ""
+                  }
+                  ${
+                    cvData.personalInfo.portfolio
+                      ? `Portfolio: ${cvData.personalInfo.portfolio}`
+                      : ""
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          ${
+            cvData.summary
+              ? `
+          <div class="section">
+            <div class="section-title">Professional Summary</div>
+            <p>${cvData.summary}</p>
+          </div>
+          `
+              : ""
+          }
+
+          ${
+            cvData.experience.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title">Professional Experience</div>
+            ${cvData.experience
+              .map(
+                (exp) => `
+              <div class="experience-item">
+                <div class="job-title">${exp.position}</div>
+                <div class="company">${exp.company}</div>
+                <div class="date">${exp.startDate} - ${
+                  exp.current ? "Present" : exp.endDate
+                }</div>
+                <div class="description">${exp.description}</div>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+          `
+              : ""
+          }
+
+          ${
+            cvData.education.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title">Education</div>
+            ${cvData.education
+              .map(
+                (edu) => `
+              <div class="education-item">
+                <div class="job-title">${edu.degree} in ${edu.field}</div>
+                <div class="company">${edu.institution}</div>
+                <div class="date">${edu.graduationYear}</div>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+          `
+              : ""
+          }
+
+          ${
+            cvData.skills.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title">Skills</div>
+            <div class="skills-list">
+              ${cvData.skills
+                .map((skill) => `<span class="skill">${skill}</span>`)
+                .join("")}
+            </div>
+          </div>
+          `
+              : ""
+          }
+
+          ${
+            cvData.languages.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title">Languages</div>
+            <div class="languages-list">
+              ${cvData.languages
+                .map((lang) => `<span class="language">${lang}</span>`)
+                .join("")}
+            </div>
+          </div>
+          `
+              : ""
+          }
+        </body>
+        </html>
+      `;
+
+      // Create a temporary div to render the HTML
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = cvHTML;
+      tempDiv.style.position = "absolute";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.top = "0";
+      tempDiv.style.width = "800px";
+      document.body.appendChild(tempDiv);
+
+      // Convert HTML to canvas
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        width: 800,
+        height: tempDiv.scrollHeight,
+      });
+
+      // Remove the temporary div
+      document.body.removeChild(tempDiv);
+
+      // Create PDF
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Download PDF
+      pdf.save(`${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.pdf`);
 
       // Show success message
       alert(
-        "CV generated and saved successfully! You can download the PDF from the provided link."
+        "CV generated and saved successfully! Check your email for a copy."
       );
-
-      // If PDF was generated, provide download link
-      if (saveResult.pdfFileUrl) {
-        const downloadLink = document.createElement("a");
-        downloadLink.href = saveResult.pdfFileUrl;
-        downloadLink.download = `${cvData.personalInfo.fullName.replace(
-          /\s+/g,
-          "_"
-        )}_CV.pdf`;
-        downloadLink.click();
-      }
     } catch (error) {
-      console.error("Error generating CV:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      alert(
-        `Error generating CV: ${errorMessage}. Falling back to HTML version.`
-      );
-
-      // Fallback to HTML generation
+      console.error("Error generating PDF:", error);
+      alert("Error generating PDF. Please try again.");
+      // Fallback to HTML download
       generateHTML();
     }
   };
