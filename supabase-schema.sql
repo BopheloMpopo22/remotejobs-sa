@@ -1,8 +1,31 @@
--- Create CV Generations table
+-- Create CV Generations table with separate columns for better readability
 CREATE TABLE IF NOT EXISTS cv_generations (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_email TEXT NOT NULL,
-  cv_data JSONB NOT NULL,
+  
+  -- Personal Information
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  location TEXT,
+  linkedin TEXT,
+  portfolio TEXT,
+  photo_url TEXT,
+  
+  -- Professional Summary
+  summary TEXT,
+  
+  -- Experience (stored as JSON array since it's multiple entries)
+  experience JSONB,
+  
+  -- Education (stored as JSON array since it's multiple entries)
+  education JSONB,
+  
+  -- Skills and Languages
+  skills TEXT[],
+  languages TEXT[],
+  
+  -- Metadata
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   status TEXT DEFAULT 'completed',
