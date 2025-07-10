@@ -159,25 +159,6 @@ const CVGenerator: React.FC = () => {
 
   const generatePDF = async () => {
     try {
-      // First, save CV data to backend
-      const saveResponse = await fetch("/api/cv-generator", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          cvData: cvData,
-          userEmail: cvData.personalInfo.email || "anonymous@example.com",
-        }),
-      });
-
-      if (!saveResponse.ok) {
-        throw new Error("Failed to save CV data");
-      }
-
-      const saveResult = await saveResponse.json();
-      console.log("CV saved with ID:", saveResult.cvId);
-
       const cvHTML = `
         <!DOCTYPE html>
         <html>
@@ -208,24 +189,23 @@ const CVGenerator: React.FC = () => {
             <div class="header-content">
               ${
                 cvData.personalInfo.photo
-                  ? `<div class="photo"><img src="${cvData.personalInfo.photo}" alt="Profile Photo" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 3px solid #333;" /></div>`
+                  ? `<div class="photo"><img src="${cvData.personalInfo.photo}" alt="Profile Photo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;"></div>`
                   : ""
               }
               <div class="info">
                 <div class="name">${cvData.personalInfo.fullName}</div>
                 <div class="contact">
-                  ${cvData.personalInfo.email} | ${
-        cvData.personalInfo.phone
-      }<br>
-                  ${cvData.personalInfo.location}
+                  ${cvData.personalInfo.email}<br>
+                  ${cvData.personalInfo.phone}<br>
+                  ${cvData.personalInfo.location}<br>
                   ${
                     cvData.personalInfo.linkedin
-                      ? `<br>LinkedIn: ${cvData.personalInfo.linkedin}`
+                      ? `LinkedIn: ${cvData.personalInfo.linkedin}<br>`
                       : ""
                   }
                   ${
                     cvData.personalInfo.portfolio
-                      ? `<br>Portfolio: ${cvData.personalInfo.portfolio}`
+                      ? `Portfolio: ${cvData.personalInfo.portfolio}`
                       : ""
                   }
                 </div>
@@ -248,7 +228,7 @@ const CVGenerator: React.FC = () => {
             cvData.experience.length > 0
               ? `
           <div class="section">
-            <div class="section-title">Work Experience</div>
+            <div class="section-title">Professional Experience</div>
             ${cvData.experience
               .map(
                 (exp) => `
@@ -363,18 +343,47 @@ const CVGenerator: React.FC = () => {
         heightLeft -= pageHeight;
       }
 
+      // Convert PDF to base64 for storage
+      const pdfBase64 = pdf.output("datauristring");
+      const pdfFileName = `${cvData.personalInfo.fullName.replace(
+        /\s+/g,
+        "_"
+      )}_CV.pdf`;
+
+      console.log("PDF generated, sending to API...");
+
+      // Save CV data and PDF to backend
+      const saveResponse = await fetch("/api/cv-generator", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cvData: cvData,
+          userEmail: cvData.personalInfo.email || "anonymous@example.com",
+          pdfData: pdfBase64,
+          pdfFileName: pdfFileName,
+        }),
+      });
+
+      if (!saveResponse.ok) {
+        throw new Error("Failed to save CV data");
+      }
+
+      const saveResult = await saveResponse.json();
+      console.log("CV saved with ID:", saveResult.cvId);
+      console.log("PDF file URL:", saveResult.pdfFileUrl);
+
       // Download PDF
-      pdf.save(`${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.pdf`);
+      pdf.save(pdfFileName);
 
       // Show success message
       alert(
         "CV generated and saved successfully! Check your email for a copy."
       );
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Error generating PDF. Please try again.");
-      // Fallback to HTML download
-      generateHTML();
+      console.error("Error generating CV:", error);
+      alert("Error generating CV. Please try again.");
     }
   };
 
