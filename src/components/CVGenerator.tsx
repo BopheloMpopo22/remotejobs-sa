@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { supabase } from "../lib/supabase";
 
 interface CVData {
   personalInfo: {
@@ -159,15 +160,19 @@ const CVGenerator: React.FC = () => {
 
   const generatePDF = async () => {
     try {
-      // First, save CV data to backend
+      // Save CV data to backend (PDF will be generated on server)
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       const saveResponse = await fetch("/api/cv-generator", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
         },
         body: JSON.stringify({
           cvData: cvData,
-          userEmail: cvData.personalInfo.email || "anonymous@example.com",
         }),
       });
 

@@ -38,9 +38,26 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Get user email from Supabase auth
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ error: "No authorization header" });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    const userEmail = user.email;
+
     const {
       fullName,
-      email,
       phone,
       location,
       desiredPosition,
@@ -54,11 +71,14 @@ export default async function handler(req, res) {
       cvFileType, // MIME type of the file
     } = req.body;
 
-    if (!fullName || !email || !desiredPosition) {
+    if (!fullName || !desiredPosition) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    console.log("Attempting to insert job assistant application...");
+    console.log(
+      "Attempting to insert job assistant application for user:",
+      userEmail
+    );
 
     let cvFileUrl = null;
 
@@ -124,7 +144,7 @@ export default async function handler(req, res) {
       .insert([
         {
           full_name: fullName,
-          email: email,
+          email: userEmail, // Use the authenticated user's email
           phone: phone || null,
           location: location || null,
           desired_position: desiredPosition,

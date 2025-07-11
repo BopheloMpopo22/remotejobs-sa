@@ -1,8 +1,8 @@
 import React, { useState } from "react";
+import { supabase } from "../lib/supabase";
 
 interface AssistantForm {
   fullName: string;
-  email: string;
   phone: string;
   location: string;
   desiredPosition: string;
@@ -18,7 +18,6 @@ interface AssistantForm {
 const JobAssistant: React.FC = () => {
   const [formData, setFormData] = useState<AssistantForm>({
     fullName: "",
-    email: "",
     phone: "",
     location: "",
     desiredPosition: "",
@@ -75,7 +74,6 @@ const JobAssistant: React.FC = () => {
       // Prepare form data
       const formDataToSend: any = {
         fullName: formData.fullName,
-        email: formData.email,
         phone: formData.phone,
         location: formData.location,
         desiredPosition: formData.desiredPosition,
@@ -127,10 +125,15 @@ const JobAssistant: React.FC = () => {
   };
 
   const sendFormData = async (data: any) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
     const response = await fetch("/api/job-assistant", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.access_token}`,
       },
       body: JSON.stringify(data),
     });
@@ -310,17 +313,6 @@ const JobAssistant: React.FC = () => {
                 value={formData.fullName}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, fullName: e.target.value }))
-                }
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Email *</label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, email: e.target.value }))
                 }
                 required
               />

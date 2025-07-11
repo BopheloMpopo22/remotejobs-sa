@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "./lib/supabase";
+import Auth from "./components/Auth";
+import UserProfile from "./components/UserProfile";
 import JobSearch from "./components/JobSearch";
 import JobList from "./components/JobList";
 import CVGenerator from "./components/CVGenerator";
@@ -25,12 +28,58 @@ interface Job {
 }
 
 function App() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [jobLoading, setJobLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<"jobs" | "cv" | "assistant">(
     "jobs"
   );
+
+  useEffect(() => {
+    // Check for existing session
+    const getSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    getSession();
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleAuthChange = (user: any) => {
+    setUser(user);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth onAuthChange={handleAuthChange} />;
+  }
 
   return (
     <div id="root">
@@ -56,6 +105,9 @@ function App() {
             Find your next remote opportunity in South Africa and around the
             world
           </p>
+
+          {/* User Profile */}
+          <UserProfile user={user} onLogout={handleLogout} />
 
           {/* Navigation */}
           <nav className="main-nav">
@@ -90,10 +142,10 @@ function App() {
             <>
               <JobSearch
                 onJobsChange={setJobs}
-                onLoadingChange={setLoading}
+                onLoadingChange={setJobLoading}
                 onErrorChange={setError}
               />
-              <JobList jobs={jobs} loading={loading} error={error} />
+              <JobList jobs={jobs} loading={jobLoading} error={error} />
             </>
           ) : currentView === "cv" ? (
             <CVGenerator />

@@ -38,13 +38,31 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { cvData, userEmail } = req.body;
+    const { cvData } = req.body;
 
-    if (!cvData || !userEmail) {
+    if (!cvData) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    console.log("Attempting to insert CV data...");
+    // Get user email from Supabase auth
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ error: "No authorization header" });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    const userEmail = user.email;
+
+    console.log("Attempting to insert CV data for user:", userEmail);
 
     // Store CV data in Supabase
     const { data, error } = await supabase
