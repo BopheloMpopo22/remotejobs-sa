@@ -15,7 +15,15 @@ interface AssistantForm {
   cvFileName?: string;
 }
 
-const JobAssistant: React.FC = () => {
+interface JobAssistantProps {
+  onAuthRequired: () => void;
+  user: any;
+}
+
+const JobAssistant: React.FC<JobAssistantProps> = ({
+  onAuthRequired,
+  user,
+}) => {
   const [formData, setFormData] = useState<AssistantForm>({
     fullName: "",
     phone: "",
@@ -69,6 +77,12 @@ const JobAssistant: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check if user is authenticated for job assistant service
+    if (!user) {
+      onAuthRequired();
+      return;
+    }
 
     try {
       // Prepare form data
@@ -499,8 +513,34 @@ const JobAssistant: React.FC = () => {
         </div>
 
         <div className="form-submit">
+          {!user && (
+            <div
+              style={{
+                background: "#fef3c7",
+                border: "1px solid #f59e0b",
+                borderRadius: "8px",
+                padding: "1rem",
+                marginBottom: "1rem",
+                textAlign: "center",
+              }}
+            >
+              <p
+                style={{
+                  margin: "0 0 0.5rem 0",
+                  fontWeight: "600",
+                  color: "#92400e",
+                }}
+              >
+                🔐 Sign up to use our Job Assistant service
+              </p>
+              <p style={{ margin: 0, fontSize: "0.9rem", color: "#92400e" }}>
+                Create an account to submit your application and start receiving
+                daily job applications
+              </p>
+            </div>
+          )}
           <button type="submit" className="submit-btn">
-            Submit Application
+            {user ? "Submit Application" : "Sign up to Submit Application"}
           </button>
           <p className="form-note">
             * This is a demo. In a real implementation, this would connect to a

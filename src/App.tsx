@@ -30,6 +30,7 @@ interface Job {
 function App() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobLoading, setJobLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +56,9 @@ function App() {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) {
+        setShowAuthModal(false); // Close auth modal when user signs in
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -62,10 +66,15 @@ function App() {
 
   const handleAuthChange = (user: any) => {
     setUser(user);
+    setShowAuthModal(false);
   };
 
   const handleLogout = () => {
     setUser(null);
+  };
+
+  const handleAuthRequired = () => {
+    setShowAuthModal(true);
   };
 
   if (loading) {
@@ -75,10 +84,6 @@ function App() {
         <p>Loading...</p>
       </div>
     );
-  }
-
-  if (!user) {
-    return <Auth onAuthChange={handleAuthChange} />;
   }
 
   return (
@@ -106,8 +111,19 @@ function App() {
             world
           </p>
 
-          {/* User Profile */}
-          <UserProfile user={user} onLogout={handleLogout} />
+          {/* User Profile or Sign In Button */}
+          <div className="auth-section">
+            {user ? (
+              <UserProfile user={user} onLogout={handleLogout} />
+            ) : (
+              <button
+                className="sign-in-btn"
+                onClick={() => setShowAuthModal(true)}
+              >
+                🔐 Sign In
+              </button>
+            )}
+          </div>
 
           {/* Navigation */}
           <nav className="main-nav">
@@ -148,9 +164,9 @@ function App() {
               <JobList jobs={jobs} loading={jobLoading} error={error} />
             </>
           ) : currentView === "cv" ? (
-            <CVGenerator />
+            <CVGenerator onAuthRequired={handleAuthRequired} user={user} />
           ) : (
-            <JobAssistant />
+            <JobAssistant onAuthRequired={handleAuthRequired} user={user} />
           )}
         </div>
       </main>
@@ -171,6 +187,21 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="auth-modal-overlay">
+          <div className="auth-modal">
+            <button
+              className="auth-modal-close"
+              onClick={() => setShowAuthModal(false)}
+            >
+              ✕
+            </button>
+            <Auth onAuthChange={handleAuthChange} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

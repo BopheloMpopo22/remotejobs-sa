@@ -32,7 +32,12 @@ interface CVData {
   languages: string[];
 }
 
-const CVGenerator: React.FC = () => {
+interface CVGeneratorProps {
+  onAuthRequired: () => void;
+  user: any;
+}
+
+const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [cvData, setCvData] = useState<CVData>({
     personalInfo: {
@@ -159,6 +164,12 @@ const CVGenerator: React.FC = () => {
   };
 
   const generatePDF = async () => {
+    // Check if user is authenticated for saving/downloading
+    if (!user) {
+      onAuthRequired();
+      return;
+    }
+
     try {
       // Save CV data to backend (PDF will be generated on server)
       const {
@@ -198,12 +209,11 @@ const CVGenerator: React.FC = () => {
             .name { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; }
             .contact { font-size: 1.1em; color: #666; }
             .section { margin-bottom: 30px; }
-            .section-title { font-size: 1.5em; font-weight: bold; border-bottom: 1px solid #ccc; margin-bottom: 15px; padding-bottom: 5px; }
+            .section-title { font-size: 1.5em; font-weight: bold; margin-bottom: 15px; color: #333; }
             .experience-item, .education-item { margin-bottom: 20px; }
-            .job-title { font-weight: bold; font-size: 1.1em; }
-            .company { font-weight: bold; color: #333; }
-            .date { color: #666; font-style: italic; }
-            .description { margin-top: 10px; }
+            .job-title { font-weight: bold; font-size: 1.2em; }
+            .company { color: #666; font-style: italic; }
+            .date { color: #888; font-size: 0.9em; }
             .skills-list, .languages-list { display: flex; flex-wrap: wrap; gap: 10px; }
             .skill, .language { background: #f0f0f0; padding: 5px 10px; border-radius: 15px; }
           </style>
@@ -213,23 +223,24 @@ const CVGenerator: React.FC = () => {
             <div class="header-content">
               ${
                 cvData.personalInfo.photo
-                  ? `<div class="photo"><img src="${cvData.personalInfo.photo}" alt="Profile Photo" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;"></div>`
+                  ? `<div class="photo"><img src="${cvData.personalInfo.photo}" alt="Profile" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" /></div>`
                   : ""
               }
               <div class="info">
                 <div class="name">${cvData.personalInfo.fullName}</div>
                 <div class="contact">
-                  ${cvData.personalInfo.email}<br>
-                  ${cvData.personalInfo.phone}<br>
-                  ${cvData.personalInfo.location}<br>
+                  ${cvData.personalInfo.email} | ${
+        cvData.personalInfo.phone
+      }<br>
+                  ${cvData.personalInfo.location}
                   ${
                     cvData.personalInfo.linkedin
-                      ? `LinkedIn: ${cvData.personalInfo.linkedin}<br>`
+                      ? `<br>LinkedIn: ${cvData.personalInfo.linkedin}`
                       : ""
                   }
                   ${
                     cvData.personalInfo.portfolio
-                      ? `Portfolio: ${cvData.personalInfo.portfolio}`
+                      ? `<br>Portfolio: ${cvData.personalInfo.portfolio}`
                       : ""
                   }
                 </div>
@@ -262,7 +273,7 @@ const CVGenerator: React.FC = () => {
                 <div class="date">${exp.startDate} - ${
                   exp.current ? "Present" : exp.endDate
                 }</div>
-                <div class="description">${exp.description}</div>
+                <p>${exp.description}</p>
               </div>
             `
               )
@@ -331,23 +342,19 @@ const CVGenerator: React.FC = () => {
       tempDiv.innerHTML = cvHTML;
       tempDiv.style.position = "absolute";
       tempDiv.style.left = "-9999px";
-      tempDiv.style.top = "0";
-      tempDiv.style.width = "800px";
       document.body.appendChild(tempDiv);
 
-      // Convert HTML to canvas
+      // Convert to canvas
       const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        width: 800,
-        height: tempDiv.scrollHeight,
       });
 
-      // Remove the temporary div
+      // Remove temporary div
       document.body.removeChild(tempDiv);
 
-      // Create PDF
+      // Convert to PDF
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       const imgWidth = 210;
@@ -367,18 +374,13 @@ const CVGenerator: React.FC = () => {
         heightLeft -= pageHeight;
       }
 
-      // Download PDF
+      // Download the PDF
       pdf.save(`${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.pdf`);
 
-      // Show success message
-      alert(
-        "CV generated and saved successfully! Check your email for a copy."
-      );
+      alert("CV generated and saved successfully!");
     } catch (error) {
       console.error("Error generating PDF:", error);
       alert("Error generating PDF. Please try again.");
-      // Fallback to HTML download
-      generateHTML();
     }
   };
 
@@ -1031,18 +1033,57 @@ const CVGenerator: React.FC = () => {
               </div>
             </div>
             <div
-              style={{ display: "flex", gap: "10px", justifyContent: "center" }}
+              style={{
+                display: "flex",
+                gap: "10px",
+                justifyContent: "center",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
             >
-              <button onClick={generateCV} className="generate-btn">
-                Generate & Download PDF
-              </button>
-              <button
-                onClick={generateHTML}
-                className="generate-btn"
-                style={{ backgroundColor: "#6b7280" }}
-              >
-                Download HTML
-              </button>
+              {!user && (
+                <div
+                  style={{
+                    background: "#fef3c7",
+                    border: "1px solid #f59e0b",
+                    borderRadius: "8px",
+                    padding: "1rem",
+                    marginBottom: "1rem",
+                    textAlign: "center",
+                    maxWidth: "400px",
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: "0 0 0.5rem 0",
+                      fontWeight: "600",
+                      color: "#92400e",
+                    }}
+                  >
+                    🔐 Sign up to save and download your CV
+                  </p>
+                  <p
+                    style={{ margin: 0, fontSize: "0.9rem", color: "#92400e" }}
+                  >
+                    Create an account to save your CV and download it as a
+                    professional PDF
+                  </p>
+                </div>
+              )}
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button onClick={generateCV} className="generate-btn">
+                  {user
+                    ? "Generate & Download PDF"
+                    : "Preview CV (Sign up to download)"}
+                </button>
+                <button
+                  onClick={generateHTML}
+                  className="generate-btn"
+                  style={{ backgroundColor: "#6b7280" }}
+                >
+                  Download HTML
+                </button>
+              </div>
             </div>
           </div>
         );
