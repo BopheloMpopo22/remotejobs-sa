@@ -342,36 +342,55 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
       tempDiv.innerHTML = cvHTML;
       tempDiv.style.position = "absolute";
       tempDiv.style.left = "-9999px";
+      tempDiv.style.width = "800px"; // Set fixed width for consistent sizing
+      tempDiv.style.backgroundColor = "white";
+      tempDiv.style.padding = "40px";
       document.body.appendChild(tempDiv);
 
-      // Convert to canvas
+      // Convert to canvas with proper dimensions
       const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
+        width: 800,
+        height: tempDiv.scrollHeight,
+        backgroundColor: "#ffffff",
       });
 
       // Remove temporary div
       document.body.removeChild(tempDiv);
 
-      // Convert to PDF
+      // Convert to PDF with proper A4 sizing
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const pageHeight = 295;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
+      const pageWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const margin = 20; // 20mm margins
+      const contentWidth = pageWidth - 2 * margin;
+      const contentHeight = pageHeight - 2 * margin;
 
+      // Calculate image dimensions to fit A4 properly
+      const imgWidth = contentWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
       let position = 0;
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      pdf.addImage(imgData, "PNG", margin, margin, imgWidth, imgHeight);
+      heightLeft -= contentHeight;
 
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        pdf.addImage(
+          imgData,
+          "PNG",
+          margin,
+          margin + position,
+          imgWidth,
+          imgHeight
+        );
+        heightLeft -= contentHeight;
       }
 
       // Download the PDF
@@ -1063,10 +1082,25 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                     🔐 Sign up to save and download your CV
                   </p>
                   <p
-                    style={{ margin: 0, fontSize: "0.9rem", color: "#92400e" }}
+                    style={{
+                      margin: "0 0 0.5rem 0",
+                      fontSize: "0.9rem",
+                      color: "#92400e",
+                    }}
                   >
-                    Create an account to save your CV and download it as a
+                    Create a free account to save your CV and download it as a
                     professional PDF
+                  </p>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "0.8rem",
+                      color: "#92400e",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    ✨ Free forever • No spam emails • No payment required •
+                    Secure & private
                   </p>
                 </div>
               )}

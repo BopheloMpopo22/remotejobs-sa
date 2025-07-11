@@ -533,9 +533,26 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
               >
                 🔐 Sign up to use our Job Assistant service
               </p>
-              <p style={{ margin: 0, fontSize: "0.9rem", color: "#92400e" }}>
-                Create an account to submit your application and start receiving
-                daily job applications
+              <p
+                style={{
+                  margin: "0 0 0.5rem 0",
+                  fontSize: "0.9rem",
+                  color: "#92400e",
+                }}
+              >
+                Create a free account to submit your application and start
+                receiving daily job applications
+              </p>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "0.8rem",
+                  color: "#92400e",
+                  fontStyle: "italic",
+                }}
+              >
+                ✨ Free signup • No spam emails • Secure & private • Smooth
+                experience guaranteed
               </p>
             </div>
           )}
