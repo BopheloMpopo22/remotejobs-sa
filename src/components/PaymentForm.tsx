@@ -1,21 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import {
-  PAYFAST_CONFIG,
-  formatPrice,
-  generatePayFastSignature,
-} from "../lib/payfast";
+import { PAYFAST_CONFIG, formatPrice } from "../lib/payfast";
 
 interface PaymentFormProps {
   applicationData: any;
-  onPaymentSuccess: () => void;
   onPaymentError: (error: string) => void;
   onCancel: () => void;
 }
 
 const PaymentForm: React.FC<PaymentFormProps> = ({
   applicationData,
-  onPaymentSuccess,
   onPaymentError,
   onCancel,
 }) => {
