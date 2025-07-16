@@ -10,8 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@stripe/react-stripe-js": "^3.7.0",
-    "@stripe/stripe-js": "^7.4.0",
     "@supabase/supabase-js": "^2.50.4",
     "@tailwindcss/postcss": "^4.1.11",
     "html2canvas": "^1.4.1",
@@ -20,7 +18,7 @@
     "puppeteer": "^24.12.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "stripe": "^18.3.0"
+    "crypto": "^1.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
