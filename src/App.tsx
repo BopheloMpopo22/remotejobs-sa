@@ -37,6 +37,10 @@ function App() {
   const [currentView, setCurrentView] = useState<"jobs" | "cv" | "assistant">(
     "jobs"
   );
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   useEffect(() => {
     // Check for existing session
@@ -58,6 +62,11 @@ function App() {
       setLoading(false);
       if (session?.user) {
         setShowAuthModal(false); // Close auth modal when user signs in
+        setCurrentView("jobs"); // Redirect to homepage
+        setToast({ message: "Login successful!", type: "success" });
+      } else {
+        setShowAuthModal(true); // Show login modal
+        setToast({ message: "Logged out successfully!", type: "success" });
       }
     });
 
@@ -67,15 +76,27 @@ function App() {
   const handleAuthChange = (user: any) => {
     setUser(user);
     setShowAuthModal(false);
+    setCurrentView("jobs"); // Redirect to homepage
+    setToast({ message: "Login successful!", type: "success" });
   };
 
   const handleLogout = () => {
     setUser(null);
+    setShowAuthModal(true); // Show login modal
+    setToast({ message: "Logged out successfully!", type: "success" });
   };
 
   const handleAuthRequired = () => {
     setShowAuthModal(true);
   };
+
+  // Toast auto-dismiss
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   if (loading) {
     return (
@@ -88,6 +109,26 @@ function App() {
 
   return (
     <div id="root">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          style={{
+            position: "fixed",
+            top: 20,
+            right: 20,
+            zIndex: 9999,
+            background: toast.type === "success" ? "#10b981" : "#dc2626",
+            color: "white",
+            padding: "12px 24px",
+            borderRadius: 8,
+            fontWeight: 600,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+          }}
+        >
+          {toast.message}
+        </div>
+      )}
+
       {/* Test Banner */}
       <div
         style={{
