@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
 
 interface AssistantForm {
@@ -39,6 +39,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const industryOptions = [
     "Technology/IT",
@@ -215,6 +216,13 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     );
   }
 
+  // Scroll to form handler
+  const scrollToForm = () => {
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="job-assistant">
       <div className="assistant-header">
@@ -226,15 +234,73 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
             <strong>5 jobs daily</strong> on your behalf - saving you time and
             increasing your chances of landing interviews.
           </p>
-          <div className="pricing-highlight">
-            <div className="price-tag">
-              <span className="price">R100</span>
-              <span className="period">one-time setup</span>
-            </div>
-            <div className="price-tag">
-              <span className="price">R50</span>
-              <span className="period">per month</span>
-            </div>
+          <div
+            className="pricing-highlight"
+            style={{
+              display: "flex",
+              gap: 16,
+              justifyContent: "center",
+              margin: "24px 0",
+            }}
+          >
+            <button
+              className="price-tag"
+              style={{
+                cursor: "pointer",
+                border: "none",
+                background: "#f3f4f6",
+                borderRadius: 12,
+                padding: "18px 32px",
+                fontSize: 22,
+                fontWeight: 700,
+                color: "#10b981",
+                boxShadow: "0 2px 8px rgba(16,185,129,0.08)",
+                transition: "background 0.2s",
+              }}
+              onClick={scrollToForm}
+            >
+              <span className="price">R149</span>
+              <span
+                className="period"
+                style={{
+                  display: "block",
+                  fontSize: 14,
+                  color: "#374151",
+                  fontWeight: 500,
+                }}
+              >
+                one-time setup
+              </span>
+            </button>
+            <button
+              className="price-tag"
+              style={{
+                cursor: "pointer",
+                border: "none",
+                background: "#f3f4f6",
+                borderRadius: 12,
+                padding: "18px 32px",
+                fontSize: 22,
+                fontWeight: 700,
+                color: "#3b82f6",
+                boxShadow: "0 2px 8px rgba(59,130,246,0.08)",
+                transition: "background 0.2s",
+              }}
+              onClick={scrollToForm}
+            >
+              <span className="price">R49</span>
+              <span
+                className="period"
+                style={{
+                  display: "block",
+                  fontSize: 14,
+                  color: "#374151",
+                  fontWeight: 500,
+                }}
+              >
+                /month
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -314,7 +380,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="assistant-form">
+      <form ref={formRef} onSubmit={handleSubmit} className="assistant-form">
         <h3>Tell us about your job preferences</h3>
 
         <div className="form-section">
