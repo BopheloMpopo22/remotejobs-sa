@@ -144,23 +144,43 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       data: { session },
     } = await supabase.auth.getSession();
 
-    const response = await fetch("/api/job-assistant", {
+    const response = await fetch("/api/create-payfast-payment", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session?.access_token}`,
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ applicationData: data }),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to submit application");
+      throw new Error("Failed to create payment");
     }
 
     const result = await response.json();
-    console.log("Application submitted with ID:", result.applicationId);
-    console.log("CV file URL:", result.cvFileUrl);
+    console.log("Payment created:", result.paymentReference);
+    console.log("Application ID:", result.applicationId);
 
+    // Redirect to PayFast payment page
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = result.paymentUrl;
+    form.target = "_blank";
+
+    // Add all PayFast data as hidden fields
+    Object.entries(result.payfastData).forEach(([key, value]) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = key;
+      input.value = value as string;
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    // Show success message
     setSubmitted(true);
   };
 
@@ -168,11 +188,11 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     return (
       <div className="job-assistant">
         <div className="success-message">
-          <div className="success-icon">✅</div>
-          <h2>Application Submitted!</h2>
+          <div className="success-icon">💳</div>
+          <h2>Redirecting to Payment...</h2>
           <p>
-            Thank you for your interest in our Job Application Assistant
-            service.
+            Your application has been saved and you're being redirected to
+            PayFast to complete your payment.
           </p>
           <div className="next-steps">
             <h3>What happens next?</h3>
