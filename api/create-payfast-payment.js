@@ -11,7 +11,7 @@ const PAYFAST_CONFIG = {
   MERCHANT_ID: process.env.PAYFAST_MERCHANT_ID,
   MERCHANT_KEY: process.env.PAYFAST_MERCHANT_KEY,
   PASS_PHRASE: process.env.PAYFAST_PASS_PHRASE,
-  SANDBOX_MODE: process.env.NODE_ENV !== "production",
+  SANDBOX_MODE: true, // Force sandbox mode for testing
   SANDBOX_URL: "https://sandbox.payfast.co.za/eng/process",
   LIVE_URL: "https://www.payfast.co.za/eng/process",
 };
