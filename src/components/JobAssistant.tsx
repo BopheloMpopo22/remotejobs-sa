@@ -158,8 +158,8 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     }
 
     const result = await response.json();
-    console.log("Payment created:", result.paymentReference);
-    console.log("Application ID:", result.applicationId);
+    console.log("PayFast paymentUrl:", result.paymentUrl);
+    console.log("PayFast payfastData:", result.payfastData);
 
     // Redirect to PayFast payment page
     const form = document.createElement("form");
