@@ -143,6 +143,8 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     const {
       data: { session },
     } = await supabase.auth.getSession();
+    console.log("Supabase session:", session);
+    console.log("Access token:", session?.access_token);
 
     const response = await fetch("/api/create-payfast-payment", {
       method: "POST",
@@ -163,24 +165,19 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
 
     // Redirect to PayFast payment page
     const form = document.createElement("form");
-    form.method = "POST";
     form.action = result.paymentUrl;
+    form.method = "POST";
     form.target = "_blank";
-
-    // Add all PayFast data as hidden fields
     Object.entries(result.payfastData).forEach(([key, value]) => {
       const input = document.createElement("input");
       input.type = "hidden";
       input.name = key;
-      input.value = value as string;
+      input.value = String(value);
       form.appendChild(input);
     });
-
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);
-
-    // Show success message
     setSubmitted(true);
   };
 
