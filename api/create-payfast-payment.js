@@ -22,14 +22,9 @@ const generatePayFastSignature = (data, passphrase) => {
   Object.keys(data)
     .sort()
     .forEach((key) => {
-      if (
-        key !== "signature" &&
-        data[key] !== undefined &&
-        data[key] !== null &&
-        data[key] !== ""
-      ) {
+      if (key !== "signature") {
         signatureString += `${key}=${encodeURIComponent(
-          String(data[key])
+          String(data[key] ?? "")
         ).replace(/%20/g, "+")}&`;
       }
     });
@@ -42,14 +37,12 @@ const generatePayFastSignature = (data, passphrase) => {
     signatureString += `&passphrase=${encodeURIComponent(passphrase)}`;
   }
 
-  // Log the signature string before hashing
   console.log("PayFast signature string:", signatureString);
 
   const signature = crypto
     .createHash("md5")
     .update(signatureString)
     .digest("hex");
-  // Log the final signature
   console.log("PayFast signature (MD5):", signature);
   return signature;
 };
