@@ -42,7 +42,16 @@ const generatePayFastSignature = (data, passphrase) => {
     signatureString += `&passphrase=${encodeURIComponent(passphrase)}`;
   }
 
-  return crypto.createHash("md5").update(signatureString).digest("hex");
+  // Log the signature string before hashing
+  console.log("PayFast signature string:", signatureString);
+
+  const signature = crypto
+    .createHash("md5")
+    .update(signatureString)
+    .digest("hex");
+  // Log the final signature
+  console.log("PayFast signature (MD5):", signature);
+  return signature;
 };
 
 export default async function handler(req, res) {
@@ -160,6 +169,7 @@ export default async function handler(req, res) {
 
     console.log("PayFast payment data prepared:", paymentReference);
     console.log("Application saved:", application.id);
+    console.log("PayFast payfastData:", payfastData);
 
     return res.status(200).json({
       paymentReference,
