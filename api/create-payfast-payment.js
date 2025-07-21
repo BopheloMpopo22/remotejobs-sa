@@ -18,16 +18,19 @@ const PAYFAST_CONFIG = {
 
 // Helper function to generate PayFast signature
 const generatePayFastSignature = (data, passphrase) => {
-  // Create signature string
   let signatureString = "";
   Object.keys(data)
     .sort()
     .forEach((key) => {
-      if (key !== "signature" && data[key] !== "") {
-        signatureString += `${key}=${encodeURIComponent(data[key]).replace(
-          /%20/g,
-          "+"
-        )}&`;
+      if (
+        key !== "signature" &&
+        data[key] !== undefined &&
+        data[key] !== null &&
+        data[key] !== ""
+      ) {
+        signatureString += `${key}=${encodeURIComponent(
+          String(data[key])
+        ).replace(/%20/g, "+")}&`;
       }
     });
 
@@ -39,7 +42,6 @@ const generatePayFastSignature = (data, passphrase) => {
     signatureString += `&passphrase=${encodeURIComponent(passphrase)}`;
   }
 
-  // Generate MD5 hash
   return crypto.createHash("md5").update(signatureString).digest("hex");
 };
 
