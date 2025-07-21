@@ -12,6 +12,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange }) => {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [showConfirmMessage, setShowConfirmMessage] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +49,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange }) => {
           "Registration successful! Please check your email to verify your account."
         );
         onAuthChange(data.user);
+        setShowConfirmMessage(true);
       }
     } catch (error: any) {
       setMessage(error.message);
@@ -122,6 +124,16 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange }) => {
               }`}
             >
               {message}
+            </div>
+          )}
+
+          {showConfirmMessage && (
+            <div className="confirm-email-message">
+              <p>
+                Please check your email and confirm your account before logging
+                in. You will not be able to submit forms until your email is
+                confirmed.
+              </p>
             </div>
           )}
 

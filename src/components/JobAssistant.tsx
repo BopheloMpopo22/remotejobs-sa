@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 
 interface AssistantForm {
@@ -40,6 +40,17 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
 
   const [submitted, setSubmitted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const [emailConfirmed, setEmailConfirmed] = useState(true);
+
+  useEffect(() => {
+    if (user && user.email && user.email_confirmed_at === null) {
+      setEmailConfirmed(false);
+    } else {
+      setEmailConfirmed(true);
+    }
+  }, [user]);
+
+  const [loading, setLoading] = useState(false);
 
   const industryOptions = [
     "Technology/IT",
@@ -84,6 +95,15 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       onAuthRequired();
       return;
     }
+
+    if (!emailConfirmed) {
+      alert(
+        "Please confirm your email address before submitting the Job Assistant form. Check your inbox for a confirmation link."
+      );
+      return;
+    }
+
+    setLoading(true);
 
     try {
       // Prepare form data
@@ -136,6 +156,8 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     } catch (error) {
       console.error("Error submitting application:", error);
       alert("Error submitting application. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -397,6 +419,15 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
         </div>
       </div>
 
+      {!emailConfirmed && (
+        <div className="email-warning">
+          <p>
+            Please confirm your email address before submitting the Job
+            Assistant form. Check your inbox for a confirmation link.
+          </p>
+        </div>
+      )}
+
       <form ref={formRef} onSubmit={handleSubmit} className="assistant-form">
         <h3>Tell us about your job preferences</h3>
 
@@ -639,7 +670,11 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
               </p>
             </div>
           )}
-          <button type="submit" className="submit-btn">
+          <button
+            type="submit"
+            disabled={!emailConfirmed || loading}
+            className="submit-btn"
+          >
             {user ? "Submit Application" : "Sign up to Submit Application"}
           </button>
           <p className="form-note">
