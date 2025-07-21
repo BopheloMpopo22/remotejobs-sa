@@ -140,9 +140,9 @@ export default async function handler(req, res) {
       amount: "149.00",
       item_name: "Job Assistant Setup Fee",
       item_description: "One-time setup fee for Job Assistant service",
-      custom_str1: user.id,
-      custom_str2: application.id,
-      custom_str3: "job_assistant_setup",
+      // custom_str1: user.id, // removed for minimal test
+      // custom_str2: application.id, // removed for minimal test
+      // custom_str3: "job_assistant_setup", // removed for minimal test
     };
 
     // Generate signature
