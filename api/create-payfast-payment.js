@@ -130,18 +130,15 @@ export default async function handler(req, res) {
     }
 
     // Prepare PayFast payment data
+    const baseUrl = (
+      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+    ).replace(/\/$/, "");
     const payfastData = {
       merchant_id: PAYFAST_CONFIG.MERCHANT_ID,
       merchant_key: PAYFAST_CONFIG.MERCHANT_KEY,
-      return_url: `${
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-      }/payment-success`,
-      cancel_url: `${
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-      }/job-assistant`,
-      notify_url: `${
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-      }/api/payfast-webhook`,
+      return_url: `${baseUrl}/payment-success`,
+      cancel_url: `${baseUrl}/job-assistant`,
+      notify_url: `${baseUrl}/api/payfast-webhook`,
       name_first:
         applicationData.fullName.split(" ")[0] || applicationData.fullName,
       name_last: applicationData.fullName.split(" ").slice(1).join(" ") || "",
