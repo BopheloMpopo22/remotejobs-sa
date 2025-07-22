@@ -23,9 +23,12 @@ const generatePayFastSignature = (data, passphrase) => {
     .sort()
     .forEach((key) => {
       if (key !== "signature") {
-        signatureString += `${key}=${encodeURIComponent(
-          String(data[key] ?? "")
-        ).replace(/%20/g, "+")}&`;
+        // Trim value, encode, replace %20 with +, and force uppercase hex codes
+        const value = String(data[key] ?? "").trim();
+        const encoded = encodeURIComponent(value)
+          .replace(/%20/g, "+")
+          .replace(/%[a-f0-9]{2}/gi, (m) => m.toUpperCase());
+        signatureString += `${key}=${encoded}&`;
       }
     });
 
@@ -34,7 +37,10 @@ const generatePayFastSignature = (data, passphrase) => {
 
   // Add passphrase if provided
   if (passphrase) {
-    signatureString += `&passphrase=${encodeURIComponent(passphrase)}`;
+    const encodedPass = encodeURIComponent(passphrase.trim())
+      .replace(/%20/g, "+")
+      .replace(/%[a-f0-9]{2}/gi, (m) => m.toUpperCase());
+    signatureString += `&passphrase=${encodedPass}`;
   }
 
   console.log("PayFast signature string:", signatureString);
