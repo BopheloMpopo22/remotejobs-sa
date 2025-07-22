@@ -17,13 +17,12 @@ const PAYFAST_CONFIG = {
 };
 
 // Helper function to generate PayFast signature
-const generatePayFastSignature = (data, passphrase) => {
+const generatePayFastSignature = (data) => {
   let signatureString = "";
   Object.keys(data)
     .sort()
     .forEach((key) => {
       if (key !== "signature") {
-        // Trim value, encode, replace %20 with +, and force uppercase hex codes
         const value = String(data[key] ?? "").trim();
         const encoded = encodeURIComponent(value)
           .replace(/%20/g, "+")
@@ -34,14 +33,6 @@ const generatePayFastSignature = (data, passphrase) => {
 
   // Remove trailing &
   signatureString = signatureString.slice(0, -1);
-
-  // Add passphrase if provided
-  if (passphrase) {
-    const encodedPass = encodeURIComponent(passphrase.trim())
-      .replace(/%20/g, "+")
-      .replace(/%[a-f0-9]{2}/gi, (m) => m.toUpperCase());
-    signatureString += `&passphrase=${encodedPass}`;
-  }
 
   console.log("PayFast signature string:", signatureString);
 
@@ -152,10 +143,7 @@ export default async function handler(req, res) {
     };
 
     // Generate signature
-    const signature = generatePayFastSignature(
-      payfastData,
-      PAYFAST_CONFIG.PASS_PHRASE
-    );
+    const signature = generatePayFastSignature(payfastData);
     payfastData.signature = signature;
 
     // Add test mode for sandbox
