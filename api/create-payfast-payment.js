@@ -8,10 +8,15 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // PayFast Configuration
 const PAYFAST_CONFIG = {
-  MERCHANT_ID: process.env.PAYFAST_MERCHANT_ID,
-  MERCHANT_KEY: process.env.PAYFAST_MERCHANT_KEY,
-  PASS_PHRASE: process.env.PAYFAST_PASS_PHRASE,
-  SANDBOX_MODE: false, // Use live mode for real payments
+  MERCHANT_ID:
+    process.env.PAYFAST_TEST_MODE === "true"
+      ? process.env.PAYFAST_SANDBOX_MERCHANT_ID
+      : process.env.PAYFAST_MERCHANT_ID,
+  MERCHANT_KEY:
+    process.env.PAYFAST_TEST_MODE === "true"
+      ? process.env.PAYFAST_SANDBOX_MERCHANT_KEY
+      : process.env.PAYFAST_MERCHANT_KEY,
+  SANDBOX_MODE: process.env.PAYFAST_TEST_MODE === "true",
   SANDBOX_URL: "https://sandbox.payfast.co.za/eng/process",
   LIVE_URL: "https://www.payfast.co.za/eng/process",
 };

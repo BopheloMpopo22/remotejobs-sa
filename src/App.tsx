@@ -6,6 +6,7 @@ import JobSearch from "./components/JobSearch";
 import JobList from "./components/JobList";
 import CVGenerator from "./components/CVGenerator";
 import JobAssistant from "./components/JobAssistant";
+import PaymentSuccess from "./components/PaymentSuccess";
 import "./App.css";
 
 interface Job {
@@ -243,6 +244,9 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Payment Success Route */}
+      {window.location.pathname === "/payment-success" && <PaymentSuccess />}
     </div>
   );
 }
