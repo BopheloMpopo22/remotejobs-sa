@@ -16,8 +16,14 @@ const PaymentSuccess: React.FC = () => {
         style={{
           display: "inline-block",
           marginTop: "2rem",
-          color: "#2563eb",
-          textDecoration: "underline",
+          padding: "0.75rem 2rem",
+          background: "#2563eb",
+          color: "#fff",
+          borderRadius: "0.375rem",
+          textDecoration: "none",
+          fontWeight: 600,
+          fontSize: "1.1rem",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
         }}
       >
         Go to Home
