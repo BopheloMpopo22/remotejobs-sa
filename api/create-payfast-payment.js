@@ -186,6 +186,12 @@ export default async function handler(req, res) {
         ? PAYFAST_CONFIG.PASS_PHRASE.slice(0, 2) + "***"
         : "<undefined>"
     );
+    console.log(
+      "PAYFAST_TEST_PHRASE (masked):",
+      process.env.PAYFAST_TEST_PHRASE
+        ? process.env.PAYFAST_TEST_PHRASE.slice(0, 2) + "***"
+        : "<undefined>"
+    );
 
     return res.status(200).json({
       paymentReference,
