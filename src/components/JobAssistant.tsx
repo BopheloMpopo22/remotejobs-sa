@@ -41,6 +41,8 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [emailConfirmed, setEmailConfirmed] = useState(true);
+  const [subscriptionAcknowledged, setSubscriptionAcknowledged] =
+    useState(false);
 
   useEffect(() => {
     if (user && user.email && user.email_confirmed_at === null) {
@@ -100,6 +102,11 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       alert(
         "Please confirm your email address before submitting the Job Assistant form. Check your inbox for a confirmation link."
       );
+      return;
+    }
+
+    if (!subscriptionAcknowledged) {
+      alert("Please acknowledge the subscription terms before submitting.");
       return;
     }
 
@@ -428,6 +435,39 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
         </div>
       )}
 
+      <div
+        className="subscription-info"
+        style={{
+          background: "#f1f5f9",
+          padding: "1rem",
+          borderRadius: "0.5rem",
+          marginBottom: "1rem",
+          border: "1px solid #cbd5e1",
+        }}
+      >
+        <h3 style={{ margin: 0 }}>Payment & Subscription</h3>
+        <p style={{ margin: 0 }}>
+          <strong>Setup Fee:</strong> R149 (once-off)
+          <br />
+          <strong>Subscription:</strong> R49/month for continued access to the
+          Job Assistant service.
+          <br />
+          <span style={{ color: "#ef4444", fontWeight: 500 }}>
+            By proceeding, you agree to be billed R49/month after the setup fee.
+          </span>
+        </p>
+        <label style={{ display: "block", marginTop: "0.5rem" }}>
+          <input
+            type="checkbox"
+            checked={subscriptionAcknowledged}
+            onChange={(e) => setSubscriptionAcknowledged(e.target.checked)}
+            style={{ marginRight: "0.5rem" }}
+          />
+          I understand and agree to the monthly subscription after the setup
+          fee.
+        </label>
+      </div>
+
       <form ref={formRef} onSubmit={handleSubmit} className="assistant-form">
         <h3>Tell us about your job preferences</h3>
 
@@ -672,7 +712,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
           )}
           <button
             type="submit"
-            disabled={!emailConfirmed || loading}
+            disabled={!emailConfirmed || loading || !subscriptionAcknowledged}
             className="submit-btn"
           >
             {user ? "Submit Application" : "Sign up to Submit Application"}

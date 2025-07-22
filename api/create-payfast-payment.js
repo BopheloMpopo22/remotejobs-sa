@@ -22,7 +22,7 @@ const PAYFAST_CONFIG = {
 };
 
 // Helper function to generate PayFast signature
-const generatePayFastSignature = (data) => {
+const generatePayFastSignature = (data, passphrase) => {
   let signatureString = "";
   Object.keys(data)
     .sort()
@@ -38,6 +38,14 @@ const generatePayFastSignature = (data) => {
 
   // Remove trailing &
   signatureString = signatureString.slice(0, -1);
+
+  // Add passphrase if provided
+  if (passphrase) {
+    const encodedPass = encodeURIComponent(passphrase.trim())
+      .replace(/%20/g, "+")
+      .replace(/%[a-f0-9]{2}/gi, (m) => m.toUpperCase());
+    signatureString += `&passphrase=${encodedPass}`;
+  }
 
   console.log("PayFast signature string:", signatureString);
 
@@ -128,6 +136,12 @@ export default async function handler(req, res) {
     const baseUrl = (
       process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
     ).replace(/\/$/, "");
+    const today = new Date();
+    const billingDate = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      today.getDate()
+    ); // first recurring billing next month
     const payfastData = {
       merchant_id: PAYFAST_CONFIG.MERCHANT_ID,
       merchant_key: PAYFAST_CONFIG.MERCHANT_KEY,
@@ -142,13 +156,19 @@ export default async function handler(req, res) {
       amount: "149.00",
       item_name: "Job Assistant Setup Fee",
       item_description: "One-time setup fee for Job Assistant service",
-      // custom_str1: user.id, // removed for minimal test
-      // custom_str2: application.id, // removed for minimal test
-      // custom_str3: "job_assistant_setup", // removed for minimal test
+      // Subscription fields
+      subscription_type: 1, // 1 = recurring
+      billing_date: billingDate.toISOString().slice(0, 10), // YYYY-MM-DD
+      recurring_amount: "49.00",
+      frequency: 3, // 3 = monthly
+      cycles: 0, // 0 = indefinite
     };
 
     // Generate signature
-    const signature = generatePayFastSignature(payfastData);
+    const signature = generatePayFastSignature(
+      payfastData,
+      PAYFAST_CONFIG.PASS_PHRASE
+    );
     payfastData.signature = signature;
 
     // Add test mode for sandbox
