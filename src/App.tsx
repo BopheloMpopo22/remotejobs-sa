@@ -108,6 +108,10 @@ function App() {
     );
   }
 
+  if (window.location.pathname === "/payment-success") {
+    return <PaymentSuccess />;
+  }
+
   return (
     <div id="root">
       {/* Toast Notification */}
@@ -244,9 +248,6 @@ function App() {
           </div>
         </div>
       )}
-
-      {/* Payment Success Route */}
-      {window.location.pathname === "/payment-success" && <PaymentSuccess />}
     </div>
   );
 }
