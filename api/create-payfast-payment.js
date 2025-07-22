@@ -19,6 +19,7 @@ const PAYFAST_CONFIG = {
   SANDBOX_MODE: process.env.PAYFAST_TEST_MODE === "true",
   SANDBOX_URL: "https://sandbox.payfast.co.za/eng/process",
   LIVE_URL: "https://www.payfast.co.za/eng/process",
+  PASS_PHRASE: process.env.PAYFAST_TEST_PHRASE, // use the working variable
 };
 
 // Helper function to generate PayFast signature
