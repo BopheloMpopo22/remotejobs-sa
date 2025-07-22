@@ -179,6 +179,12 @@ export default async function handler(req, res) {
     console.log("PayFast payment data prepared:", paymentReference);
     console.log("Application saved:", application.id);
     console.log("PayFast payfastData:", payfastData);
+    console.log(
+      "PAYFAST_CONFIG.PASS_PHRASE (masked):",
+      PAYFAST_CONFIG.PASS_PHRASE
+        ? PAYFAST_CONFIG.PASS_PHRASE.slice(0, 2) + "***"
+        : "<undefined>"
+    );
 
     return res.status(200).json({
       paymentReference,
