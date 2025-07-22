@@ -56,8 +56,22 @@ CREATE INDEX IF NOT EXISTS idx_payments_application_id ON payments(application_i
 CREATE INDEX IF NOT EXISTS idx_webhooks_reference ON payment_webhooks(payment_reference);
 
 -- Update existing RLS policies to allow updates
+-- Drop and recreate policy for updating own subscription (safe for production if recreated immediately)
+DROP POLICY IF EXISTS "Allow users to update their own subscription" ON users;
 CREATE POLICY "Allow users to update their own subscription" ON users
   FOR UPDATE USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Allow users to view their own subscription" ON users;
+CREATE POLICY "Allow users to view their own subscription" ON users
+  FOR SELECT USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Allow admins to view all subscriptions" ON subscriptions;
+CREATE POLICY "Allow admins to view all subscriptions" ON subscriptions
+  FOR SELECT USING (auth.role() = 'admin');
+
+DROP POLICY IF EXISTS "Allow users to view their own subscriptions" ON subscriptions;
+CREATE POLICY "Allow users to view their own subscriptions" ON subscriptions
+  FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Allow users to update their own applications" ON job_assistant_applications
   FOR UPDATE USING (auth.email() = email);
@@ -76,3 +90,40 @@ ALTER TABLE payment_webhooks ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Only admins can view webhooks" ON payment_webhooks
   FOR ALL USING (auth.email() IN ('admin@remotejobssa.com')); -- Replace with your admin email 
+
+-- Add subscription fields to users table
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='subscription_status'
+  ) THEN
+    ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT 'inactive';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='subscription_start_date'
+  ) THEN
+    ALTER TABLE users ADD COLUMN subscription_start_date TIMESTAMP WITH TIME ZONE;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='subscription_end_date'
+  ) THEN
+    ALTER TABLE users ADD COLUMN subscription_end_date TIMESTAMP WITH TIME ZONE;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='next_billing_date'
+  ) THEN
+    ALTER TABLE users ADD COLUMN next_billing_date TIMESTAMP WITH TIME ZONE;
+  END IF;
+END $$;
+
+-- Create subscriptions table if not exists
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  status TEXT,
+  start_date TIMESTAMP WITH TIME ZONE,
+  end_date TIMESTAMP WITH TIME ZONE,
+  next_billing_date TIMESTAMP WITH TIME ZONE,
+  payfast_subscription_id TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+); 
