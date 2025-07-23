@@ -396,7 +396,13 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
       // Download the PDF
       pdf.save(`${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.pdf`);
 
-      alert("CV generated and saved successfully!");
+      if (isMobile()) {
+        alert(
+          "Your CV PDF has been downloaded. Please check your device's Downloads folder."
+        );
+      } else {
+        alert("CV generated and saved successfully!");
+      }
     } catch (error) {
       console.error("Error generating PDF:", error);
       alert("Error generating PDF. Please try again.");
@@ -1129,6 +1135,34 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
 
   return (
     <div className="cv-generator">
+      <style>{`
+      @media (max-width: 600px) {
+        .cv-generator, .cv-content, .cv-step, .form-group, .add-experience, .add-education, .skills-section, .languages-section {
+          width: 100% !important;
+          max-width: 100vw !important;
+          box-sizing: border-box;
+        }
+        .cv-header, .cv-progress, .cv-navigation {
+          padding-left: 8px !important;
+          padding-right: 8px !important;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+          width: 100% !important;
+          font-size: 1rem !important;
+        }
+        .add-btn, .remove-btn, .generate-btn, .nav-btn {
+          width: 100%;
+          margin-top: 8px;
+          font-size: 1.1rem;
+        }
+        .cv-step h3, .cv-step h4 {
+          font-size: 1.2rem;
+        }
+        .cv-preview, .preview-section {
+          font-size: 1rem;
+        }
+      }
+    `}</style>
       <div className="cv-header">
         <h2>CV Generator</h2>
         <p>Create a professional CV in minutes</p>
@@ -1170,5 +1204,10 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
     </div>
   );
 };
+
+// Add a helper to detect mobile
+function isMobile() {
+  return /Mobi|Android/i.test(navigator.userAgent);
+}
 
 export default CVGenerator;
