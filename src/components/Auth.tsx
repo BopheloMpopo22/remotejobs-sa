@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { supabase } from "../lib/supabase";
-import { sendEmail } from "../lib/email";
 
 interface AuthProps {
   onAuthChange: (user: any) => void;
