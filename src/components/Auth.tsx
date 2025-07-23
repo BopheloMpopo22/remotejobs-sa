@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { supabase } from "../lib/supabase";
+import { sendEmail } from "../lib/email";
 
 interface AuthProps {
   onAuthChange: (user: any) => void;
@@ -70,6 +71,32 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange }) => {
     } catch (error: any) {
       setMessage(error.message);
     }
+  };
+
+  const handleSignup = async (
+    email: string,
+    password: string,
+    name: string
+  ) => {
+    // ... existing signup logic ...
+    // After successful signup:
+    await sendEmail({
+      to: email,
+      subject: "Welcome to RemoteJobsSA! 🚀",
+      html: `
+        <div style="font-family: Arial, sans-serif; background: #f0f4f8; padding: 2rem; border-radius: 1rem; color: #222;">
+          <h1 style="color: #2563eb;">🎉 Welcome to <span style='color:#10b981;'>RemoteJobsSA</span>!</h1>
+          <p style="font-size: 1.1rem;">Hi <b>${name || "there"}</b>,</p>
+          <p>We’re <b>so excited</b> to have you join our community of remote job seekers! 🚀</p>
+          <ul style="margin: 1rem 0;">
+            <li>✨ <b>Job Assistant</b>: We’ll apply to jobs for you every day!</li>
+            <li>📝 <b>CV Generator</b>: Create a standout CV in minutes.</li>
+          </ul>
+          <p>Log in and try these features now. If you have any questions, just reply to this email—I’m here to help!</p>
+          <p style="margin-top:2rem; color:#10b981; font-weight:bold;">To your success,<br/>Bophelo<br/>RemoteJobsSA</p>
+        </div>
+      `,
+    });
   };
 
   return (
