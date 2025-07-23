@@ -41,8 +41,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [emailConfirmed, setEmailConfirmed] = useState(true);
-  const [subscriptionAcknowledged, setSubscriptionAcknowledged] =
-    useState(false);
+  // Remove the subscriptionAcknowledged state and checkbox logic
 
   useEffect(() => {
     if (user && user.email && user.email_confirmed_at === null) {
@@ -105,10 +104,11 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       return;
     }
 
-    if (!subscriptionAcknowledged) {
-      alert("Please acknowledge the subscription terms before submitting.");
-      return;
-    }
+    // Remove the subscriptionAcknowledged check
+    // if (!subscriptionAcknowledged) {
+    //   alert("Please acknowledge the subscription terms before submitting.");
+    //   return;
+    // }
 
     setLoading(true);
 
@@ -452,20 +452,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
           <strong>Subscription:</strong> R49/month for continued access to the
           Job Assistant service.
           <br />
-          <span style={{ color: "#ef4444", fontWeight: 500 }}>
-            By proceeding, you agree to be billed R49/month after the setup fee.
-          </span>
         </p>
-        <label style={{ display: "block", marginTop: "0.5rem" }}>
-          <input
-            type="checkbox"
-            checked={subscriptionAcknowledged}
-            onChange={(e) => setSubscriptionAcknowledged(e.target.checked)}
-            style={{ marginRight: "0.5rem" }}
-          />
-          I understand and agree to the monthly subscription after the setup
-          fee.
-        </label>
       </div>
 
       <form ref={formRef} onSubmit={handleSubmit} className="assistant-form">
@@ -712,7 +699,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
           )}
           <button
             type="submit"
-            disabled={!emailConfirmed || loading || !subscriptionAcknowledged}
+            disabled={!emailConfirmed || loading}
             className="submit-btn"
           >
             {user ? "Submit Application" : "Sign up to Submit Application"}
