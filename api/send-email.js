@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-const RESEND_API_KEY = "re_6rPaYRWX_GNRwADso5fuVpnG77P13ajay";
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_API_URL = "https://api.resend.com/emails";
 
 async function sendEmail({ to, subject, html }) {
