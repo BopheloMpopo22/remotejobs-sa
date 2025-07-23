@@ -113,7 +113,41 @@ function App() {
   }
 
   return (
-    <div id="root">
+    <div className="app-root">
+      <style>{`
+        @media (max-width: 600px) {
+          .app-root, .main-content, .nav-bar, .progress-bar, .job-list, .job-card, .cv-generator, .job-assistant {
+            width: 100% !important;
+            max-width: 100vw !important;
+            box-sizing: border-box;
+          }
+          .nav-bar, .progress-bar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 8px !important;
+          }
+          .progress-step {
+            font-size: 1rem !important;
+            min-width: 32px !important;
+            min-height: 32px !important;
+          }
+          .main-content, .job-list, .job-card {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+          }
+          .job-card, .cv-generator, .job-assistant {
+            margin-bottom: 16px !important;
+          }
+          .nav-btn, .submit-btn, .generate-btn {
+            width: 100%;
+            margin-top: 8px;
+            font-size: 1.1rem;
+          }
+          h1, h2, h3, h4 {
+            font-size: 1.2rem !important;
+          }
+        }
+      `}</style>
       {/* Toast Notification */}
       {toast && (
         <div
