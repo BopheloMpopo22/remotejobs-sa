@@ -18,15 +18,18 @@ export default async function handler(req, res) {
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
     const { data: jobs } = await supabase
       .from("job_applications")
-      .select("title, company")
+      .select("job_title, company, job_url")
       .eq("user_id", user.id)
-      .gte("applied_at", today);
+      .gte("application_date", today);
 
     if (!jobs || jobs.length === 0) continue;
 
     // Build email content
     const jobList = jobs
-      .map((j) => `<li>${j.title} at ${j.company}</li>`)
+      .map(
+        (j) =>
+          `<li><a href="${j.job_url}" style="color:#2563eb;text-decoration:underline;" target="_blank">${j.job_title}</a> at <b>${j.company}</b></li>`
+      )
       .join("");
     const html = `
       <div style="font-family: Arial, sans-serif; background: #f0f4f8; padding: 2rem; border-radius: 1rem; color: #222;">
@@ -36,6 +39,8 @@ export default async function handler(req, res) {
         <ul>${jobList}</ul>
         <p style="margin-top:1.5rem;">Keep an eye on your inbox for responses from employers! If you have any questions, just reply to this email—I’m here to help.</p>
         <p style="margin-top:2rem; color:#10b981; font-weight:bold;">To your success,<br/>Bophelo<br/>RemoteJobsSA</p>
+        <hr style="margin:2rem 0;" />
+        <footer style="font-size:0.95rem; color:#666;">Need help? Email us at <a href="mailto:bophelompopo22@gmail.com" style="color:#2563eb;">bophelompopo22@gmail.com</a></footer>
       </div>
     `;
 
