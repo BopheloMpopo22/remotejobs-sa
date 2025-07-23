@@ -30,6 +30,37 @@ interface CVData {
   }>;
   skills: string[];
   languages: string[];
+  references: Array<{
+    name: string;
+    relationship: string;
+    company?: string;
+    email: string;
+    phone: string;
+  }>;
+  certifications: Array<{
+    name: string;
+    issuer: string;
+    date: string;
+    description: string;
+  }>;
+  awards: Array<{
+    name: string;
+    issuer: string;
+    date: string;
+    description: string;
+  }>;
+  volunteer: Array<{
+    organization: string;
+    role: string;
+    dates: string;
+    description: string;
+  }>;
+  projects: Array<{
+    name: string;
+    description: string;
+    technologies: string;
+    link?: string;
+  }>;
 }
 
 interface CVGeneratorProps {
@@ -54,6 +85,11 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
     education: [],
     skills: [],
     languages: [],
+    references: [],
+    certifications: [],
+    awards: [],
+    volunteer: [],
+    projects: [],
   });
 
   const [tempExperience, setTempExperience] = useState({
