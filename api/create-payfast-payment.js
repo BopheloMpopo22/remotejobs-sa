@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
+import { sendEmail } from "../src/lib/email";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
@@ -193,6 +194,27 @@ export default async function handler(req, res) {
         ? process.env.PAYFAST_TEST_PHRASE.slice(0, 2) + "***"
         : "<undefined>"
     );
+
+    // After saving application and preparing payfastData, send payment success email
+    await sendEmail({
+      to: user.email,
+      subject: "Payment Received! Here’s What Happens Next",
+      html: `
+        <div style="font-family: Arial, sans-serif; background: #f0f4f8; padding: 2rem; border-radius: 1rem; color: #222;">
+          <h1 style="color: #10b981;">Thank you for your payment! 🎉</h1>
+          <p style="font-size: 1.1rem;">Hi <b>${
+            applicationData.fullName || "there"
+          }</b>,</p>
+          <p>We’ve received your payment and are excited to help you land your next remote job!</p>
+          <ul style="margin: 1rem 0;">
+            <li>✨ <b>Job Assistant</b>: We’ll start applying to jobs for you every day.</li>
+            <li>📬 You’ll receive updates and summaries of your applications.</li>
+          </ul>
+          <p>If you have any questions or want to update your preferences, just reply to this email—I’m here to help!</p>
+          <p style="margin-top:2rem; color:#2563eb; font-weight:bold;">To your success,<br/>Bophelo<br/>RemoteJobsSA</p>
+        </div>
+      `,
+    });
 
     return res.status(200).json({
       paymentReference,
