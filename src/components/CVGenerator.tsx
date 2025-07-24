@@ -633,7 +633,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
               />
             </div>
             <div className="form-group">
-              <label>Email *</label>
+              <label>Email Address *</label>
               <input
                 type="email"
                 value={cvData.personalInfo.email}
