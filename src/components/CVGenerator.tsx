@@ -616,7 +616,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
           <div className="cv-step">
             <h3>Personal Information</h3>
             <div className="form-group">
-              <label>Full Name *</label>
+              <label>Name *</label>
               <input
                 type="text"
                 value={cvData.personalInfo.fullName}
