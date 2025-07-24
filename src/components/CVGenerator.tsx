@@ -1,8 +1,9 @@
+// CV Generator: Optional sections and visual enhancements are present. Triggering deployment.
 import React, { useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { supabase } from "../lib/supabase";
-
+//Hello World
 interface CVData {
   personalInfo: {
     fullName: string;
