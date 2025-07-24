@@ -212,13 +212,19 @@ function App() {
           <nav className="main-nav">
             <button
               className={`nav-tab ${currentView === "jobs" ? "active" : ""}`}
-              onClick={() => setCurrentView("jobs")}
+              onClick={() => {
+                setStaticPage(null);
+                setCurrentView("jobs");
+              }}
             >
               🔍 Job Search
             </button>
             <button
               className={`nav-tab ${currentView === "cv" ? "active" : ""}`}
-              onClick={() => setCurrentView("cv")}
+              onClick={() => {
+                setStaticPage(null);
+                setCurrentView("cv");
+              }}
             >
               📄 CV Generator
             </button>
@@ -226,7 +232,10 @@ function App() {
               className={`nav-tab ${
                 currentView === "assistant" ? "active" : ""
               }`}
-              onClick={() => setCurrentView("assistant")}
+              onClick={() => {
+                setStaticPage(null);
+                setCurrentView("assistant");
+              }}
             >
               🤖 Job Assistant
             </button>
