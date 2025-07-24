@@ -1714,3 +1714,28 @@ footer > div {
     width: 100%;
   }
 }
+section {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #e0e7ff;
+  margin: 32px auto;
+  padding: 32px 24px;
+  max-width: 700px;
+}
+section h2 {
+  margin-top: 0;
+  color: #222;
+  font-size: 2rem;
+}
+section ul {
+  margin: 16px 0 16px 24px;
+  padding: 0;
+}
+section li {
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+section a {
+  color: #2563eb;
+  text-decoration: underline;
+}

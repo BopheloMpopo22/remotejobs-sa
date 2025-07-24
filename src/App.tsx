@@ -42,6 +42,9 @@ function App() {
     message: string;
     type: "success" | "error";
   } | null>(null);
+  const [staticPage, setStaticPage] = useState<
+    null | "about" | "contact" | "privacy"
+  >(null);
 
   useEffect(() => {
     // Check for existing session
@@ -234,19 +237,105 @@ function App() {
       {/* Main Content */}
       <main>
         <div>
-          {currentView === "jobs" ? (
-            <>
-              <JobSearch
-                onJobsChange={setJobs}
-                onLoadingChange={setJobLoading}
-                onErrorChange={setError}
-              />
-              <JobList jobs={jobs} loading={jobLoading} error={error} />
-            </>
-          ) : currentView === "cv" ? (
-            <CVGenerator onAuthRequired={handleAuthRequired} user={user} />
+          {staticPage === "about" ? (
+            <section style={{ maxWidth: 700, margin: "0 auto", padding: 24 }}>
+              <h2>About Remote Jobs SA</h2>
+              <p>
+                <b>Mission:</b> To make the process of finding jobs easy and
+                affordable for everyone in South Africa and beyond.
+              </p>
+              <p>
+                Remote Jobs SA is dedicated to connecting job seekers with
+                remote opportunities both locally and globally. Our platform
+                offers:
+              </p>
+              <ul>
+                <li>
+                  <b>Job Search:</b> Find remote jobs from top companies,
+                  filtered by your preferences.
+                </li>
+                <li>
+                  <b>CV Generator:</b> Create a professional CV in minutes with
+                  customizable sections.
+                </li>
+                <li>
+                  <b>Job Assistant:</b> Get AI-powered help with applications,
+                  job matching, and more.
+                </li>
+                <li>
+                  <b>Easy Payments:</b> Secure, affordable access to premium
+                  features.
+                </li>
+              </ul>
+              <p>
+                We believe in empowering job seekers with the tools they need to
+                succeed in the modern workforce.
+              </p>
+            </section>
+          ) : staticPage === "contact" ? (
+            <section style={{ maxWidth: 700, margin: "0 auto", padding: 24 }}>
+              <h2>Contact Us</h2>
+              <p>Have questions, feedback, or need support? Reach out to us:</p>
+              <ul>
+                <li>
+                  <b>Email:</b>{" "}
+                  <a href="mailto:bophelompopo22@gmail.com">
+                    bophelompopo22@gmail.com
+                  </a>
+                </li>
+                <li>
+                  <b>Cellphone:</b>{" "}
+                  <a href="tel:+27711083613">+27 71 108 3613</a>
+                </li>
+              </ul>
+              <p>We aim to respond to all queries within 24 hours.</p>
+            </section>
+          ) : staticPage === "privacy" ? (
+            <section style={{ maxWidth: 700, margin: "0 auto", padding: 24 }}>
+              <h2>Privacy Policy</h2>
+              <p>
+                Your privacy is important to us. This policy explains how we
+                collect, use, and protect your information:
+              </p>
+              <ul>
+                <li>
+                  We only collect personal information necessary to provide our
+                  services (e.g., account creation, job applications, CV
+                  generation).
+                </li>
+                <li>Your data is never sold to third parties.</li>
+                <li>We use secure technologies to protect your information.</li>
+                <li>
+                  You can request deletion of your data at any time by
+                  contacting us.
+                </li>
+              </ul>
+              <p>
+                By using Remote Jobs SA, you agree to this policy. For
+                questions, contact us at{" "}
+                <a href="mailto:bophelompopo22@gmail.com">
+                  bophelompopo22@gmail.com
+                </a>
+                .
+              </p>
+            </section>
           ) : (
-            <JobAssistant onAuthRequired={handleAuthRequired} user={user} />
+            <>
+              {currentView === "jobs" ? (
+                <>
+                  <JobSearch
+                    onJobsChange={setJobs}
+                    onLoadingChange={setJobLoading}
+                    onErrorChange={setError}
+                  />
+                  <JobList jobs={jobs} loading={jobLoading} error={error} />
+                </>
+              ) : currentView === "cv" ? (
+                <CVGenerator onAuthRequired={handleAuthRequired} user={user} />
+              ) : (
+                <JobAssistant onAuthRequired={handleAuthRequired} user={user} />
+              )}
+            </>
           )}
         </div>
       </main>
@@ -258,11 +347,34 @@ function App() {
             <h3>Remote Jobs SA</h3>
             <p>Connecting South Africans with global remote opportunities</p>
           </div>
-
           <div className="footer-links">
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
-            <a href="#privacy">Privacy Policy</a>
+            <a
+              href="#about"
+              onClick={(e) => {
+                e.preventDefault();
+                setStaticPage("about");
+              }}
+            >
+              About
+            </a>
+            <a
+              href="#contact"
+              onClick={(e) => {
+                e.preventDefault();
+                setStaticPage("contact");
+              }}
+            >
+              Contact
+            </a>
+            <a
+              href="#privacy"
+              onClick={(e) => {
+                e.preventDefault();
+                setStaticPage("privacy");
+              }}
+            >
+              Privacy Policy
+            </a>
             <a href="#terms">Terms of Service</a>
           </div>
         </div>
