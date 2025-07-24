@@ -667,7 +667,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
               />
             </div>
             <div className="form-group">
-              <label>Location *</label>
+              <label>Current Location *</label>
               <input
                 type="text"
                 value={cvData.personalInfo.location}
