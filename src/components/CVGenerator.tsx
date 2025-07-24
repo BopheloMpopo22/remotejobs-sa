@@ -111,6 +111,37 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
 
   const [tempSkills, setTempSkills] = useState("");
   const [tempLanguages, setTempLanguages] = useState("");
+  const [tempReference, setTempReference] = useState({
+    name: "",
+    relationship: "",
+    company: "",
+    email: "",
+    phone: "",
+  });
+  const [tempCertification, setTempCertification] = useState({
+    name: "",
+    issuer: "",
+    date: "",
+    description: "",
+  });
+  const [tempAward, setTempAward] = useState({
+    name: "",
+    issuer: "",
+    date: "",
+    description: "",
+  });
+  const [tempVolunteer, setTempVolunteer] = useState({
+    organization: "",
+    role: "",
+    dates: "",
+    description: "",
+  });
+  const [tempProject, setTempProject] = useState({
+    name: "",
+    description: "",
+    technologies: "",
+    link: "",
+  });
 
   const addExperience = () => {
     if (tempExperience.company && tempExperience.position) {
@@ -1067,6 +1098,369 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                 </button>
               </div>
             </div>
+            {/* References */}
+            <div className="references-section">
+              <h4>References (Optional)</h4>
+              {cvData.references.map((ref, idx) => (
+                <div key={idx} className="reference-item">
+                  <strong>{ref.name}</strong> ({ref.relationship})
+                  {ref.company && <> - {ref.company}</>}
+                  <div>
+                    {ref.email} {ref.phone && <>| {ref.phone}</>}
+                  </div>
+                </div>
+              ))}
+              <div className="form-group">
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={tempReference.name || ""}
+                  onChange={(e) =>
+                    setTempReference({ ...tempReference, name: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Relationship"
+                  value={tempReference.relationship || ""}
+                  onChange={(e) =>
+                    setTempReference({
+                      ...tempReference,
+                      relationship: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Company"
+                  value={tempReference.company || ""}
+                  onChange={(e) =>
+                    setTempReference({
+                      ...tempReference,
+                      company: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={tempReference.email || ""}
+                  onChange={(e) =>
+                    setTempReference({
+                      ...tempReference,
+                      email: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Phone"
+                  value={tempReference.phone || ""}
+                  onChange={(e) =>
+                    setTempReference({
+                      ...tempReference,
+                      phone: e.target.value,
+                    })
+                  }
+                />
+                <button
+                  onClick={() => {
+                    setCvData((prev) => ({
+                      ...prev,
+                      references: [...prev.references, tempReference],
+                    }));
+                    setTempReference({
+                      name: "",
+                      relationship: "",
+                      company: "",
+                      email: "",
+                      phone: "",
+                    });
+                  }}
+                >
+                  Add Reference
+                </button>
+              </div>
+            </div>
+            {/* Certifications */}
+            <div className="certifications-section">
+              <h4>Certifications & Courses (Optional)</h4>
+              {cvData.certifications.map((cert, idx) => (
+                <div key={idx} className="certification-item">
+                  <strong>{cert.name}</strong> ({cert.issuer}) - {cert.date}
+                  <div>{cert.description}</div>
+                </div>
+              ))}
+              <div className="form-group">
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={tempCertification.name || ""}
+                  onChange={(e) =>
+                    setTempCertification({
+                      ...tempCertification,
+                      name: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Issuer"
+                  value={tempCertification.issuer || ""}
+                  onChange={(e) =>
+                    setTempCertification({
+                      ...tempCertification,
+                      issuer: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  type="date"
+                  placeholder="Date"
+                  value={tempCertification.date || ""}
+                  onChange={(e) =>
+                    setTempCertification({
+                      ...tempCertification,
+                      date: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Description"
+                  value={tempCertification.description || ""}
+                  onChange={(e) =>
+                    setTempCertification({
+                      ...tempCertification,
+                      description: e.target.value,
+                    })
+                  }
+                />
+                <button
+                  onClick={() => {
+                    setCvData((prev) => ({
+                      ...prev,
+                      certifications: [
+                        ...prev.certifications,
+                        tempCertification,
+                      ],
+                    }));
+                    setTempCertification({
+                      name: "",
+                      issuer: "",
+                      date: "",
+                      description: "",
+                    });
+                  }}
+                >
+                  Add Certification
+                </button>
+              </div>
+            </div>
+            {/* Awards */}
+            <div className="awards-section">
+              <h4>Awards & Achievements (Optional)</h4>
+              {cvData.awards.map((award, idx) => (
+                <div key={idx} className="award-item">
+                  <strong>{award.name}</strong> ({award.issuer}) - {award.date}
+                  <div>{award.description}</div>
+                </div>
+              ))}
+              <div className="form-group">
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={tempAward.name || ""}
+                  onChange={(e) =>
+                    setTempAward({ ...tempAward, name: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Issuer"
+                  value={tempAward.issuer || ""}
+                  onChange={(e) =>
+                    setTempAward({ ...tempAward, issuer: e.target.value })
+                  }
+                />
+                <input
+                  type="date"
+                  placeholder="Date"
+                  value={tempAward.date || ""}
+                  onChange={(e) =>
+                    setTempAward({ ...tempAward, date: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Description"
+                  value={tempAward.description || ""}
+                  onChange={(e) =>
+                    setTempAward({ ...tempAward, description: e.target.value })
+                  }
+                />
+                <button
+                  onClick={() => {
+                    setCvData((prev) => ({
+                      ...prev,
+                      awards: [...prev.awards, tempAward],
+                    }));
+                    setTempAward({
+                      name: "",
+                      issuer: "",
+                      date: "",
+                      description: "",
+                    });
+                  }}
+                >
+                  Add Award
+                </button>
+              </div>
+            </div>
+            {/* Volunteer */}
+            <div className="volunteer-section">
+              <h4>Volunteer Experience (Optional)</h4>
+              {cvData.volunteer.map((vol, idx) => (
+                <div key={idx} className="volunteer-item">
+                  <strong>{vol.organization}</strong> ({vol.role}) - {vol.dates}
+                  <div>{vol.description}</div>
+                </div>
+              ))}
+              <div className="form-group">
+                <input
+                  type="text"
+                  placeholder="Organization"
+                  value={tempVolunteer.organization || ""}
+                  onChange={(e) =>
+                    setTempVolunteer({
+                      ...tempVolunteer,
+                      organization: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Role"
+                  value={tempVolunteer.role || ""}
+                  onChange={(e) =>
+                    setTempVolunteer({ ...tempVolunteer, role: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Dates"
+                  value={tempVolunteer.dates || ""}
+                  onChange={(e) =>
+                    setTempVolunteer({
+                      ...tempVolunteer,
+                      dates: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Description"
+                  value={tempVolunteer.description || ""}
+                  onChange={(e) =>
+                    setTempVolunteer({
+                      ...tempVolunteer,
+                      description: e.target.value,
+                    })
+                  }
+                />
+                <button
+                  onClick={() => {
+                    setCvData((prev) => ({
+                      ...prev,
+                      volunteer: [...prev.volunteer, tempVolunteer],
+                    }));
+                    setTempVolunteer({
+                      organization: "",
+                      role: "",
+                      dates: "",
+                      description: "",
+                    });
+                  }}
+                >
+                  Add Volunteer
+                </button>
+              </div>
+            </div>
+            {/* Projects */}
+            <div className="projects-section">
+              <h4>Projects (Optional)</h4>
+              {cvData.projects.map((proj, idx) => (
+                <div key={idx} className="project-item">
+                  <strong>{proj.name}</strong> - {proj.technologies}
+                  <div>{proj.description}</div>
+                  {proj.link && (
+                    <a
+                      href={proj.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {proj.link}
+                    </a>
+                  )}
+                </div>
+              ))}
+              <div className="form-group">
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={tempProject.name || ""}
+                  onChange={(e) =>
+                    setTempProject({ ...tempProject, name: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Description"
+                  value={tempProject.description || ""}
+                  onChange={(e) =>
+                    setTempProject({
+                      ...tempProject,
+                      description: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Technologies"
+                  value={tempProject.technologies || ""}
+                  onChange={(e) =>
+                    setTempProject({
+                      ...tempProject,
+                      technologies: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  type="url"
+                  placeholder="Link"
+                  value={tempProject.link || ""}
+                  onChange={(e) =>
+                    setTempProject({ ...tempProject, link: e.target.value })
+                  }
+                />
+                <button
+                  onClick={() => {
+                    setCvData((prev) => ({
+                      ...prev,
+                      projects: [...prev.projects, tempProject],
+                    }));
+                    setTempProject({
+                      name: "",
+                      description: "",
+                      technologies: "",
+                      link: "",
+                    });
+                  }}
+                >
+                  Add Project
+                </button>
+              </div>
+            </div>
           </div>
         );
 
@@ -1093,6 +1487,33 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
               <div className="preview-section">
                 <strong>Languages:</strong> {cvData.languages.length} languages
               </div>
+              {cvData.references.length > 0 && (
+                <div className="preview-section">
+                  <strong>References:</strong> {cvData.references.length}{" "}
+                  entries
+                </div>
+              )}
+              {cvData.certifications.length > 0 && (
+                <div className="preview-section">
+                  <strong>Certifications:</strong>{" "}
+                  {cvData.certifications.length} entries
+                </div>
+              )}
+              {cvData.awards.length > 0 && (
+                <div className="preview-section">
+                  <strong>Awards:</strong> {cvData.awards.length} entries
+                </div>
+              )}
+              {cvData.volunteer.length > 0 && (
+                <div className="preview-section">
+                  <strong>Volunteer:</strong> {cvData.volunteer.length} entries
+                </div>
+              )}
+              {cvData.projects.length > 0 && (
+                <div className="preview-section">
+                  <strong>Projects:</strong> {cvData.projects.length} entries
+                </div>
+              )}
             </div>
             <div
               style={{
