@@ -269,21 +269,24 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
           <meta charset="UTF-8">
           <title>${cvData.personalInfo.fullName} - CV</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-            .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; background: #f9fafb; }
+            .header { border-bottom: 3px solid #6366f1; padding-bottom: 20px; margin-bottom: 30px; background: #eef2ff; border-radius: 12px 12px 0 0; }
             .header-content { display: flex; align-items: center; gap: 30px; }
             .photo { flex-shrink: 0; }
             .info { flex-grow: 1; }
-            .name { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; }
+            .name { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; color: #3730a3; }
             .contact { font-size: 1.1em; color: #666; }
-            .section { margin-bottom: 30px; }
-            .section-title { font-size: 1.5em; font-weight: bold; margin-bottom: 15px; color: #333; }
-            .experience-item, .education-item { margin-bottom: 20px; }
+            .section { margin-bottom: 30px; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #e0e7ff; padding: 20px; }
+            .section-title { font-size: 1.5em; font-weight: bold; margin-bottom: 15px; color: #4f46e5; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #c7d2fe; padding-bottom: 5px; }
+            .icon { font-size: 1.2em; }
+            .experience-item, .education-item, .reference-item, .certification-item, .award-item, .volunteer-item, .project-item { margin-bottom: 20px; }
             .job-title { font-weight: bold; font-size: 1.2em; }
             .company { color: #666; font-style: italic; }
             .date { color: #888; font-size: 0.9em; }
             .skills-list, .languages-list { display: flex; flex-wrap: wrap; gap: 10px; }
-            .skill, .language { background: #f0f0f0; padding: 5px 10px; border-radius: 15px; }
+            .skill, .language { background: #e0e7ff; color: #3730a3; padding: 5px 10px; border-radius: 15px; font-weight: 500; }
+            .divider { border-top: 2px solid #6366f1; margin: 30px 0; }
+            a { color: #2563eb; text-decoration: underline; }
           </style>
         </head>
         <body>
@@ -291,7 +294,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             <div class="header-content">
               ${
                 cvData.personalInfo.photo
-                  ? `<div class="photo"><img src="${cvData.personalInfo.photo}" alt="Profile" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" /></div>`
+                  ? `<div class="photo"><img src="${cvData.personalInfo.photo}" alt="Profile" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1;" /></div>`
                   : ""
               }
               <div class="info">
@@ -320,9 +323,10 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             cvData.summary
               ? `
           <div class="section">
-            <div class="section-title">Professional Summary</div>
+            <div class="section-title"><span class="icon">💡</span> Professional Summary</div>
             <p>${cvData.summary}</p>
           </div>
+          <div class="divider"></div>
           `
               : ""
           }
@@ -331,7 +335,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             cvData.experience.length > 0
               ? `
           <div class="section">
-            <div class="section-title">Professional Experience</div>
+            <div class="section-title"><span class="icon">💼</span> Professional Experience</div>
             ${cvData.experience
               .map(
                 (exp) => `
@@ -347,6 +351,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
               )
               .join("")}
           </div>
+          <div class="divider"></div>
           `
               : ""
           }
@@ -355,7 +360,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             cvData.education.length > 0
               ? `
           <div class="section">
-            <div class="section-title">Education</div>
+            <div class="section-title"><span class="icon">🎓</span> Education</div>
             ${cvData.education
               .map(
                 (edu) => `
@@ -368,6 +373,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
               )
               .join("")}
           </div>
+          <div class="divider"></div>
           `
               : ""
           }
@@ -376,13 +382,14 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             cvData.skills.length > 0
               ? `
           <div class="section">
-            <div class="section-title">Skills</div>
+            <div class="section-title"><span class="icon">🛠️</span> Skills</div>
             <div class="skills-list">
               ${cvData.skills
                 .map((skill) => `<span class="skill">${skill}</span>`)
                 .join("")}
             </div>
           </div>
+          <div class="divider"></div>
           `
               : ""
           }
@@ -391,16 +398,129 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             cvData.languages.length > 0
               ? `
           <div class="section">
-            <div class="section-title">Languages</div>
+            <div class="section-title"><span class="icon">🌐</span> Languages</div>
             <div class="languages-list">
               ${cvData.languages
                 .map((lang) => `<span class="language">${lang}</span>`)
                 .join("")}
             </div>
           </div>
+          <div class="divider"></div>
           `
               : ""
           }
+
+          ${
+            cvData.references.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title"><span class="icon">📞</span> References</div>
+            ${cvData.references
+              .map(
+                (ref) => `
+              <div class="reference-item">
+                <strong>${ref.name}</strong> (${ref.relationship})
+                ${ref.company ? `- ${ref.company}` : ""}<br>
+                <span>${ref.email}${ref.phone ? ` | ${ref.phone}` : ""}</span>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+          <div class="divider"></div>
+          `
+              : ""
+          }
+
+          ${
+            cvData.certifications.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title"><span class="icon">📜</span> Certifications & Courses</div>
+            ${cvData.certifications
+              .map(
+                (cert) => `
+              <div class="certification-item">
+                <strong>${cert.name}</strong> (${cert.issuer}) - ${cert.date}<br>
+                <span>${cert.description}</span>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+          <div class="divider"></div>
+          `
+              : ""
+          }
+
+          ${
+            cvData.awards.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title"><span class="icon">🏆</span> Awards & Achievements</div>
+            ${cvData.awards
+              .map(
+                (award) => `
+              <div class="award-item">
+                <strong>${award.name}</strong> (${award.issuer}) - ${award.date}<br>
+                <span>${award.description}</span>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+          <div class="divider"></div>
+          `
+              : ""
+          }
+
+          ${
+            cvData.volunteer.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title"><span class="icon">🤝</span> Volunteer Experience</div>
+            ${cvData.volunteer
+              .map(
+                (vol) => `
+              <div class="volunteer-item">
+                <strong>${vol.organization}</strong> (${vol.role}) - ${vol.dates}<br>
+                <span>${vol.description}</span>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+          <div class="divider"></div>
+          `
+              : ""
+          }
+
+          ${
+            cvData.projects.length > 0
+              ? `
+          <div class="section">
+            <div class="section-title"><span class="icon">💻</span> Projects</div>
+            ${cvData.projects
+              .map(
+                (proj) => `
+              <div class="project-item">
+                <strong>${proj.name}</strong> - ${proj.technologies}<br>
+                <span>${proj.description}</span>
+                ${
+                  proj.link
+                    ? `<br><a href="${proj.link}" target="_blank">${proj.link}</a>`
+                    : ""
+                }
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+          <div class="divider"></div>
+          `
+              : ""
+          }
+
         </body>
         </html>
       `;
