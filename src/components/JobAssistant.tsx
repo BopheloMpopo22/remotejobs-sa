@@ -704,10 +704,6 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
           >
             {user ? "Submit Application" : "Sign up to Submit Application"}
           </button>
-          <p className="form-note">
-            * This is a demo. In a real implementation, this would connect to a
-            backend service.
-          </p>
         </div>
       </form>
     </div>
