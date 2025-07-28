@@ -253,6 +253,8 @@ export default async function handler(req, res) {
     );
 
     // After saving application and preparing payfastData, send payment success email
+    // TEMPORARILY DISABLED FOR DEBUGGING
+    /*
     try {
       await sendEmail({
         to: user.email,
@@ -279,6 +281,8 @@ export default async function handler(req, res) {
       console.error("Email sending failed:", emailError);
       // Don't fail the payment process if email fails
     }
+    */
+    console.log("Email sending temporarily disabled for debugging");
 
     return res.status(200).json({
       paymentReference,
