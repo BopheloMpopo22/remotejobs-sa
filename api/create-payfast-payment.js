@@ -10,18 +10,18 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // PayFast Configuration
 const PAYFAST_CONFIG = {
   MERCHANT_ID:
-    process.env.PAYFAST_TEST_MODE === "true"
+    process.env.PAYFAST_TEST_MODE === "true" || true // Force sandbox for testing
       ? process.env.PAYFAST_SANDBOX_MERCHANT_ID
       : process.env.PAYFAST_MERCHANT_ID,
   MERCHANT_KEY:
-    process.env.PAYFAST_TEST_MODE === "true"
+    process.env.PAYFAST_TEST_MODE === "true" || true // Force sandbox for testing
       ? process.env.PAYFAST_SANDBOX_MERCHANT_KEY
       : process.env.PAYFAST_MERCHANT_KEY,
-  SANDBOX_MODE: process.env.PAYFAST_TEST_MODE === "true",
+  SANDBOX_MODE: process.env.PAYFAST_TEST_MODE === "true" || true, // Force sandbox for testing
   SANDBOX_URL: "https://sandbox.payfast.co.za/eng/process",
   LIVE_URL: "https://www.payfast.co.za/eng/process",
   PASS_PHRASE:
-    process.env.PAYFAST_TEST_MODE === "true"
+    process.env.PAYFAST_TEST_MODE === "true" || true // Force sandbox for testing
       ? process.env.PAYFAST_TEST_PHRASE
       : process.env.PAYFAST_PASS_PHRASE,
 };
@@ -203,6 +203,7 @@ export default async function handler(req, res) {
       amount: "149.00",
       item_name: "Job Assistant Setup Fee",
       item_description: "One-time setup fee for Job Assistant service",
+      test_mode: "1", // Force test mode
       // TEMPORARILY REMOVED SUBSCRIPTION FIELDS FOR TESTING
       // subscription_type: "1",
       // frequency: "3",
