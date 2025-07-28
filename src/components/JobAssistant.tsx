@@ -169,45 +169,58 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
   };
 
   const sendFormData = async (data: any) => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    console.log("Supabase session:", session);
-    console.log("Access token:", session?.access_token);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      console.log("Supabase session:", session);
+      console.log("Access token:", session?.access_token);
 
-    const response = await fetch("/api/create-payfast-payment", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.access_token}`,
-      },
-      body: JSON.stringify({ applicationData: data }),
-    });
+      console.log("Sending payment request...");
+      const response = await fetch("/api/create-payfast-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ applicationData: data }),
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to create payment");
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API Error:", errorText);
+        throw new Error(
+          `Failed to create payment: ${response.status} ${errorText}`
+        );
+      }
+
+      const result = await response.json();
+      console.log("PayFast paymentUrl:", result.paymentUrl);
+      console.log("PayFast payfastData:", result.payfastData);
+
+      // Redirect to PayFast payment page
+      const form = document.createElement("form");
+      form.action = result.paymentUrl;
+      form.method = "POST";
+      form.target = "_blank";
+      Object.entries(result.payfastData).forEach(([key, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = String(value);
+        form.appendChild(input);
+      });
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+      setSubmitted(true);
+    } catch (error: any) {
+      console.error("Payment error:", error);
+      alert(`Payment error: ${error.message}`);
     }
-
-    const result = await response.json();
-    console.log("PayFast paymentUrl:", result.paymentUrl);
-    console.log("PayFast payfastData:", result.payfastData);
-
-    // Redirect to PayFast payment page
-    const form = document.createElement("form");
-    form.action = result.paymentUrl;
-    form.method = "POST";
-    form.target = "_blank";
-    Object.entries(result.payfastData).forEach(([key, value]) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = String(value);
-      form.appendChild(input);
-    });
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-    setSubmitted(true);
   };
 
   if (submitted) {
