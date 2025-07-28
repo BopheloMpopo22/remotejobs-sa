@@ -43,7 +43,7 @@ function App() {
     type: "success" | "error";
   } | null>(null);
   const [staticPage, setStaticPage] = useState<
-    null | "about" | "contact" | "privacy"
+    null | "about" | "contact" | "privacy" | "terms"
   >(null);
 
   useEffect(() => {
@@ -328,6 +328,58 @@ function App() {
                 .
               </p>
             </section>
+          ) : staticPage === "terms" ? (
+            <section style={{ maxWidth: 700, margin: "0 auto", padding: 24 }}>
+              <h2>Terms of Service</h2>
+              <p>By using RemoteJobs SA, you agree to these terms:</p>
+              <ul>
+                <li>
+                  <b>Service Usage:</b> Our platform provides job search, CV
+                  generation, and job assistance services. Use these services
+                  responsibly and in accordance with applicable laws.
+                </li>
+                <li>
+                  <b>Account Responsibility:</b> You are responsible for
+                  maintaining the confidentiality of your account and for all
+                  activities that occur under your account.
+                </li>
+                <li>
+                  <b>Payment Terms:</b> Premium features require payment. All
+                  payments are processed securely through PayFast. Refunds are
+                  handled according to our refund policy.
+                </li>
+                <li>
+                  <b>Content Accuracy:</b> While we strive for accuracy, we
+                  cannot guarantee the completeness or reliability of job
+                  listings or CV generation results.
+                </li>
+                <li>
+                  <b>Prohibited Use:</b> You may not use our services for any
+                  illegal or unauthorized purpose, including but not limited to
+                  fraud, harassment, or copyright infringement.
+                </li>
+                <li>
+                  <b>Service Availability:</b> We aim to provide reliable
+                  service but cannot guarantee uninterrupted access. We may
+                  modify or discontinue services with notice.
+                </li>
+                <li>
+                  <b>Limitation of Liability:</b> RemoteJobs SA is not liable
+                  for any damages arising from the use of our services,
+                  including but not limited to lost data, missed opportunities,
+                  or financial losses.
+                </li>
+              </ul>
+              <p>
+                We reserve the right to modify these terms at any time.
+                Continued use of our services constitutes acceptance of any
+                changes. For questions about these terms, contact us at{" "}
+                <a href="mailto:bophelompopo22@gmail.com">
+                  bophelompopo22@gmail.com
+                </a>
+                .
+              </p>
+            </section>
           ) : (
             <>
               {currentView === "jobs" ? (
@@ -384,7 +436,15 @@ function App() {
             >
               Privacy Policy
             </a>
-            <a href="#terms">Terms of Service</a>
+            <a
+              href="#terms"
+              onClick={(e) => {
+                e.preventDefault();
+                setStaticPage("terms");
+              }}
+            >
+              Terms of Service
+            </a>
           </div>
         </div>
       </footer>
