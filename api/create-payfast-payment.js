@@ -203,12 +203,12 @@ export default async function handler(req, res) {
       amount: "149.00",
       item_name: "Job Assistant Setup Fee",
       item_description: "One-time setup fee for Job Assistant service",
-      // Subscription fields (exactly as PayFast example)
-      subscription_type: "1",
-      frequency: "3",
-      cycles: "12",
-      subscription_notify_email: "true",
-      subscription_notify_webhook: "true",
+      // TEMPORARILY REMOVED SUBSCRIPTION FIELDS FOR TESTING
+      // subscription_type: "1",
+      // frequency: "3",
+      // cycles: "12",
+      // subscription_notify_email: true,
+      // subscription_notify_webhook: true,
     };
 
     // Generate signature
