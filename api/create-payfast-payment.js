@@ -197,21 +197,37 @@ export default async function handler(req, res) {
       notify_url: `${baseUrl}/api/payfast-webhook`,
       name_first:
         applicationData.fullName.split(" ")[0] || applicationData.fullName,
-      name_last: applicationData.fullName.split(" ").slice(1).join(" ") || "",
+      name_last:
+        applicationData.fullName.split(" ").slice(1).join(" ") || "User",
       email_address: user.email,
       m_payment_id: paymentReference,
       amount: "149.00",
       item_name: "Job Assistant Setup Fee",
       item_description: "One-time setup fee for Job Assistant service",
-      // Live payment specific fields
       currency: "ZAR",
-      // TEMPORARILY REMOVED SUBSCRIPTION FIELDS FOR TESTING
-      // subscription_type: "1",
-      // frequency: "3",
-      // cycles: "12",
-      // subscription_notify_email: true,
-      // subscription_notify_webhook: true,
+      // Add custom fields for tracking
+      custom_str1: application.id,
+      custom_str2: "JobAssistant",
     };
+
+    // Validate required fields for live payments
+    if (!payfastData.merchant_id || !payfastData.merchant_key) {
+      console.error("Missing merchant credentials");
+      return res.status(500).json({
+        error: "Missing PayFast merchant credentials",
+      });
+    }
+
+    if (
+      !payfastData.name_first ||
+      !payfastData.email_address ||
+      !payfastData.amount
+    ) {
+      console.error("Missing required payment fields");
+      return res.status(500).json({
+        error: "Missing required payment fields",
+      });
+    }
 
     // Generate signature
     try {
@@ -251,6 +267,8 @@ export default async function handler(req, res) {
       "PayFast Mode:",
       PAYFAST_CONFIG.SANDBOX_MODE ? "SANDBOX" : "LIVE"
     );
+    console.log("Merchant ID being used:", PAYFAST_CONFIG.MERCHANT_ID);
+    console.log("Merchant Key being used:", PAYFAST_CONFIG.MERCHANT_KEY);
     console.log(
       "PAYFAST_CONFIG.PASS_PHRASE (masked):",
       PAYFAST_CONFIG.PASS_PHRASE
