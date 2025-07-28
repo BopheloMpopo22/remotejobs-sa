@@ -20,7 +20,10 @@ const PAYFAST_CONFIG = {
   SANDBOX_MODE: process.env.PAYFAST_TEST_MODE === "true",
   SANDBOX_URL: "https://sandbox.payfast.co.za/eng/process",
   LIVE_URL: "https://www.payfast.co.za/eng/process",
-  PASS_PHRASE: process.env.PAYFAST_TEST_PHRASE, // use the working variable
+  PASS_PHRASE:
+    process.env.PAYFAST_TEST_MODE === "true"
+      ? process.env.PAYFAST_TEST_PHRASE
+      : process.env.PAYFAST_PASS_PHRASE,
 };
 
 // Helper function to generate PayFast signature
@@ -87,6 +90,10 @@ export default async function handler(req, res) {
   console.log(
     "PAYFAST_TEST_PHRASE:",
     process.env.PAYFAST_TEST_PHRASE ? "SET" : "MISSING"
+  );
+  console.log(
+    "PAYFAST_PASS_PHRASE:",
+    process.env.PAYFAST_PASS_PHRASE ? "SET" : "MISSING"
   );
   console.log("NEXT_PUBLIC_BASE_URL:", process.env.NEXT_PUBLIC_BASE_URL);
   console.log("=== END DEBUG INFO ===");
@@ -170,12 +177,6 @@ export default async function handler(req, res) {
     const baseUrl = (
       process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
     ).replace(/\/$/, "");
-    const today = new Date();
-    const billingDate = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      today.getDate()
-    ); // first recurring billing next month
     const payfastData = {
       merchant_id: PAYFAST_CONFIG.MERCHANT_ID,
       merchant_key: PAYFAST_CONFIG.MERCHANT_KEY,
@@ -190,12 +191,6 @@ export default async function handler(req, res) {
       amount: "149.00",
       item_name: "Job Assistant Setup Fee",
       item_description: "One-time setup fee for Job Assistant service",
-      // Subscription fields
-      subscription_type: 1, // 1 = recurring
-      billing_date: billingDate.toISOString().slice(0, 10), // YYYY-MM-DD
-      recurring_amount: "49.00",
-      frequency: 3, // 3 = monthly
-      cycles: 0, // 0 = indefinite
     };
 
     // Generate signature
