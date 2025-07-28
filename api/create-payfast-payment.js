@@ -60,6 +60,37 @@ const generatePayFastSignature = (data, passphrase) => {
 };
 
 export default async function handler(req, res) {
+  // Add debugging for environment variables
+  console.log("=== PAYFAST DEBUG INFO ===");
+  console.log("SUPABASE_URL:", process.env.SUPABASE_URL ? "SET" : "MISSING");
+  console.log(
+    "SUPABASE_ANON_KEY:",
+    process.env.SUPABASE_ANON_KEY ? "SET" : "MISSING"
+  );
+  console.log(
+    "PAYFAST_MERCHANT_ID:",
+    process.env.PAYFAST_MERCHANT_ID ? "SET" : "MISSING"
+  );
+  console.log(
+    "PAYFAST_MERCHANT_KEY:",
+    process.env.PAYFAST_MERCHANT_KEY ? "SET" : "MISSING"
+  );
+  console.log("PAYFAST_TEST_MODE:", process.env.PAYFAST_TEST_MODE);
+  console.log(
+    "PAYFAST_SANDBOX_MERCHANT_ID:",
+    process.env.PAYFAST_SANDBOX_MERCHANT_ID ? "SET" : "MISSING"
+  );
+  console.log(
+    "PAYFAST_SANDBOX_MERCHANT_KEY:",
+    process.env.PAYFAST_SANDBOX_MERCHANT_KEY ? "SET" : "MISSING"
+  );
+  console.log(
+    "PAYFAST_TEST_PHRASE:",
+    process.env.PAYFAST_TEST_PHRASE ? "SET" : "MISSING"
+  );
+  console.log("NEXT_PUBLIC_BASE_URL:", process.env.NEXT_PUBLIC_BASE_URL);
+  console.log("=== END DEBUG INFO ===");
+
   console.log("Incoming headers:", req.headers);
   console.log("Authorization header:", req.headers.authorization);
   console.log("DEBUG_TEST:", process.env.DEBUG_TEST);
