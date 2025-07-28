@@ -172,19 +172,6 @@ function App() {
       )}
 
       {/* Test Banner */}
-      <div
-        style={{
-          backgroundColor: "#10b981",
-          color: "white",
-          textAlign: "center",
-          padding: "0.5rem",
-          fontWeight: "bold",
-          fontSize: "1rem",
-        }}
-      >
-        ✅ NEW: CV Generator & Job Assistant - Zero cost AI implementations!
-      </div>
-
       {/* Header */}
       <header>
         <div>
