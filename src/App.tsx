@@ -43,7 +43,13 @@ function App() {
     type: "success" | "error";
   } | null>(null);
   const [staticPage, setStaticPage] = useState<
-    null | "about" | "contact" | "privacy" | "terms"
+    | null
+    | "about"
+    | "contact"
+    | "privacy"
+    | "terms"
+    | "payment-success"
+    | "payment-cancel"
   >(null);
 
   useEffect(() => {
@@ -75,6 +81,17 @@ function App() {
     });
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  // Handle URL parameters for PayFast redirects
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = urlParams.get("page");
+    if (page === "payment-success") {
+      setStaticPage("payment-success");
+    } else if (page === "payment-cancel") {
+      setStaticPage("payment-cancel");
+    }
   }, []);
 
   const handleAuthChange = (user: any) => {
@@ -366,6 +383,63 @@ function App() {
                 </a>
                 .
               </p>
+            </section>
+          ) : staticPage === "payment-success" ? (
+            <section style={{ maxWidth: 700, margin: "0 auto", padding: 24 }}>
+              <h2>🎉 Payment Successful!</h2>
+              <p>
+                Thank you for your payment! Your Job Assistant subscription has
+                been activated.
+              </p>
+              <div
+                style={{
+                  background: "#f0f9ff",
+                  padding: 20,
+                  borderRadius: 8,
+                  margin: "20px 0",
+                }}
+              >
+                <h3>What happens next?</h3>
+                <ul>
+                  <li>✅ Your application has been saved</li>
+                  <li>📧 You'll receive a confirmation email shortly</li>
+                  <li>🤖 We'll start applying to 5 jobs daily for you</li>
+                  <li>📊 Weekly progress reports will be sent to your email</li>
+                  <li>
+                    💳 R49/month will be charged automatically starting next
+                    month
+                  </li>
+                </ul>
+              </div>
+              <button
+                onClick={() => {
+                  setStaticPage(null);
+                  setCurrentView("jobs");
+                }}
+                className="btn-primary"
+              >
+                Back to Job Search
+              </button>
+            </section>
+          ) : staticPage === "payment-cancel" ? (
+            <section style={{ maxWidth: 700, margin: "0 auto", padding: 24 }}>
+              <h2>Payment Cancelled</h2>
+              <p>
+                Your payment was cancelled. No charges have been made to your
+                account.
+              </p>
+              <p>
+                You can try again anytime by going to the Job Assistant section.
+              </p>
+              <button
+                onClick={() => {
+                  setStaticPage(null);
+                  setCurrentView("assistant");
+                }}
+                className="btn-primary"
+              >
+                Try Again
+              </button>
             </section>
           ) : (
             <>

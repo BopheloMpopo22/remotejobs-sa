@@ -192,8 +192,8 @@ export default async function handler(req, res) {
     const payfastData = {
       merchant_id: PAYFAST_CONFIG.MERCHANT_ID,
       merchant_key: PAYFAST_CONFIG.MERCHANT_KEY,
-      return_url: `${baseUrl}/payment-success`,
-      cancel_url: `${baseUrl}/job-assistant`,
+      return_url: `${baseUrl}/?page=payment-success`,
+      cancel_url: `${baseUrl}/?page=payment-cancel`,
       notify_url: `${baseUrl}/api/payfast-webhook`,
       name_first:
         applicationData.fullName.split(" ")[0] || applicationData.fullName,
