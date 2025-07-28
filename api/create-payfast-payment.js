@@ -37,6 +37,7 @@ const generatePayFastSignature = (data, passphrase) => {
     .sort()
     .forEach((key) => {
       if (key !== "signature") {
+        // Ensure all values are strings (PayFast requirement)
         const value = String(data[key] ?? "").trim();
         const encoded = encodeURIComponent(value)
           .replace(/%20/g, "+")
@@ -202,6 +203,12 @@ export default async function handler(req, res) {
       amount: "149.00",
       item_name: "Job Assistant Setup Fee",
       item_description: "One-time setup fee for Job Assistant service",
+      // Subscription fields (exactly as PayFast example)
+      subscription_type: "1",
+      frequency: "3",
+      cycles: "12",
+      subscription_notify_email: "true",
+      subscription_notify_webhook: "true",
     };
 
     // Generate signature
@@ -260,6 +267,7 @@ export default async function handler(req, res) {
             <ul style="margin: 1rem 0;">
               <li>✨ <b>Job Assistant</b>: We'll start applying to jobs for you every day.</li>
               <li>📬 You'll receive updates and summaries of your applications.</li>
+              <li>💳 <b>Subscription</b>: R49/month will be charged automatically starting next month.</li>
             </ul>
             <p>If you have any questions or want to update your preferences, just reply to this email—I'm here to help!</p>
             <p style="margin-top:2rem; color:#2563eb; font-weight:bold;">To your success,<br/>Bophelo<br/>RemoteJobsSA</p>
