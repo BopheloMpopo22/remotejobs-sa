@@ -28,6 +28,10 @@ const PAYFAST_CONFIG = {
 
 // Helper function to generate PayFast signature
 const generatePayFastSignature = (data, passphrase) => {
+  console.log("=== SIGNATURE GENERATION DEBUG ===");
+  console.log("Input data:", JSON.stringify(data, null, 2));
+  console.log("Passphrase provided:", passphrase ? "YES" : "NO");
+
   let signatureString = "";
   Object.keys(data)
     .sort()
@@ -38,6 +42,7 @@ const generatePayFastSignature = (data, passphrase) => {
           .replace(/%20/g, "+")
           .replace(/%[a-f0-9]{2}/gi, (m) => m.toUpperCase());
         signatureString += `${key}=${encoded}&`;
+        console.log(`Key: ${key}, Value: ${value}, Encoded: ${encoded}`);
       }
     });
 
@@ -50,15 +55,17 @@ const generatePayFastSignature = (data, passphrase) => {
       .replace(/%20/g, "+")
       .replace(/%[a-f0-9]{2}/gi, (m) => m.toUpperCase());
     signatureString += `&passphrase=${encodedPass}`;
+    console.log("Passphrase encoded:", encodedPass);
   }
 
-  console.log("PayFast signature string:", signatureString);
+  console.log("Final signature string:", signatureString);
 
   const signature = crypto
     .createHash("md5")
     .update(signatureString)
     .digest("hex");
-  console.log("PayFast signature (MD5):", signature);
+  console.log("Generated signature (MD5):", signature);
+  console.log("=== END SIGNATURE DEBUG ===");
   return signature;
 };
 
@@ -194,11 +201,24 @@ export default async function handler(req, res) {
     };
 
     // Generate signature
-    const signature = generatePayFastSignature(
-      payfastData,
-      PAYFAST_CONFIG.PASS_PHRASE
-    );
-    payfastData.signature = signature;
+    try {
+      console.log(
+        "About to generate signature with passphrase:",
+        PAYFAST_CONFIG.PASS_PHRASE ? "AVAILABLE" : "MISSING"
+      );
+      const signature = generatePayFastSignature(
+        payfastData,
+        PAYFAST_CONFIG.PASS_PHRASE
+      );
+      payfastData.signature = signature;
+      console.log("Signature generated successfully:", signature);
+    } catch (signatureError) {
+      console.error("Signature generation error:", signatureError);
+      return res.status(500).json({
+        error: "Failed to generate PayFast signature",
+        details: signatureError.message,
+      });
+    }
 
     // Add test mode for sandbox
     if (PAYFAST_CONFIG.SANDBOX_MODE) {
