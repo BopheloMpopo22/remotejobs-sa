@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../lib/supabase";
+import { PayPalButtons } from "@paypal/react-paypal-js";
 
 interface AssistantForm {
   fullName: string;
@@ -52,6 +53,8 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
   }, [user]);
 
   const [loading, setLoading] = useState(false);
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [showPayPalButton, setShowPayPalButton] = useState(false);
 
   const industryOptions = [
     "Technology/IT",
@@ -177,13 +180,13 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       console.log("Access token:", session?.access_token);
 
       console.log("Sending payment request...");
-      const response = await fetch("/api/create-payfast-payment", {
+      const response = await fetch("/api/create-paypal-payment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({ applicationData: data }),
+        body: JSON.stringify({ applicationData: data, user }),
       });
 
       console.log("Response status:", response.status);
@@ -198,25 +201,10 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       }
 
       const result = await response.json();
-      console.log("PayFast paymentUrl:", result.paymentUrl);
-      console.log("PayFast payfastData:", result.payfastData);
+      console.log("PayPal payment data:", result.paypalPaymentData);
 
-      // Redirect to PayFast payment page
-      const form = document.createElement("form");
-      form.action = result.paymentUrl;
-      form.method = "POST";
-      form.target = "_blank";
-      Object.entries(result.payfastData).forEach(([key, value]) => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = String(value);
-        form.appendChild(input);
-      });
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
-      setSubmitted(true);
+      setPaymentData(result.paypalPaymentData);
+      setShowPayPalButton(true);
     } catch (error: any) {
       console.error("Payment error:", error);
       alert(`Payment error: ${error.message}`);
@@ -717,6 +705,52 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
           >
             {user ? "Submit Application" : "Sign up to Submit Application"}
           </button>
+
+          {showPayPalButton && paymentData && (
+            <div style={{ marginTop: "1rem", textAlign: "center" }}>
+              <h4>Complete Payment</h4>
+              <p>Click below to pay R149 for Job Assistant setup</p>
+              <PayPalButtons
+                createOrder={(data, actions) => {
+                  return actions.order.create({
+                    intent: "CAPTURE",
+                    purchase_units: [
+                      {
+                        amount: {
+                          value: paymentData.amount,
+                          currency_code: paymentData.currency,
+                        },
+                        description: paymentData.description,
+                        custom_id: paymentData.paymentReference,
+                      },
+                    ],
+                    application_context: {
+                      return_url: paymentData.returnUrl,
+                      cancel_url: paymentData.cancelUrl,
+                    },
+                  });
+                }}
+                onApprove={(data, actions) => {
+                  if (actions.order) {
+                    return actions.order.capture().then((details) => {
+                      console.log("Payment completed:", details);
+                      setSubmitted(true);
+                      setShowPayPalButton(false);
+                    });
+                  }
+                  return Promise.resolve();
+                }}
+                onError={(err) => {
+                  console.error("PayPal error:", err);
+                  alert("Payment failed. Please try again.");
+                }}
+                onCancel={() => {
+                  console.log("Payment cancelled");
+                  setShowPayPalButton(false);
+                }}
+              />
+            </div>
+          )}
         </div>
       </form>
     </div>

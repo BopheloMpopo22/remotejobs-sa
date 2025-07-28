@@ -21,21 +21,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log("PayFast webhook received:", req.body);
+    console.log("PayPal webhook received:", req.body);
 
-    // Basic webhook handling
-    const { payment_status, m_payment_id } = req.body;
+    // Basic webhook handling for PayPal
+    const { payment_status, payment_id, custom_id } = req.body;
 
-    if (payment_status === "COMPLETE") {
+    if (payment_status === "COMPLETED") {
       // Update application status to paid
       const { error } = await supabase
         .from("job_assistant_applications")
         .update({
           status: "paid",
-          payfast_payment_id: m_payment_id,
+          paypal_payment_id: payment_id,
           updated_at: new Date().toISOString(),
         })
-        .eq("payment_reference", m_payment_id);
+        .eq("payment_reference", custom_id);
 
       if (error) {
         console.error("Database update error:", error);
