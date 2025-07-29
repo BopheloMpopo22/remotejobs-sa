@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS job_assistant_applications (
   additional_notes TEXT,
   cv_file_name TEXT,
   cv_file_url TEXT, -- Public URL to the uploaded CV file
+  payment_reference TEXT,
   status TEXT DEFAULT 'pending',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
