@@ -50,6 +50,19 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange }) => {
         );
         onAuthChange(data.user);
         setShowConfirmMessage(true);
+
+        // Send welcome email
+        try {
+          await fetch("/api/send-welcome-email", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user: data.user }),
+          });
+        } catch (emailError) {
+          console.error("Failed to send welcome email:", emailError);
+        }
       }
     } catch (error: any) {
       setMessage(error.message);
