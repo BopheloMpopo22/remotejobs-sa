@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PayPal Setup Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        background: #0070ba;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 10px 0;
+      }
+      button:hover {
+        background: #005ea6;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 6px;
+        white-space: pre-wrap;
+        font-family: monospace;
+        font-size: 14px;
+      }
+      .success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+      .loading {
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 PayPal Setup Test</h1>
+      <p>
+        This page will test your PayPal configuration and create the necessary
+        product and subscription plan.
+      </p>
+
+      <button onclick="testPayPalSetup()">🚀 Test PayPal Setup</button>
+      <button onclick="testSubscription()">
+        💳 Test Subscription Creation
+      </button>
+
+      <div id="result"></div>
+    </div>
+
+    <script>
+      async function testPayPalSetup() {
+        const resultDiv = document.getElementById("result");
+        resultDiv.className = "result loading";
+        resultDiv.textContent = "Testing PayPal setup...";
+
+        try {
+          const response = await fetch("/api/auto-setup-paypal", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            resultDiv.className = "result success";
+            resultDiv.textContent = `✅ PayPal Setup Successful!
+
+Product ID: ${data.product.id}
+Plan ID: ${data.plan.id}
+
+Environment Variables to add:
+PAYPAL_CLIENT_ID=${data.environmentVariables.PAYPAL_CLIENT_ID}
+PAYPAL_CLIENT_SECRET=***add your client secret***
+PAYPAL_MODE=sandbox
+PAYPAL_SUBSCRIPTION_PLAN_ID=${data.plan.id}
+
+Next steps:
+1. Add the Client Secret to your .env.local file
+2. Test the subscription creation
+3. Set up webhooks in PayPal dashboard`;
+          } else {
+            resultDiv.className = "result error";
+            resultDiv.textContent = `❌ Setup Failed: ${data.error}
+
+Details: ${JSON.stringify(data.details, null, 2)}`;
+          }
+        } catch (error) {
+          resultDiv.className = "result error";
+          resultDiv.textContent = `❌ Error: ${error.message}`;
+        }
+      }
+
+      async function testSubscription() {
+        const resultDiv = document.getElementById("result");
+        resultDiv.className = "result loading";
+        resultDiv.textContent = "Testing subscription creation...";
+
+        try {
+          const testData = {
+            applicationData: {
+              fullName: "Test User",
+              desiredPosition: "Software Developer",
+              experience: "Mid-level",
+              industries: ["Technology"],
+              salary: "$50,000 - $70,000",
+              remotePreference: "Remote only",
+              additionalNotes: "Test subscription",
+            },
+            user: {
+              email: "test@example.com",
+            },
+          };
+
+          const response = await fetch("/api/create-paypal-subscription", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(testData),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            resultDiv.className = "result success";
+            resultDiv.textContent = `✅ Subscription Test Successful!
+
+Subscription ID: ${data.subscriptionId}
+Approval URL: ${data.approvalUrl}
+
+You can test the subscription by visiting the approval URL.`;
+          } else {
+            resultDiv.className = "result error";
+            resultDiv.textContent = `❌ Subscription Test Failed: ${data.error}
+
+Details: ${JSON.stringify(data.details, null, 2)}`;
+          }
+        } catch (error) {
+          resultDiv.className = "result error";
+          resultDiv.textContent = `❌ Error: ${error.message}`;
+        }
+      }
+    </script>
+  </body>
+</html>
