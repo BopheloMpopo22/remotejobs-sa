@@ -96,11 +96,17 @@ app.get("/api/test-paypal-auth", async (req, res) => {
   }
 });
 
-// Serve the React app for all other routes
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+// Simple route for testing
+app.get("/", (req, res) => {
+  res.send(
+    "Server is running! Visit /test-paypal-auth.html to test PayPal credentials."
+  );
 });
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log(
+    `Test PayPal auth: http://localhost:${PORT}/api/test-paypal-auth`
+  );
+  console.log(`Test page: http://localhost:${PORT}/test-paypal-auth.html`);
 });
