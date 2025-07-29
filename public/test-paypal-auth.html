@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PayPal Auth Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        background: #0070ba;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 10px 0;
+      }
+      button:hover {
+        background: #005ea6;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 6px;
+        white-space: pre-wrap;
+        font-family: monospace;
+        font-size: 14px;
+      }
+      .success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+      .loading {
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔐 PayPal Authentication Test</h1>
+      <p>
+        This page will test if your PayPal credentials are working correctly.
+      </p>
+
+      <button onclick="testPayPalAuth()">🔍 Test PayPal Authentication</button>
+
+      <div id="result"></div>
+    </div>
+
+    <script>
+      async function testPayPalAuth() {
+        const resultDiv = document.getElementById("result");
+        resultDiv.className = "result loading";
+        resultDiv.textContent = "Testing PayPal authentication...";
+
+        try {
+          const response = await fetch("/api/test-paypal-auth", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            resultDiv.className = "result success";
+            resultDiv.textContent = `✅ PayPal Authentication Successful!
+
+Environment Variables:
+- Client ID: ${data.environment.clientId}
+- Client Secret: ${data.environment.clientSecret}
+- Mode: ${data.environment.mode}
+
+Token Info:
+- Expires In: ${data.tokenInfo.expiresIn} seconds
+- Token Type: ${data.tokenInfo.tokenType}
+
+Your PayPal credentials are working correctly!`;
+          } else {
+            resultDiv.className = "result error";
+            resultDiv.textContent = `❌ Authentication Failed: ${data.error}
+
+Details: ${JSON.stringify(data.details, null, 2)}
+
+Environment Check:
+- Client ID: ${data.environment?.clientId || "UNKNOWN"}
+- Client Secret: ${data.environment?.clientSecret || "UNKNOWN"}
+- Mode: ${data.environment?.mode || "UNKNOWN"}
+
+Please check your .env.local file and make sure you have:
+PAYPAL_CLIENT_ID=your_sandbox_client_id
+PAYPAL_CLIENT_SECRET=your_sandbox_client_secret
+PAYPAL_MODE=sandbox`;
+          }
+        } catch (error) {
+          resultDiv.className = "result error";
+          resultDiv.textContent = `❌ Error: ${error.message}
+
+This might mean:
+1. Your dev server isn't running
+2. The API route isn't working
+3. There's a network issue
+
+Try visiting: http://localhost:5174/api/test-paypal-auth directly`;
+        }
+      }
+    </script>
+  </body>
+</html>
