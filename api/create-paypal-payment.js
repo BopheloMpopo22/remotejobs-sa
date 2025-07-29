@@ -68,8 +68,8 @@ export default async function handler(req, res) {
     const paypalPaymentData = {
       paymentReference,
       applicationId: application.id,
-      amount: "149.00",
-      currency: "ZAR",
+      amount: "10.00", // Changed from 149.00 ZAR to 10.00 USD for testing
+      currency: "USD",
       description: "Job Assistant Setup Fee",
       returnUrl: `${
         process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5174"
