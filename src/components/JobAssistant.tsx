@@ -181,14 +181,21 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
 
       console.log("Sending payment request...");
       console.log("API URL:", "/api/create-paypal-payment");
-      const response = await fetch("/api/create-paypal-payment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({ applicationData: data, user }),
-      });
+      const timestamp = Date.now();
+      const response = await fetch(
+        `/api/create-paypal-payment?t=${timestamp}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+          body: JSON.stringify({ applicationData: data, user }),
+        }
+      );
 
       console.log("Response status:", response.status);
       console.log("Response ok:", response.ok);
