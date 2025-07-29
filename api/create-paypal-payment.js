@@ -1,7 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey =
+  process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -21,6 +22,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log("PayPal API called with body:", req.body);
     const { applicationData, user } = req.body;
 
     if (!applicationData || !user) {
@@ -39,10 +41,10 @@ export default async function handler(req, res) {
         email: user.email,
         full_name: applicationData.fullName,
         desired_position: applicationData.desiredPosition,
-        experience_level: applicationData.experienceLevel,
-        preferred_industries: applicationData.preferredIndustries,
-        salary_expectation: applicationData.salaryExpectation,
-        availability: applicationData.availability,
+        experience_level: applicationData.experience,
+        preferred_industries: applicationData.industries,
+        salary_expectation: applicationData.salary,
+        availability: applicationData.remotePreference,
         additional_notes: applicationData.additionalNotes,
         payment_reference: paymentReference,
         status: "pending",
@@ -66,8 +68,12 @@ export default async function handler(req, res) {
       amount: "149.00",
       currency: "ZAR",
       description: "Job Assistant Setup Fee",
-      returnUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/?page=payment-success`,
-      cancelUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/?page=payment-cancel`,
+      returnUrl: `${
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5174"
+      }/?page=payment-success`,
+      cancelUrl: `${
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5174"
+      }/?page=payment-cancel`,
     };
 
     console.log("PayPal payment data prepared:", paymentReference);

@@ -136,7 +136,7 @@ function App() {
   return (
     <PayPalScriptProvider
       options={{
-        clientId: process.env.REACT_APP_PAYPAL_CLIENT_ID || "YOUR_CLIENT_ID",
+        clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || "YOUR_CLIENT_ID",
         currency: "ZAR",
         intent: "capture",
       }}

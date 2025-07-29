@@ -216,10 +216,10 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       <div className="job-assistant">
         <div className="success-message">
           <div className="success-icon">💳</div>
-          <h2>Redirecting to Payment...</h2>
+          <h2>Payment Completed!</h2>
           <p>
-            Your application has been saved and you're being redirected to
-            PayFast to complete your payment.
+            Your application has been saved and payment has been processed
+            through PayPal.
           </p>
           <div className="next-steps">
             <h3>What happens next?</h3>
@@ -252,7 +252,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
             </div>
             <div className="service-card">
               <h4>💰 Affordable Pricing</h4>
-              <p>R100 setup + R50/month - Cancel anytime</p>
+              <p>R149 setup + R49/month - Cancel anytime</p>
             </div>
           </div>
           <button onClick={() => setSubmitted(false)} className="back-btn">
