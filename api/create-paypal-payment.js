@@ -22,7 +22,10 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log("=== PAYPAL API DEBUG ===");
     console.log("PayPal API called with body:", req.body);
+    console.log("Request method:", req.method);
+    console.log("Request URL:", req.url);
     const { applicationData, user } = req.body;
 
     if (!applicationData || !user) {
@@ -78,6 +81,12 @@ export default async function handler(req, res) {
 
     console.log("PayPal payment data prepared:", paymentReference);
     console.log("Application saved:", application.id);
+    console.log("Returning PayPal data:", {
+      paymentReference,
+      applicationId: application.id,
+      paypalPaymentData,
+    });
+    console.log("=== END PAYPAL API DEBUG ===");
 
     return res.status(200).json({
       paymentReference,

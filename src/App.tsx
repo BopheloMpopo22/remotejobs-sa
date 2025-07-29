@@ -84,7 +84,7 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Handle URL parameters for PayFast redirects
+  // Handle URL parameters for PayPal redirects
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const page = urlParams.get("page");
@@ -361,7 +361,7 @@ function App() {
                   </li>
                   <li>
                     <b>Payment Terms:</b> Premium features require payment. All
-                    payments are processed securely through PayFast. Refunds are
+                    payments are processed securely through PayPal. Refunds are
                     handled according to our refund policy.
                   </li>
                   <li>

@@ -180,6 +180,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       console.log("Access token:", session?.access_token);
 
       console.log("Sending payment request...");
+      console.log("API URL:", "/api/create-paypal-payment");
       const response = await fetch("/api/create-paypal-payment", {
         method: "POST",
         headers: {
@@ -191,6 +192,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
 
       console.log("Response status:", response.status);
       console.log("Response ok:", response.ok);
+      console.log("Response headers:", response.headers);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -201,7 +203,10 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       }
 
       const result = await response.json();
+      console.log("=== FRONTEND DEBUG ===");
+      console.log("Full API response:", result);
       console.log("PayPal payment data:", result.paypalPaymentData);
+      console.log("=== END FRONTEND DEBUG ===");
 
       setPaymentData(result.paypalPaymentData);
       setShowPayPalButton(true);
