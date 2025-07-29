@@ -305,17 +305,20 @@ app.post("/api/create-paypal-subscription", async (req, res) => {
         .json({ error: "Failed to authenticate with PayPal" });
     }
 
-    // Create subscription
+    // Create subscription with the actual plan ID
     const subscriptionData = {
-      plan_id: process.env.PAYPAL_SUBSCRIPTION_PLAN_ID || "P-REMOTEJOBS-SA", // You'll need to create this plan
+      plan_id: "P-6BP16976VJ5270240NCEOM7I", // Use the actual plan ID from setup
       start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Start tomorrow
       subscriber: {
         name: {
-          given_name: applicationData.fullName.split(" ")[0] || "User",
-          surname:
-            applicationData.fullName.split(" ").slice(1).join(" ") || "Name",
+          given_name: applicationData.fullName
+            ? applicationData.fullName.split(" ")[0] || "User"
+            : "User",
+          surname: applicationData.fullName
+            ? applicationData.fullName.split(" ").slice(1).join(" ") || "Name"
+            : "Name",
         },
-        email_address: user.email,
+        email_address: user.email || "test@example.com",
       },
       application_context: {
         brand_name: "RemoteJobs SA",
@@ -331,6 +334,11 @@ app.post("/api/create-paypal-subscription", async (req, res) => {
       },
       custom_id: subscriptionReference,
     };
+
+    console.log(
+      "Creating subscription with data:",
+      JSON.stringify(subscriptionData, null, 2)
+    );
 
     const subscriptionResponse = await fetch(
       `${baseUrl}/v1/billing/subscriptions`,
