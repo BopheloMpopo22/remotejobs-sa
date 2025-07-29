@@ -55,6 +55,9 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPayPalButton, setShowPayPalButton] = useState(false);
+  const [paymentType, setPaymentType] = useState<"one-time" | "subscription">(
+    "one-time"
+  );
 
   const industryOptions = [
     "Technology/IT",
@@ -180,22 +183,24 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       console.log("Access token:", session?.access_token);
 
       console.log("Sending payment request...");
-      console.log("API URL:", "/api/create-paypal-payment");
+      const apiEndpoint =
+        paymentType === "subscription"
+          ? "/api/create-paypal-subscription"
+          : "/api/create-paypal-payment";
+      console.log("API URL:", apiEndpoint);
+
       const timestamp = Date.now();
-      const response = await fetch(
-        `/api/create-paypal-payment?t=${timestamp}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-          body: JSON.stringify({ applicationData: data, user }),
-        }
-      );
+      const response = await fetch(`${apiEndpoint}?t=${timestamp}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+        body: JSON.stringify({ applicationData: data, user }),
+      });
 
       console.log("Response status:", response.status);
       console.log("Response ok:", response.ok);
@@ -212,11 +217,27 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       const result = await response.json();
       console.log("=== FRONTEND DEBUG ===");
       console.log("Full API response:", result);
-      console.log("PayPal payment data:", result.paypalPaymentData);
+      console.log(
+        "Payment data:",
+        paymentType === "subscription"
+          ? result.subscription
+          : result.paypalPaymentData
+      );
       console.log("=== END FRONTEND DEBUG ===");
 
-      setPaymentData(result.paypalPaymentData);
-      setShowPayPalButton(true);
+      if (paymentType === "subscription") {
+        // For subscriptions, redirect to PayPal approval URL
+        if (result.approvalUrl) {
+          window.location.href = result.approvalUrl;
+        } else {
+          setPaymentData(result.subscription);
+          setShowPayPalButton(true);
+        }
+      } else {
+        // For one-time payments, show PayPal button
+        setPaymentData(result.paypalPaymentData);
+        setShowPayPalButton(true);
+      }
     } catch (error: any) {
       console.error("Payment error:", error);
       alert(`Payment error: ${error.message}`);
@@ -651,18 +672,53 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
         <div className="form-section">
           <h4>Additional Information</h4>
           <div className="form-group">
-            <label>Additional Notes (Optional)</label>
+            <label>Additional Notes</label>
             <textarea
               value={formData.additionalNotes}
               onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  additionalNotes: e.target.value,
-                }))
+                setFormData({ ...formData, additionalNotes: e.target.value })
               }
-              rows={4}
-              placeholder="Tell us about your specific requirements, preferred companies, or any other details..."
+              placeholder="Any additional information about your job preferences..."
+              rows={3}
             />
+          </div>
+
+          <div className="form-group">
+            <label>Payment Type</label>
+            <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
+              <label
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+              >
+                <input
+                  type="radio"
+                  name="paymentType"
+                  value="one-time"
+                  checked={paymentType === "one-time"}
+                  onChange={(e) =>
+                    setPaymentType(
+                      e.target.value as "one-time" | "subscription"
+                    )
+                  }
+                />
+                <span>One-time Setup ($10 USD)</span>
+              </label>
+              <label
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+              >
+                <input
+                  type="radio"
+                  name="paymentType"
+                  value="subscription"
+                  checked={paymentType === "subscription"}
+                  onChange={(e) =>
+                    setPaymentType(
+                      e.target.value as "one-time" | "subscription"
+                    )
+                  }
+                />
+                <span>Monthly Subscription ($10 setup + $5/month)</span>
+              </label>
+            </div>
           </div>
         </div>
 

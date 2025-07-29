@@ -48,14 +48,15 @@ CREATE TABLE IF NOT EXISTS job_assistant_applications (
   cv_file_name TEXT,
   cv_file_url TEXT, -- Public URL to the uploaded CV file
   payment_reference TEXT,
+  paypal_subscription_id TEXT,
   status TEXT DEFAULT 'pending',
+  subscription_status TEXT DEFAULT 'pending',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  applications_sent INTEGER DEFAULT 0,
-  responses_received INTEGER DEFAULT 0,
-  subscription_status TEXT DEFAULT 'pending',
   subscription_start_date TIMESTAMP WITH TIME ZONE,
-  subscription_end_date TIMESTAMP WITH TIME ZONE
+  subscription_end_date TIMESTAMP WITH TIME ZONE,
+  applications_sent INTEGER DEFAULT 0,
+  responses_received INTEGER DEFAULT 0
 );
 
 -- Create Users table for future authentication
