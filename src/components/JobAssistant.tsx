@@ -723,7 +723,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
               <h4>Complete Payment</h4>
               <p>Click below to pay R149 for Job Assistant setup</p>
               <PayPalButtons
-                createOrder={(data, actions) => {
+                createOrder={(_, actions) => {
                   return actions.order.create({
                     intent: "CAPTURE",
                     purchase_units: [
@@ -742,7 +742,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
                     },
                   });
                 }}
-                onApprove={(data, actions) => {
+                onApprove={(_, actions) => {
                   if (actions.order) {
                     return actions.order.capture().then((details) => {
                       console.log("Payment completed:", details);
