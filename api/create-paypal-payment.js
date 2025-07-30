@@ -68,17 +68,24 @@ export default async function handler(req, res) {
 
     // Create PayPal payment data
     const paypalPaymentData = {
-      paymentReference,
-      applicationId: application.id,
-      amount: "10.00", // Changed from 149.00 ZAR to 10.00 USD for testing
-      currency: "USD",
-      description: "Job Assistant Setup Fee",
-      returnUrl: `${
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5174"
-      }/?page=payment-success`,
-      cancelUrl: `${
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5174"
-      }/?page=payment-cancel`,
+      intent: "capture",
+      purchase_units: [
+        {
+          amount: {
+            currency_code: "USD",
+            value: "10.00", // $10 USD = R179 ZAR
+          },
+          description: "RemoteJobs SA Job Assistant - One-time Setup",
+          custom_id: paymentReference,
+        },
+      ],
+      application_context: {
+        brand_name: "RemoteJobs SA",
+        landing_page: "LOGIN",
+        user_action: "PAY_NOW",
+        return_url: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5174"}/?page=payment-success`,
+        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5174"}/?page=payment-cancel`,
+      },
     };
 
     console.log("PayPal payment data prepared:", paymentReference);

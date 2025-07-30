@@ -177,7 +177,7 @@ app.post("/api/auto-setup-paypal", async (req, res) => {
 
     console.log("✅ Product created:", productResult.id);
 
-    // Step 3: Create Subscription Plan
+    // Step 3: Create Subscription Plan with USD pricing
     console.log("Creating subscription plan...");
     const planData = {
       product_id: productResult.id,
@@ -195,7 +195,7 @@ app.post("/api/auto-setup-paypal", async (req, res) => {
           total_cycles: 0, // Unlimited
           pricing_scheme: {
             fixed_price: {
-              value: "5.00",
+              value: "3.30", // $3.30 USD = R59 ZAR
               currency_code: "USD",
             },
           },
@@ -204,7 +204,7 @@ app.post("/api/auto-setup-paypal", async (req, res) => {
       payment_preferences: {
         auto_bill_outstanding: true,
         setup_fee: {
-          value: "10.00",
+          value: "10.00", // $10 USD = R179 ZAR
           currency_code: "USD",
         },
         setup_fee_failure_action: "CONTINUE",
@@ -242,6 +242,18 @@ app.post("/api/auto-setup-paypal", async (req, res) => {
         plan: {
           id: planResult.id,
           name: planResult.name,
+        },
+        pricing: {
+          display: {
+            oneTime: "R179",
+            setupFee: "R179",
+            monthlyFee: "R59",
+          },
+          api: {
+            oneTime: "$10.00 USD",
+            setupFee: "$10.00 USD",
+            monthlyFee: "$3.30 USD",
+          },
         },
         environmentVariables: {
           PAYPAL_CLIENT_ID: clientId,

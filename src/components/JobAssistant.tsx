@@ -700,7 +700,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
                     )
                   }
                 />
-                <span>One-time Setup ($10 USD)</span>
+                <span>One-time Setup (R179)</span>
               </label>
               <label
                 style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
@@ -716,9 +716,50 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
                     )
                   }
                 />
-                <span>Monthly Subscription ($10 setup + $5/month)</span>
+                <span>Monthly Subscription (R179 setup + R59/month)</span>
               </label>
             </div>
+
+            {/* Payment Type Explanations */}
+            {paymentType === "one-time" && (
+              <div
+                style={{
+                  marginTop: "0.5rem",
+                  padding: "0.75rem",
+                  backgroundColor: "#fef3c7",
+                  border: "1px solid #f59e0b",
+                  borderRadius: "0.375rem",
+                  fontSize: "0.875rem",
+                }}
+              >
+                <strong>One-time Setup:</strong> Pay R179 for immediate access.
+                This is a one-time fee - if you want to continue using the
+                service next month, you'll need to pay R179 again. Consider the
+                subscription for ongoing access.
+              </div>
+            )}
+
+            {paymentType === "subscription" && (
+              <div
+                style={{
+                  marginTop: "0.5rem",
+                  padding: "0.75rem",
+                  backgroundColor: "#dbeafe",
+                  border: "1px solid #3b82f6",
+                  borderRadius: "0.375rem",
+                  fontSize: "0.875rem",
+                }}
+              >
+                <strong>💡 Best Value - Monthly Subscription:</strong> Pay R179
+                setup + R59/month. After the first month, you save R120 compared
+                to paying one-time fees repeatedly.
+                <br />
+                <br />
+                <strong>💳 Payment Tip:</strong> Don't have a PayPal account? No
+                problem! You can pay with any credit/debit card. Just uncheck
+                "Create PayPal account" during checkout and use guest payment.
+              </div>
+            )}
           </div>
         </div>
 
