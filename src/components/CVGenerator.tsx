@@ -146,18 +146,23 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
   // Save CV data to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("cvGeneratorData", JSON.stringify(cvData));
+    console.log("💾 Saved CV Generator data to localStorage:", cvData);
   }, [cvData]);
 
   // Load CV data from localStorage on component mount
   useEffect(() => {
     const savedData = localStorage.getItem("cvGeneratorData");
+    console.log("📂 Loading CV Generator data from localStorage:", savedData);
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
+        console.log("✅ Successfully parsed saved CV data:", parsedData);
         setCvData(parsedData);
       } catch (error) {
-        console.error("Error loading saved CV data:", error);
+        console.error("❌ Error loading saved CV data:", error);
       }
+    } else {
+      console.log("📭 No saved CV data found in localStorage");
     }
   }, []);
 

@@ -102,6 +102,12 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     setUploadedFileNames((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const clearSavedData = () => {
+    localStorage.removeItem("jobAssistantFormData");
+    console.log("🗑️ Cleared Job Assistant saved data");
+    alert("Saved data cleared. Form will reset.");
+  };
+
   // Save form data to localStorage whenever it changes
   useEffect(() => {
     const dataToSave = {
@@ -109,24 +115,33 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       uploadedFileNames,
     };
     localStorage.setItem("jobAssistantFormData", JSON.stringify(dataToSave));
+    console.log("💾 Saved Job Assistant data to localStorage:", dataToSave);
   }, [formData, uploadedFileNames]);
 
   // Load form data from localStorage on component mount
   useEffect(() => {
     const savedData = localStorage.getItem("jobAssistantFormData");
+    console.log("📂 Loading Job Assistant data from localStorage:", savedData);
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
+        console.log("✅ Successfully parsed saved data:", parsedData);
         setFormData((prev) => ({
           ...prev,
           ...parsedData,
         }));
         if (parsedData.uploadedFileNames) {
           setUploadedFileNames(parsedData.uploadedFileNames);
+          console.log(
+            "📄 Restored uploaded file names:",
+            parsedData.uploadedFileNames
+          );
         }
       } catch (error) {
-        console.error("Error loading saved form data:", error);
+        console.error("❌ Error loading saved form data:", error);
       }
+    } else {
+      console.log("📭 No saved data found in localStorage");
     }
   }, []);
 
@@ -574,7 +589,31 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
         </div>
 
         <div className="form-section">
-          <h4>📄 Upload Required Documents</h4>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            <h4>📄 Upload Required Documents</h4>
+            <button
+              type="button"
+              onClick={clearSavedData}
+              style={{
+                background: "#6b7280",
+                color: "white",
+                border: "none",
+                borderRadius: "0.25rem",
+                padding: "0.5rem 1rem",
+                fontSize: "0.75rem",
+                cursor: "pointer",
+              }}
+            >
+              🗑️ Clear Saved Data
+            </button>
+          </div>
           <div
             style={{
               marginTop: "0.5rem",
