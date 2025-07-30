@@ -419,7 +419,7 @@ function App() {
                       📊 Weekly progress reports will be sent to your email
                     </li>
                     <li>
-                      💳 R49/month will be charged automatically starting next
+                      💳 R59/month will be charged automatically starting next
                       month
                     </li>
                   </ul>

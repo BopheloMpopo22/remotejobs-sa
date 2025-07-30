@@ -1,5 +1,5 @@
 // CV Generator: Optional sections and visual enhancements are present. Triggering deployment.
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { supabase } from "../lib/supabase";
@@ -142,6 +142,24 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
     technologies: "",
     link: "",
   });
+
+  // Save CV data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("cvGeneratorData", JSON.stringify(cvData));
+  }, [cvData]);
+
+  // Load CV data from localStorage on component mount
+  useEffect(() => {
+    const savedData = localStorage.getItem("cvGeneratorData");
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setCvData(parsedData);
+      } catch (error) {
+        console.error("Error loading saved CV data:", error);
+      }
+    }
+  }, []);
 
   const addExperience = () => {
     if (tempExperience.company && tempExperience.position) {
@@ -300,8 +318,8 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                 <div class="name">${cvData.personalInfo.fullName}</div>
                 <div class="contact">
                   ${cvData.personalInfo.email} | ${
-        cvData.personalInfo.phone
-      }<br>
+                    cvData.personalInfo.phone
+                  }<br>
                   ${cvData.personalInfo.location}
                   ${
                     cvData.personalInfo.linkedin

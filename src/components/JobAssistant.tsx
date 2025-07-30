@@ -52,6 +52,27 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     }
   }, [user]);
 
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("jobAssistantFormData", JSON.stringify(formData));
+  }, [formData]);
+
+  // Load form data from localStorage on component mount
+  useEffect(() => {
+    const savedData = localStorage.getItem("jobAssistantFormData");
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setFormData((prev) => ({
+          ...prev,
+          ...parsedData,
+        }));
+      } catch (error) {
+        console.error("Error loading saved form data:", error);
+      }
+    }
+  }, []);
+
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPayPalButton, setShowPayPalButton] = useState(false);
@@ -285,7 +306,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
             </div>
             <div className="service-card">
               <h4>💰 Affordable Pricing</h4>
-              <p>R149 setup + R49/month - Cancel anytime</p>
+              <p>R179 setup + R59/month - Cancel anytime</p>
             </div>
           </div>
           <button onClick={() => setSubmitted(false)} className="back-btn">
@@ -339,7 +360,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
               }}
               onClick={scrollToForm}
             >
-              <span className="price">R149</span>
+              <span className="price">R179</span>
               <span
                 className="period"
                 style={{
@@ -368,7 +389,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
               }}
               onClick={scrollToForm}
             >
-              <span className="price">R49</span>
+              <span className="price">R59</span>
               <span
                 className="period"
                 style={{
@@ -481,9 +502,9 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       >
         <h3 style={{ margin: 0 }}>Payment & Subscription</h3>
         <p style={{ margin: 0 }}>
-          <strong>Setup Fee:</strong> R149 (once-off)
+          <strong>Setup Fee:</strong> R179 (once-off)
           <br />
-          <strong>Subscription:</strong> R49/month for continued access to the
+          <strong>Subscription:</strong> R59/month for continued access to the
           Job Assistant service.
           <br />
         </p>
@@ -818,7 +839,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
           {showPayPalButton && paymentData && (
             <div style={{ marginTop: "1rem", textAlign: "center" }}>
               <h4>Complete Payment</h4>
-              <p>Click below to pay R149 for Job Assistant setup</p>
+              <p>Click below to pay R179 for Job Assistant setup</p>
               <PayPalButtons
                 createOrder={(_, actions) => {
                   return actions.order.create({
