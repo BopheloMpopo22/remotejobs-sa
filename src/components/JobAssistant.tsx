@@ -52,27 +52,6 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     }
   }, [user]);
 
-  // Save form data to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem("jobAssistantFormData", JSON.stringify(formData));
-  }, [formData]);
-
-  // Load form data from localStorage on component mount
-  useEffect(() => {
-    const savedData = localStorage.getItem("jobAssistantFormData");
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        setFormData((prev) => ({
-          ...prev,
-          ...parsedData,
-        }));
-      } catch (error) {
-        console.error("Error loading saved form data:", error);
-      }
-    }
-  }, []);
-
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPayPalButton, setShowPayPalButton] = useState(false);
@@ -104,16 +83,52 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     }));
   };
 
-  const handleCVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFormData((prev) => ({
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedFileNames, setUploadedFileNames] = useState<string[]>([]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      setUploadedFiles((prev) => [...prev, ...files]);
+      setUploadedFileNames((prev) => [
         ...prev,
-        cvFile: file,
-        cvFileName: file.name,
-      }));
+        ...files.map((file) => file.name),
+      ]);
     }
   };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+    setUploadedFileNames((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    const dataToSave = {
+      ...formData,
+      uploadedFileNames,
+    };
+    localStorage.setItem("jobAssistantFormData", JSON.stringify(dataToSave));
+  }, [formData, uploadedFileNames]);
+
+  // Load form data from localStorage on component mount
+  useEffect(() => {
+    const savedData = localStorage.getItem("jobAssistantFormData");
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setFormData((prev) => ({
+          ...prev,
+          ...parsedData,
+        }));
+        if (parsedData.uploadedFileNames) {
+          setUploadedFileNames(parsedData.uploadedFileNames);
+        }
+      } catch (error) {
+        console.error("Error loading saved form data:", error);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,40 +166,43 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
         remotePreference: formData.remotePreference,
         industries: formData.industries,
         additionalNotes: formData.additionalNotes,
-        cvFileName: formData.cvFileName,
+        uploadedFiles: uploadedFileNames,
       };
 
-      // If CV file is uploaded, convert it to base64
-      if (formData.cvFile) {
-        console.log(
-          "CV file found:",
-          formData.cvFile.name,
-          formData.cvFile.size,
-          formData.cvFile.type
-        );
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          const base64Data = event.target?.result as string;
-          console.log("File converted to base64, length:", base64Data.length);
+      // If files are uploaded, convert them to base64
+      if (uploadedFiles.length > 0) {
+        console.log("Files found:", uploadedFiles.length, "files uploaded");
 
-          // Add file data to form data
-          formDataToSend.cvFileData = base64Data;
-          formDataToSend.cvFileType =
-            formData.cvFile?.type || "application/pdf";
+        const processFiles = async () => {
+          const fileDataArray: any[] = [];
 
-          console.log("Sending form data with file:", {
-            cvFileName: formDataToSend.cvFileName,
-            cvFileType: formDataToSend.cvFileType,
-            hasFileData: !!formDataToSend.cvFileData,
-          });
+          for (let i = 0; i < uploadedFiles.length; i++) {
+            const file = uploadedFiles[i];
+            const base64Data = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                resolve(event.target?.result as string);
+              };
+              reader.readAsDataURL(file);
+            });
 
-          // Send the complete data
+            fileDataArray.push({
+              fileName: file.name,
+              fileType: file.type,
+              fileData: base64Data,
+              fileSize: file.size,
+            });
+          }
+
+          formDataToSend.files = fileDataArray;
+          console.log("Sending form data with", fileDataArray.length, "files");
           await sendFormData(formDataToSend);
         };
-        reader.readAsDataURL(formData.cvFile);
+
+        await processFiles();
       } else {
-        console.log("No CV file uploaded");
-        // No file uploaded, send data directly
+        console.log("No files uploaded");
+        // No files uploaded, send data directly
         await sendFormData(formDataToSend);
       }
     } catch (error) {
@@ -556,40 +574,101 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
         </div>
 
         <div className="form-section">
-          <h4>Upload Your CV</h4>
+          <h4>📄 Upload Required Documents</h4>
+          <div
+            style={{
+              marginTop: "0.5rem",
+              padding: "1rem",
+              backgroundColor: "#f0f9ff",
+              border: "1px solid #0ea5e9",
+              borderRadius: "0.375rem",
+              fontSize: "0.875rem",
+            }}
+          >
+            <strong>Please upload the following documents:</strong>
+            <ul style={{ margin: "0.5rem 0", paddingLeft: "1.5rem" }}>
+              <li>
+                <strong>Senior Certificate (Matric)</strong> - Required for all
+                applications
+              </li>
+              <li>
+                <strong>Matric Results/Statement</strong> - Shows your final
+                grades
+              </li>
+              <li>
+                <strong>University/College Transcripts</strong> - If you have
+                tertiary education
+              </li>
+              <li>
+                <strong>CV/Resume</strong> - Your professional summary
+              </li>
+              <li>
+                <strong>Any other relevant certificates</strong> - Professional
+                certifications, courses, etc.
+              </li>
+            </ul>
+            <p
+              style={{
+                margin: "0.5rem 0",
+                fontSize: "0.8rem",
+                color: "#64748b",
+              }}
+            >
+              💡 <strong>Tip:</strong> You can select multiple files at once by
+              holding Ctrl (or Cmd on Mac) while selecting files.
+            </p>
+          </div>
+
           <div className="cv-upload-section">
             <div className="cv-upload-area">
               <input
                 type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={handleCVUpload}
+                multiple
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                onChange={handleFileUpload}
                 id="cv-upload"
                 style={{ display: "none" }}
               />
               <label htmlFor="cv-upload" className="cv-upload-label">
                 <div className="upload-icon">📄</div>
                 <div className="upload-text">
-                  <strong>Click to upload your CV</strong>
-                  <p>PDF, DOC, or DOCX files accepted</p>
+                  <strong>Click to upload your documents</strong>
+                  <p>PDF, DOC, DOCX, JPG, PNG files accepted</p>
                 </div>
               </label>
             </div>
-            {formData.cvFileName && (
+            {uploadedFileNames.length > 0 && (
               <div className="cv-preview">
-                <span className="file-name">✅ {formData.cvFileName}</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      cvFile: undefined,
-                      cvFileName: "",
-                    }))
-                  }
-                  className="remove-cv"
-                >
-                  Remove
-                </button>
+                <strong>Uploaded Files:</strong>
+                <ul style={{ margin: "0.5rem 0", paddingLeft: "1.5rem" }}>
+                  {uploadedFileNames.map((fileName, index) => (
+                    <li
+                      key={index}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <span>📄 {fileName}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        style={{
+                          background: "#ef4444",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "0.25rem",
+                          padding: "0.25rem 0.5rem",
+                          fontSize: "0.75rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
