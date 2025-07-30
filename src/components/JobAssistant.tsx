@@ -25,11 +25,8 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
   onAuthRequired,
   user,
 }) => {
-  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [emailConfirmed, setEmailConfirmed] = useState(false);
-  const [subscriptionAcknowledged, setSubscriptionAcknowledged] =
-    useState(false);
   const [paymentType, setPaymentType] = useState<"one-time" | "subscription">(
     "one-time"
   );
