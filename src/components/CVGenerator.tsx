@@ -93,6 +93,8 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
     projects: [],
   });
 
+  const [isInitialized, setIsInitialized] = useState(false);
+
   const [tempExperience, setTempExperience] = useState({
     company: "",
     position: "",
@@ -145,25 +147,84 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
 
   // Save CV data to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem("cvGeneratorData", JSON.stringify(cvData));
-    console.log("💾 Saved CV Generator data to localStorage:", cvData);
-  }, [cvData]);
+    // Don't save on initial mount
+    if (!isInitialized) {
+      console.log(
+        "⏳ CV Generator component not yet initialized, skipping save"
+      );
+      return;
+    }
+
+    // Only save if we have actual data (not just empty values)
+    const hasData = Object.values(cvData).some((value) => {
+      if (typeof value === "string") {
+        return value.trim() !== "";
+      } else if (Array.isArray(value)) {
+        return value.length > 0;
+      } else if (typeof value === "object" && value !== null) {
+        return Object.values(value).some((v) =>
+          typeof v === "string"
+            ? v.trim() !== ""
+            : Array.isArray(v)
+              ? v.length > 0
+              : v
+        );
+      }
+      return false;
+    });
+
+    if (hasData) {
+      localStorage.setItem("cvGeneratorData", JSON.stringify(cvData));
+      console.log("💾 Saved CV Generator data to localStorage:", cvData);
+    } else {
+      console.log("⚠️ Not saving empty CV data to localStorage");
+    }
+  }, [cvData, isInitialized]);
 
   // Load CV data from localStorage on component mount
   useEffect(() => {
+    console.log("🔄 CV Generator component mounted");
     const savedData = localStorage.getItem("cvGeneratorData");
     console.log("📂 Loading CV Generator data from localStorage:", savedData);
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
         console.log("✅ Successfully parsed saved CV data:", parsedData);
-        setCvData(parsedData);
+
+        // Check if the parsed data has actual content
+        const hasContent = Object.values(parsedData).some((value) => {
+          if (typeof value === "string") {
+            return value.trim() !== "";
+          } else if (Array.isArray(value)) {
+            return value.length > 0;
+          } else if (typeof value === "object" && value !== null) {
+            return Object.values(value).some((v) =>
+              typeof v === "string"
+                ? v.trim() !== ""
+                : Array.isArray(v)
+                  ? v.length > 0
+                  : v
+            );
+          }
+          return false;
+        });
+
+        if (hasContent) {
+          setCvData(parsedData);
+          console.log("✅ Restored CV data successfully");
+        } else {
+          console.log("⚠️ Parsed CV data is empty, not restoring");
+        }
       } catch (error) {
         console.error("❌ Error loading saved CV data:", error);
       }
     } else {
       console.log("📭 No saved CV data found in localStorage");
     }
+
+    // Mark as initialized after loading attempt
+    setIsInitialized(true);
+    console.log("✅ CV Generator component initialized");
   }, []);
 
   const addExperience = () => {
@@ -780,6 +841,27 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
 
   const generateCV = () => {
     generatePDF();
+  };
+
+  const addProject = () => {
+    if (tempProject.name && tempProject.description) {
+      setCvData((prev) => ({
+        ...prev,
+        projects: [...prev.projects, { ...tempProject }],
+      }));
+      setTempProject({
+        name: "",
+        description: "",
+        technologies: "",
+        link: "",
+      });
+    }
+  };
+
+  const clearSavedData = () => {
+    localStorage.removeItem("cvGeneratorData");
+    console.log("🗑️ Cleared CV Generator saved data");
+    alert("Saved CV data cleared. Form will reset.");
   };
 
   const renderStep = () => {
@@ -1764,8 +1846,33 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
       }
     `}</style>
       <div className="cv-header">
-        <h2>CV Generator</h2>
-        <p>Create a professional CV in minutes</p>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "1rem",
+          }}
+        >
+          <div>
+            <h2>CV Generator</h2>
+            <p>Create a professional CV in minutes</p>
+          </div>
+          <button
+            onClick={clearSavedData}
+            style={{
+              background: "#6b7280",
+              color: "white",
+              border: "none",
+              borderRadius: "0.25rem",
+              padding: "0.5rem 1rem",
+              fontSize: "0.75rem",
+              cursor: "pointer",
+            }}
+          >
+            🗑️ Clear Saved Data
+          </button>
+        </div>
       </div>
 
       <div className="cv-progress">
