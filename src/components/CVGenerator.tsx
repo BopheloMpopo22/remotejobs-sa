@@ -843,21 +843,6 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
     generatePDF();
   };
 
-  const addProject = () => {
-    if (tempProject.name && tempProject.description) {
-      setCvData((prev) => ({
-        ...prev,
-        projects: [...prev.projects, { ...tempProject }],
-      }));
-      setTempProject({
-        name: "",
-        description: "",
-        technologies: "",
-        link: "",
-      });
-    }
-  };
-
   const clearSavedData = () => {
     localStorage.removeItem("cvGeneratorData");
     console.log("🗑️ Cleared CV Generator saved data");
