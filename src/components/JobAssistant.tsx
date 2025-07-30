@@ -25,6 +25,16 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
   onAuthRequired,
   user,
 }) => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [emailConfirmed, setEmailConfirmed] = useState(false);
+  const [subscriptionAcknowledged, setSubscriptionAcknowledged] =
+    useState(false);
+  const [paymentType, setPaymentType] = useState<"one-time" | "subscription">(
+    "one-time"
+  );
+  const [isInitialized, setIsInitialized] = useState(false);
+
   const [formData, setFormData] = useState<AssistantForm>({
     fullName: "",
     phone: "",
@@ -35,13 +45,10 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     remotePreference: "",
     industries: [],
     additionalNotes: "",
-    cvFile: undefined,
-    cvFileName: "",
   });
 
   const [submitted, setSubmitted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const [emailConfirmed, setEmailConfirmed] = useState(true);
   // Remove the subscriptionAcknowledged state and checkbox logic
 
   useEffect(() => {
@@ -52,12 +59,8 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     }
   }, [user]);
 
-  const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
   const [showPayPalButton, setShowPayPalButton] = useState(false);
-  const [paymentType, setPaymentType] = useState<"one-time" | "subscription">(
-    "one-time"
-  );
 
   const industryOptions = [
     "Technology/IT",
@@ -110,32 +113,73 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
 
   // Save form data to localStorage whenever it changes
   useEffect(() => {
+    // Don't save on initial mount
+    if (!isInitialized) {
+      console.log("⏳ Component not yet initialized, skipping save");
+      return;
+    }
+
     const dataToSave = {
       ...formData,
       uploadedFileNames,
     };
-    localStorage.setItem("jobAssistantFormData", JSON.stringify(dataToSave));
-    console.log("💾 Saved Job Assistant data to localStorage:", dataToSave);
-  }, [formData, uploadedFileNames]);
+
+    // Only save if we have actual data (not just empty strings)
+    const hasData =
+      Object.values(formData).some(
+        (value) =>
+          value &&
+          (typeof value === "string"
+            ? value.trim() !== ""
+            : Array.isArray(value)
+              ? value.length > 0
+              : true)
+      ) || uploadedFileNames.length > 0;
+
+    if (hasData) {
+      localStorage.setItem("jobAssistantFormData", JSON.stringify(dataToSave));
+      console.log("💾 Saved Job Assistant data to localStorage:", dataToSave);
+    } else {
+      console.log("⚠️ Not saving empty data to localStorage");
+    }
+  }, [formData, uploadedFileNames, isInitialized]);
 
   // Load form data from localStorage on component mount
   useEffect(() => {
+    console.log("🔄 JobAssistant component mounted");
     const savedData = localStorage.getItem("jobAssistantFormData");
     console.log("📂 Loading Job Assistant data from localStorage:", savedData);
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
         console.log("✅ Successfully parsed saved data:", parsedData);
-        setFormData((prev) => ({
-          ...prev,
-          ...parsedData,
-        }));
-        if (parsedData.uploadedFileNames) {
-          setUploadedFileNames(parsedData.uploadedFileNames);
-          console.log(
-            "📄 Restored uploaded file names:",
-            parsedData.uploadedFileNames
-          );
+
+        // Check if the parsed data has actual content
+        const hasContent = Object.values(parsedData).some(
+          (value) =>
+            value &&
+            (typeof value === "string"
+              ? value.trim() !== ""
+              : Array.isArray(value)
+                ? value.length > 0
+                : true)
+        );
+
+        if (hasContent) {
+          setFormData((prev) => ({
+            ...prev,
+            ...parsedData,
+          }));
+          if (parsedData.uploadedFileNames) {
+            setUploadedFileNames(parsedData.uploadedFileNames);
+            console.log(
+              "📄 Restored uploaded file names:",
+              parsedData.uploadedFileNames
+            );
+          }
+          console.log("✅ Restored form data successfully");
+        } else {
+          console.log("⚠️ Parsed data is empty, not restoring");
         }
       } catch (error) {
         console.error("❌ Error loading saved form data:", error);
@@ -143,6 +187,10 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
     } else {
       console.log("📭 No saved data found in localStorage");
     }
+
+    // Mark as initialized after loading attempt
+    setIsInitialized(true);
+    console.log("✅ Component initialized");
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
