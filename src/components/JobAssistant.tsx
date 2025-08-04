@@ -1012,8 +1012,18 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
                 Debug: showPayPalButton={showPayPalButton.toString()},
                 paymentData exists={!!paymentData}
               </p>
+              <p style={{ fontSize: "0.8rem", color: "#666" }}>
+                PayPal Script Status:{" "}
+                {typeof window !== "undefined" && (window as any).paypal
+                  ? "Loaded"
+                  : "Not Loaded"}
+              </p>
               <PayPalButtons
                 createOrder={(_, actions) => {
+                  console.log(
+                    "PayPal createOrder called with paymentData:",
+                    paymentData
+                  );
                   return actions.order.create(paymentData);
                 }}
                 onApprove={(_, actions) => {
@@ -1035,6 +1045,20 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
                   setShowPayPalButton(false);
                 }}
               />
+              <div
+                style={{
+                  marginTop: "1rem",
+                  padding: "1rem",
+                  backgroundColor: "#fef3c7",
+                  borderRadius: "0.5rem",
+                }}
+              >
+                <p style={{ margin: 0, fontSize: "0.9rem", color: "#92400e" }}>
+                  <strong>PayPal Button Debug:</strong> If you don't see the
+                  PayPal button above, it might be a script loading issue. Try
+                  refreshing the page.
+                </p>
+              </div>
             </div>
           )}
         </div>
