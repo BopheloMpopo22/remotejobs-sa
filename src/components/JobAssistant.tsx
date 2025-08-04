@@ -334,8 +334,13 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
         }
       } else {
         // For one-time payments, show PayPal button
+        console.log(
+          "Setting payment data for one-time payment:",
+          result.paypalPaymentData
+        );
         setPaymentData(result.paypalPaymentData);
         setShowPayPalButton(true);
+        console.log("showPayPalButton set to true");
       }
     } catch (error: any) {
       console.error("Payment error:", error);
@@ -1003,6 +1008,10 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
             <div style={{ marginTop: "1rem", textAlign: "center" }}>
               <h4>Complete Payment</h4>
               <p>Click below to pay R179 for Job Assistant setup</p>
+              <p style={{ fontSize: "0.8rem", color: "#666" }}>
+                Debug: showPayPalButton={showPayPalButton.toString()},
+                paymentData exists={!!paymentData}
+              </p>
               <PayPalButtons
                 createOrder={(_, actions) => {
                   return actions.order.create(paymentData);
