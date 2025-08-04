@@ -142,7 +142,6 @@ function App() {
         clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
         currency: "USD",
         intent: "capture",
-        mode: "live",
         "data-client-timestamp": Date.now().toString(),
       }}
     >
