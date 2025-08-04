@@ -103,7 +103,7 @@ export default async function handler(req, res) {
 
     // Send test email
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: "RemoteJobs SA <noreply@remotejobs-sa.com>",
+      from: "RemoteJobs SA <onboarding@resend.dev>",
       to: [userEmail],
       subject: `🧪 TEST: Daily Job Application Report - ${todayString}`,
       html: emailContent,
