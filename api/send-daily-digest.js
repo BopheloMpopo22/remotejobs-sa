@@ -9,19 +9,19 @@ const supabase = createClient(
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
+  // Allow both GET (for manual triggers) and POST (for automated calls)
+  if (req.method !== "GET" && req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    console.log("📧 Starting daily digest email process...");
+    console.log("📧 Starting daily digest email system...");
 
-    // Get today's date in CAT timezone (UTC+2)
+    // Get today's date
     const today = new Date();
-    const catDate = new Date(today.getTime() + 2 * 60 * 60 * 1000); // UTC+2
-    const todayString = catDate.toISOString().split("T")[0];
+    const todayString = today.toISOString().split("T")[0];
 
-    console.log("📅 Processing applications for date:", todayString);
+    console.log("📅 Processing for date:", todayString);
 
     // Get all paid job assistant applications
     const { data: paidApplications, error: paidError } = await supabase
@@ -36,15 +36,26 @@ export default async function handler(req, res) {
 
     console.log(`✅ Found ${paidApplications.length} paid applications`);
 
-    // Group users by email to avoid duplicate emails
-    const userEmails = [...new Set(paidApplications.map((app) => app.email))];
-    console.log(`📧 Sending emails to ${userEmails.length} unique users`);
+    if (paidApplications.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No paid applications found",
+        date: todayString,
+        emailsSent: 0,
+      });
+    }
 
     let emailsSent = 0;
-    let errors = [];
+    const results = [];
 
-    for (const userEmail of userEmails) {
+    // Process each paid user
+    for (const user of paidApplications) {
       try {
+        const userEmail = user.email;
+        const userName = user.full_name || userEmail.split("@")[0];
+
+        console.log(`📧 Processing user: ${userEmail}`);
+
         // Get user's job applications for today
         const { data: todaysApplications, error: appError } = await supabase
           .from("job_applications")
@@ -57,7 +68,6 @@ export default async function handler(req, res) {
             `❌ Error fetching applications for ${userEmail}:`,
             appError
           );
-          errors.push({ email: userEmail, error: "Database error" });
           continue;
         }
 
@@ -72,15 +82,8 @@ export default async function handler(req, res) {
             `❌ Error fetching total applications for ${userEmail}:`,
             totalError
           );
-          errors.push({ email: userEmail, error: "Database error" });
           continue;
         }
-
-        // Get user's job assistant application for personalization
-        const userApplication = paidApplications.find(
-          (app) => app.email === userEmail
-        );
-        const userName = userApplication?.full_name || userEmail.split("@")[0];
 
         // Calculate statistics
         const totalApplications = allApplications.length;
@@ -89,13 +92,10 @@ export default async function handler(req, res) {
         ).length;
         const todaysCount = todaysApplications.length;
 
-        // Only send email if there are applications today
-        if (todaysCount === 0) {
-          console.log(
-            `⏭️ No applications today for ${userEmail}, skipping email`
-          );
-          continue;
-        }
+        console.log(`📊 Statistics for ${userEmail}:`);
+        console.log(`- Today's applications: ${todaysCount}`);
+        console.log(`- Total applications: ${totalApplications}`);
+        console.log(`- Total responses: ${totalResponses}`);
 
         // Generate email content
         const emailContent = generateDailyDigestEmail({
@@ -109,45 +109,63 @@ export default async function handler(req, res) {
         // Send email
         const { data: emailData, error: emailError } = await resend.emails.send(
           {
-            from: "RemoteJobs SA <noreply@remotejobs-sa.com>",
+            from: "RemoteJobs SA <onboarding@resend.dev>",
             to: [userEmail],
-            subject: `📊 Your Daily Job Application Report - ${todayString}`,
+            subject: `📊 Daily Job Application Report - ${todayString}`,
             html: emailContent,
           }
         );
 
         if (emailError) {
           console.error(`❌ Error sending email to ${userEmail}:`, emailError);
-          errors.push({ email: userEmail, error: emailError });
-        } else {
-          console.log(`✅ Email sent successfully to ${userEmail}`);
-          emailsSent++;
-
-          // Update job assistant application with today's stats
-          await supabase
-            .from("job_assistant_applications")
-            .update({
-              applications_sent: totalApplications,
-              responses_received: totalResponses,
-              last_application_date: todayString,
-            })
-            .eq("email", userEmail);
+          results.push({
+            email: userEmail,
+            success: false,
+            error: emailError.message,
+          });
+          continue;
         }
-      } catch (error) {
-        console.error(`❌ Error processing ${userEmail}:`, error);
-        errors.push({ email: userEmail, error: error.message });
+
+        console.log(`✅ Email sent successfully to ${userEmail}`);
+        emailsSent++;
+
+        // Update user's application statistics
+        await supabase
+          .from("job_assistant_applications")
+          .update({
+            applications_sent: totalApplications,
+            responses_received: totalResponses,
+            last_application_date: todayString,
+          })
+          .eq("id", user.id);
+
+        results.push({
+          email: userEmail,
+          success: true,
+          statistics: {
+            todaysApplications: todaysCount,
+            totalApplications,
+            totalResponses,
+          },
+        });
+      } catch (userError) {
+        console.error(`❌ Error processing user ${user.email}:`, userError);
+        results.push({
+          email: user.email,
+          success: false,
+          error: userError.message,
+        });
       }
     }
 
-    console.log(
-      `📧 Daily digest completed: ${emailsSent} emails sent, ${errors.length} errors`
-    );
+    console.log(`🎉 Daily digest completed. ${emailsSent} emails sent.`);
 
     return res.status(200).json({
       success: true,
-      emailsSent,
-      errors,
+      message: "Daily digest completed",
       date: todayString,
+      emailsSent,
+      results,
     });
   } catch (error) {
     console.error("❌ Daily digest error:", error);
@@ -162,12 +180,20 @@ function generateDailyDigestEmail({
   totalResponses,
   todaysCount,
 }) {
-  const applicationsList = todaysApplications
-    .map(
-      (app) =>
-        `<li><strong>${app.job_title}</strong> at <strong>${app.company}</strong> - ${app.location}</li>`
-    )
-    .join("");
+  const applicationsList =
+    todaysApplications.length > 0
+      ? todaysApplications
+          .map(
+            (app) =>
+              `<li><strong>${app.job_title}</strong> at <strong>${app.company}</strong> - ${app.location}</li>`
+          )
+          .join("")
+      : "<li><em>No new applications recorded for today</em></li>";
+
+  const successRate =
+    totalApplications > 0
+      ? Math.round((totalResponses / totalApplications) * 100)
+      : 0;
 
   return `
     <!DOCTYPE html>
@@ -179,13 +205,13 @@ function generateDailyDigestEmail({
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #1f2937; color: white; padding: 20px; text-align: center; }
+        .header { background: #059669; color: white; padding: 20px; text-align: center; }
         .content { padding: 20px; background: #f9fafb; }
         .stats { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
         .applications { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
         .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
         .highlight { color: #059669; font-weight: bold; }
-        .warning { color: #dc2626; }
+        .success-rate { color: #059669; font-size: 18px; font-weight: bold; }
       </style>
     </head>
     <body>
@@ -205,6 +231,7 @@ function generateDailyDigestEmail({
             <p><span class="highlight">${todaysCount}</span> new applications sent today</p>
             <p><span class="highlight">${totalApplications}</span> total applications sent</p>
             <p><span class="highlight">${totalResponses}</span> responses received</p>
+            <p class="success-rate">Success Rate: ${successRate}%</p>
           </div>
           
           <div class="applications">
@@ -221,7 +248,7 @@ function generateDailyDigestEmail({
               <li>✅ Daily job applications: <strong>${todaysCount}/5</strong></li>
               <li>📊 Total applications sent: <strong>${totalApplications}</strong></li>
               <li>📨 Responses received: <strong>${totalResponses}</strong></li>
-              <li>📈 Success rate: <strong>${totalApplications > 0 ? Math.round((totalResponses / totalApplications) * 100) : 0}%</strong></li>
+              <li>📈 Success rate: <strong>${successRate}%</strong></li>
             </ul>
           </div>
           
