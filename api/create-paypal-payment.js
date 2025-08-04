@@ -83,8 +83,8 @@ export default async function handler(req, res) {
         brand_name: "RemoteJobs SA",
         landing_page: "LOGIN",
         user_action: "PAY_NOW",
-        return_url: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5174"}/?page=payment-success`,
-        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5174"}/?page=payment-cancel`,
+        return_url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app"}/?page=payment-success`,
+        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app"}/?page=payment-cancel`,
       },
     };
 

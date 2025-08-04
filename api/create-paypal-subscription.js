@@ -67,10 +67,7 @@ export default async function handler(req, res) {
     // PayPal API credentials
     const clientId = process.env.PAYPAL_CLIENT_ID;
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-    const baseUrl =
-      process.env.PAYPAL_MODE === "live"
-        ? "https://api-m.paypal.com"
-        : "https://api-m.sandbox.paypal.com";
+    const baseUrl = "https://api-m.paypal.com";
 
     // Get access token
     const tokenResponse = await fetch(`${baseUrl}/v1/oauth2/token`, {
@@ -112,8 +109,8 @@ export default async function handler(req, res) {
           payer_selected: "PAYPAL",
           payee_preferred: "IMMEDIATE_PAYMENT_REQUIRED",
         },
-        return_url: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5174"}/?page=subscription-success`,
-        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5174"}/?page=subscription-cancel`,
+        return_url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app"}/?page=subscription-success`,
+        cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app"}/?page=subscription-cancel`,
       },
       custom_id: subscriptionReference,
     };

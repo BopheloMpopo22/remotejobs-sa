@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     // Check environment variables
     const clientId = process.env.PAYPAL_CLIENT_ID;
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-    const mode = process.env.PAYPAL_MODE || "sandbox";
+    const mode = process.env.PAYPAL_MODE || "live";
 
     console.log("Environment check:");
     console.log("- PAYPAL_CLIENT_ID:", clientId ? "SET" : "MISSING");
@@ -31,9 +31,7 @@ export default async function handler(req, res) {
 
     // Test authentication
     const baseUrl =
-      mode === "live"
-        ? "https://api-m.paypal.com"
-        : "https://api-m.sandbox.paypal.com";
+      mode === "live" ? "https://api-m.paypal.com" : "https://api-m.paypal.com";
 
     console.log("Testing authentication with:", baseUrl);
 

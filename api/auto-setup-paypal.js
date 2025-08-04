@@ -9,9 +9,9 @@ export default async function handler(req, res) {
     // PayPal API credentials
     const clientId = process.env.PAYPAL_CLIENT_ID;
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-    const baseUrl = "https://api-m.sandbox.paypal.com"; // Force sandbox for now
+    const baseUrl = "https://api-m.paypal.com"; // Live PayPal API
 
-    console.log("Using sandbox URL:", baseUrl);
+    console.log("Using live PayPal URL:", baseUrl);
     console.log("Client ID available:", !!clientId);
     console.log("Client Secret available:", !!clientSecret);
 
@@ -135,7 +135,7 @@ export default async function handler(req, res) {
         credentials: {
           clientId: clientId,
           clientSecret: "***hidden***",
-          mode: "sandbox",
+          mode: "live",
         },
         product: {
           id: productResult.id,
@@ -148,7 +148,7 @@ export default async function handler(req, res) {
         environmentVariables: {
           PAYPAL_CLIENT_ID: clientId,
           PAYPAL_CLIENT_SECRET: "***add your client secret***",
-          PAYPAL_MODE: "sandbox",
+          PAYPAL_MODE: "live",
           PAYPAL_SUBSCRIPTION_PLAN_ID: planResult.id,
         },
       });
