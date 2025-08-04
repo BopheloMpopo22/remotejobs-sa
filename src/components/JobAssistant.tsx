@@ -1005,23 +1005,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
               <p>Click below to pay R179 for Job Assistant setup</p>
               <PayPalButtons
                 createOrder={(_, actions) => {
-                  return actions.order.create({
-                    intent: "CAPTURE",
-                    purchase_units: [
-                      {
-                        amount: {
-                          value: paymentData.amount,
-                          currency_code: paymentData.currency,
-                        },
-                        description: paymentData.description,
-                        custom_id: paymentData.paymentReference,
-                      },
-                    ],
-                    application_context: {
-                      return_url: paymentData.returnUrl,
-                      cancel_url: paymentData.cancelUrl,
-                    },
-                  });
+                  return actions.order.create(paymentData);
                 }}
                 onApprove={(_, actions) => {
                   if (actions.order) {
