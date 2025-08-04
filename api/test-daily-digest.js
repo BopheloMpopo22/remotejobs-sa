@@ -45,7 +45,7 @@ export default async function handler(req, res) {
 
     // Test with the first paid application
     const testUser = paidApplications[0];
-    const userEmail = testUser.email;
+    const userEmail = "bophelompopo22@gmail.com"; // Send to your real email for testing
     const userName = testUser.full_name || userEmail.split("@")[0];
 
     console.log(`🧪 Testing with user: ${userEmail}`);
