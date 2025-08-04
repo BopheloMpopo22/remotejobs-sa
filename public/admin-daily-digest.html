@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Daily Digest Trigger</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #059669;
+      }
+      .button {
+        background: #059669;
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 10px;
+      }
+      .button:hover {
+        background: #047857;
+      }
+      .button:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+      }
+      .status {
+        margin: 20px 0;
+        padding: 15px;
+        border-radius: 5px;
+      }
+      .success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+      }
+      .error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #ef4444;
+      }
+      .info {
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #3b82f6;
+      }
+      .log {
+        background: #f3f4f6;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        font-family: monospace;
+        white-space: pre-wrap;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .instructions {
+        background: #fef3c7;
+        padding: 20px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📧 Daily Digest Admin Panel</h1>
+        <p>Manually trigger daily digest emails for all paid users</p>
+      </div>
+
+      <div class="instructions">
+        <h3>📋 Instructions:</h3>
+        <ol>
+          <li>
+            <strong>Add job applications</strong> to the database using the SQL
+            template
+          </li>
+          <li><strong>Click "Send Daily Digest"</strong> to trigger emails</li>
+          <li><strong>Check the logs</strong> below for results</li>
+        </ol>
+        <p>
+          <strong>Note:</strong> This replaces the automated cron job due to
+          Vercel plan limits.
+        </p>
+      </div>
+
+      <div style="text-align: center">
+        <button id="triggerBtn" class="button" onclick="triggerDailyDigest()">
+          🚀 Send Daily Digest
+        </button>
+        <button id="testBtn" class="button" onclick="testDailyDigest()">
+          🧪 Test Daily Digest
+        </button>
+      </div>
+
+      <div id="status"></div>
+      <div id="log" class="log" style="display: none"></div>
+    </div>
+
+    <script>
+      let isProcessing = false;
+
+      function log(message) {
+        const logDiv = document.getElementById("log");
+        logDiv.style.display = "block";
+        logDiv.textContent +=
+          new Date().toLocaleTimeString() + ": " + message + "\n";
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+
+      function showStatus(message, type = "info") {
+        const statusDiv = document.getElementById("status");
+        statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+      }
+
+      async function triggerDailyDigest() {
+        if (isProcessing) return;
+
+        isProcessing = true;
+        const btn = document.getElementById("triggerBtn");
+        btn.disabled = true;
+        btn.textContent = "⏳ Processing...";
+
+        log("🚀 Starting daily digest process...");
+        showStatus("Processing daily digest...", "info");
+
+        try {
+          const response = await fetch("/api/send-daily-digest", {
+            method: "GET",
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            log("✅ Daily digest completed successfully!");
+            log(`📧 Emails sent: ${result.emailsSent || 0}`);
+            log(`📅 Date: ${result.date}`);
+
+            if (result.results) {
+              log("\n📊 Results:");
+              result.results.forEach((user, index) => {
+                if (user.success) {
+                  log(
+                    `✅ ${user.email}: ${user.statistics?.todaysApplications || 0} applications today`
+                  );
+                } else {
+                  log(`❌ ${user.email}: ${user.error}`);
+                }
+              });
+            }
+
+            showStatus(
+              `✅ Daily digest completed! ${result.emailsSent || 0} emails sent.`,
+              "success"
+            );
+          } else {
+            log(`❌ Error: ${result.error || "Unknown error"}`);
+            showStatus(`❌ Error: ${result.error || "Unknown error"}`, "error");
+          }
+        } catch (error) {
+          log(`❌ Network error: ${error.message}`);
+          showStatus(`❌ Network error: ${error.message}`, "error");
+        } finally {
+          isProcessing = false;
+          btn.disabled = false;
+          btn.textContent = "🚀 Send Daily Digest";
+        }
+      }
+
+      async function testDailyDigest() {
+        if (isProcessing) return;
+
+        isProcessing = true;
+        const btn = document.getElementById("testBtn");
+        btn.disabled = true;
+        btn.textContent = "⏳ Testing...";
+
+        log("🧪 Testing daily digest system...");
+        showStatus("Testing daily digest...", "info");
+
+        try {
+          const response = await fetch("/api/test-daily-digest", {
+            method: "POST",
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            log("✅ Test completed successfully!");
+            log(
+              `📧 Test email sent to: ${result.testUser?.email || "Unknown"}`
+            );
+            log(
+              `📊 Statistics: ${result.statistics?.todaysApplications || 0} applications today`
+            );
+            showStatus(
+              `✅ Test completed! Email sent to ${result.testUser?.email || "Unknown"}`,
+              "success"
+            );
+          } else {
+            log(`❌ Test error: ${result.error || "Unknown error"}`);
+            showStatus(
+              `❌ Test error: ${result.error || "Unknown error"}`,
+              "error"
+            );
+          }
+        } catch (error) {
+          log(`❌ Network error: ${error.message}`);
+          showStatus(`❌ Network error: ${error.message}`, "error");
+        } finally {
+          isProcessing = false;
+          btn.disabled = false;
+          btn.textContent = "🧪 Test Daily Digest";
+        }
+      }
+    </script>
+  </body>
+</html>
