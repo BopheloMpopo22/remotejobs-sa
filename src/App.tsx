@@ -54,6 +54,9 @@ function App() {
   >(null);
 
   useEffect(() => {
+    // Debug PayPal client ID
+    console.log("PayPal Client ID:", import.meta.env.VITE_PAYPAL_CLIENT_ID);
+
     // Check for existing session
     const getSession = async () => {
       const {
@@ -140,6 +143,7 @@ function App() {
         currency: "USD",
         intent: "capture",
         mode: "live",
+        "data-client-timestamp": Date.now().toString(),
       }}
     >
       <div className="app-root">
