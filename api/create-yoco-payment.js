@@ -101,8 +101,18 @@ export default async function handler(req, res) {
     console.log("Application saved:", application.id);
 
     // Debug Yoco credentials
+    console.log("=== YOCO CREDENTIALS DEBUG ===");
     console.log("YOCO_SECRET_KEY available:", !!process.env.YOCO_SECRET_KEY);
     console.log("YOCO_SECRET_KEY length:", process.env.YOCO_SECRET_KEY?.length);
+    console.log(
+      "YOCO_SECRET_KEY starts with:",
+      process.env.YOCO_SECRET_KEY?.substring(0, 10)
+    );
+    console.log(
+      "All environment variables:",
+      Object.keys(process.env).filter((key) => key.includes("YOCO"))
+    );
+    console.log("=== END YOCO CREDENTIALS DEBUG ===");
 
     const responseData = {
       paymentReference,
