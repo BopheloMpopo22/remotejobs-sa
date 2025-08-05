@@ -31,6 +31,7 @@ interface Job {
 
 function App() {
   // Yoco payment system ready for testing
+  // Triggering deployment for Yoco integration fixes
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
