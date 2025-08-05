@@ -74,6 +74,28 @@ export default async function handler(req, res) {
       cancelUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app"}/?page=payment-cancel`,
     };
 
+    // Create Yoco payment session
+    const yocoResponse = await fetch("https://online.yoco.com/v2/checkout/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Auth-Secret-Key": process.env.YOCO_SECRET_KEY,
+      },
+      body: JSON.stringify(yocoPaymentData),
+    });
+
+    if (!yocoResponse.ok) {
+      const errorData = await yocoResponse.text();
+      console.error("Yoco API error:", errorData);
+      return res.status(500).json({
+        error: "Failed to create Yoco payment session",
+        details: errorData,
+      });
+    }
+
+    const yocoSession = await yocoResponse.json();
+    console.log("Yoco session created:", yocoSession);
+
     console.log("Yoco payment data prepared:", paymentReference);
     console.log("Application saved:", application.id);
 
@@ -81,7 +103,7 @@ export default async function handler(req, res) {
       paymentReference,
       applicationId: application.id,
       yocoPaymentData,
-      checkoutUrl: `https://online.yoco.com/v2/checkout/${process.env.YOCO_PUBLIC_KEY}`,
+      checkoutUrl: yocoSession.checkout_url,
     };
 
     console.log("Returning response data:", responseData);

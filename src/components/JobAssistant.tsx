@@ -312,12 +312,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       const result = await response.json();
       console.log("=== FRONTEND DEBUG ===");
       console.log("Full API response:", result);
-      console.log(
-        "Payment data:",
-        paymentType === "subscription"
-          ? result.subscription
-          : result.paypalPaymentData
-      );
+      console.log("Payment data:", result.yocoPaymentData);
       console.log("=== END FRONTEND DEBUG ===");
 
       // For Yoco payments, show payment button
