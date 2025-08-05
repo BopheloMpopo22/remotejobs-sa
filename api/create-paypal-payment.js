@@ -72,8 +72,8 @@ export default async function handler(req, res) {
       purchase_units: [
         {
           amount: {
-            currency_code: "ZAR",
-            value: "10.00", // R10 ZAR for testing
+            currency_code: "USD",
+            value: "5.00", // $5 USD = ~R90 ZAR
           },
           description: "RemoteJobs SA Job Assistant - One-time Setup",
           custom_id: paymentReference,

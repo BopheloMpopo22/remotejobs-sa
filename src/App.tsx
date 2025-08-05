@@ -140,7 +140,7 @@ function App() {
     <PayPalScriptProvider
       options={{
         clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
-        currency: "ZAR",
+        currency: "USD",
         intent: "capture",
         "data-client-timestamp": Date.now().toString(),
       }}
