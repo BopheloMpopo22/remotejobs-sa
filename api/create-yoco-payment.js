@@ -77,12 +77,16 @@ export default async function handler(req, res) {
     console.log("Yoco payment data prepared:", paymentReference);
     console.log("Application saved:", application.id);
 
-    return res.status(200).json({
+    const responseData = {
       paymentReference,
       applicationId: application.id,
       yocoPaymentData,
       checkoutUrl: `https://online.yoco.com/v2/checkout/${process.env.YOCO_PUBLIC_KEY}`,
-    });
+    };
+
+    console.log("Returning response data:", responseData);
+
+    return res.status(200).json(responseData);
   } catch (error) {
     console.error("Yoco payment creation error:", error);
     return res.status(500).json({

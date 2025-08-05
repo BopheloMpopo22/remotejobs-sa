@@ -321,11 +321,8 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       console.log("=== END FRONTEND DEBUG ===");
 
       // For Yoco payments, show payment button
-      console.log(
-        "Setting payment data for Yoco payment:",
-        result.yocoPaymentData
-      );
-      setPaymentData(result.yocoPaymentData);
+      console.log("Setting payment data for Yoco payment:", result);
+      setPaymentData(result);
       setShowPayPalButton(true);
       console.log("showPayPalButton set to true");
     } catch (error: any) {
@@ -1006,8 +1003,18 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
               </p>
               <button
                 onClick={() => {
-                  if (paymentData.checkoutUrl) {
+                  if (paymentData && paymentData.checkoutUrl) {
+                    console.log(
+                      "Redirecting to Yoco checkout:",
+                      paymentData.checkoutUrl
+                    );
                     window.location.href = paymentData.checkoutUrl;
+                  } else {
+                    console.error(
+                      "No checkout URL found in payment data:",
+                      paymentData
+                    );
+                    alert("Payment setup error. Please try again.");
                   }
                 }}
                 style={{
