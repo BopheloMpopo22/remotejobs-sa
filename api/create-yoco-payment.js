@@ -80,7 +80,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Auth-Secret-Key": process.env.YOCO_SECRET_KEY,
+        "X-Auth-Secret-Key": process.env.YOCO_SECRET_KEY || "",
       },
       body: JSON.stringify(yocoPaymentData),
     });
@@ -99,6 +99,10 @@ export default async function handler(req, res) {
 
     console.log("Yoco payment data prepared:", paymentReference);
     console.log("Application saved:", application.id);
+
+    // Debug Yoco credentials
+    console.log("YOCO_SECRET_KEY available:", !!process.env.YOCO_SECRET_KEY);
+    console.log("YOCO_SECRET_KEY length:", process.env.YOCO_SECRET_KEY?.length);
 
     const responseData = {
       paymentReference,
