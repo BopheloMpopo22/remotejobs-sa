@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import { PayPalButtons } from "@paypal/react-paypal-js";
 
 interface AssistantForm {
   fullName: string;
@@ -282,10 +281,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       console.log("Access token:", session?.access_token);
 
       console.log("Sending payment request...");
-      const apiEndpoint =
-        paymentType === "subscription"
-          ? "/api/create-paypal-subscription"
-          : "/api/create-paypal-payment";
+      const apiEndpoint = "/api/create-yoco-payment";
       console.log("API URL:", apiEndpoint);
 
       const timestamp = Date.now();
@@ -324,24 +320,14 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       );
       console.log("=== END FRONTEND DEBUG ===");
 
-      if (paymentType === "subscription") {
-        // For subscriptions, redirect to PayPal approval URL
-        if (result.approvalUrl) {
-          window.location.href = result.approvalUrl;
-        } else {
-          setPaymentData(result.subscription);
-          setShowPayPalButton(true);
-        }
-      } else {
-        // For one-time payments, show PayPal button
-        console.log(
-          "Setting payment data for one-time payment:",
-          result.paypalPaymentData
-        );
-        setPaymentData(result.paypalPaymentData);
-        setShowPayPalButton(true);
-        console.log("showPayPalButton set to true");
-      }
+      // For Yoco payments, show payment button
+      console.log(
+        "Setting payment data for Yoco payment:",
+        result.yocoPaymentData
+      );
+      setPaymentData(result.yocoPaymentData);
+      setShowPayPalButton(true);
+      console.log("showPayPalButton set to true");
     } catch (error: any) {
       console.error("Payment error:", error);
       alert(`Payment error: ${error.message}`);
@@ -356,7 +342,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
           <h2>Payment Completed!</h2>
           <p>
             Your application has been saved and payment has been processed
-            through PayPal.
+            through Yoco.
           </p>
           <div className="next-steps">
             <h3>What happens next?</h3>
@@ -1018,33 +1004,26 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
                   ? "Loaded"
                   : "Not Loaded"}
               </p>
-              <PayPalButtons
-                createOrder={(_, actions) => {
-                  console.log(
-                    "PayPal createOrder called with paymentData:",
-                    paymentData
-                  );
-                  return actions.order.create(paymentData);
-                }}
-                onApprove={(_, actions) => {
-                  if (actions.order) {
-                    return actions.order.capture().then((details) => {
-                      console.log("Payment completed:", details);
-                      setSubmitted(true);
-                      setShowPayPalButton(false);
-                    });
+              <button
+                onClick={() => {
+                  if (paymentData.checkoutUrl) {
+                    window.location.href = paymentData.checkoutUrl;
                   }
-                  return Promise.resolve();
                 }}
-                onError={(err) => {
-                  console.error("PayPal error:", err);
-                  alert("Payment failed. Please try again.");
+                style={{
+                  background: "#059669",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  marginTop: "1rem",
                 }}
-                onCancel={() => {
-                  console.log("Payment cancelled");
-                  setShowPayPalButton(false);
-                }}
-              />
+              >
+                💳 Pay with Yoco (R179)
+              </button>
               <div
                 style={{
                   marginTop: "1rem",

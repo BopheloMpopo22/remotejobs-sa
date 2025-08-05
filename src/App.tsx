@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+
 import { supabase } from "./lib/supabase";
 import Auth from "./components/Auth";
 import UserProfile from "./components/UserProfile";
@@ -137,14 +137,6 @@ function App() {
   }
 
   return (
-    <PayPalScriptProvider
-      options={{
-        clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
-        currency: "USD",
-        intent: "capture",
-        "data-client-timestamp": Date.now().toString(),
-      }}
-    >
       <div className="app-root">
         <style>{`
           @media (max-width: 600px) {
@@ -550,7 +542,7 @@ function App() {
           </div>
         )}
       </div>
-    </PayPalScriptProvider>
+    </div>
   );
 }
 
