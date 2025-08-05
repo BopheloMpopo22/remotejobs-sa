@@ -65,6 +65,7 @@ export default async function handler(req, res) {
       amount: 17900, // R179.00 in cents
       currency: "ZAR",
       source: "card",
+      chargeURL: `${process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app"}/api/yoco-webhook`,
       metadata: {
         paymentReference,
         applicationId: application.id,
