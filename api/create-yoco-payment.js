@@ -47,7 +47,6 @@ export default async function handler(req, res) {
         additional_notes: applicationData.additionalNotes,
         payment_reference: paymentReference,
         status: "pending",
-        payment_provider: "yoco",
         created_at: new Date().toISOString(),
       })
       .select()
