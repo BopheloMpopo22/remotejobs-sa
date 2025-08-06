@@ -83,14 +83,14 @@ export default async function handler(req, res) {
       amount: 17900, // R179.00 in cents
       currency: "ZAR",
       source: "card",
-      webhook_url: `${baseUrl}/api/yoco-webhook`,
+      chargeURL: `${baseUrl}/api/yoco-webhook`,
       metadata: {
         paymentReference,
         applicationId: application.id,
         userEmail: user.email,
       },
-      redirect_url: `${baseUrl}/?page=payment-success`,
-      cancel_url: `${baseUrl}/?page=payment-cancel`,
+      redirectUrl: `${baseUrl}/?page=payment-success`,
+      cancelUrl: `${baseUrl}/?page=payment-cancel`,
     };
 
     // Debug before Yoco API call
