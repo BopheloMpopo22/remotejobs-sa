@@ -34,6 +34,7 @@ function App() {
   // Triggering deployment for Yoco integration fixes
   // Force deployment for debugging Yoco credentials
   // Deployment trigger: 2024-12-30 15:30
+  // Force deployment for Yoco API endpoint fix
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
