@@ -75,7 +75,7 @@ export default async function handler(req, res) {
     }
 
     // Create Yoco payment data
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app";
+    const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app").replace(/\/$/, '');
     const yocoPaymentData = {
       amount: 17900, // R179.00 in cents
       currency: "ZAR",
@@ -101,6 +101,7 @@ export default async function handler(req, res) {
 
     // Create Yoco payment session
     console.log("Making Yoco API call with secret key:", process.env.YOCO_SECRET_KEY?.substring(0, 20) + "...");
+    console.log("Yoco API endpoint: https://online.yoco.com/v2/checkout/");
     
     const yocoResponse = await fetch("https://online.yoco.com/v2/checkout/", {
       method: "POST",
