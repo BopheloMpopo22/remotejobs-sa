@@ -83,14 +83,14 @@ export default async function handler(req, res) {
       amount: 17900, // R179.00 in cents
       currency: "ZAR",
       source: "card",
-      chargeURL: `${baseUrl}/api/yoco-webhook`,
+      webhook_url: `${baseUrl}/api/yoco-webhook`,
       metadata: {
         paymentReference,
         applicationId: application.id,
         userEmail: user.email,
       },
-      redirectUrl: `${baseUrl}/?page=payment-success`,
-      cancelUrl: `${baseUrl}/?page=payment-cancel`,
+      redirect_url: `${baseUrl}/?page=payment-success`,
+      cancel_url: `${baseUrl}/?page=payment-cancel`,
     };
 
     // Debug before Yoco API call
@@ -107,9 +107,9 @@ export default async function handler(req, res) {
       "Making Yoco API call with secret key:",
       process.env.YOCO_SECRET_KEY?.substring(0, 20) + "..."
     );
-    console.log("Yoco API endpoint: https://online.yoco.com/v2/checkout");
+    console.log("Yoco API endpoint: https://online.yoco.com/v2/checkout/");
 
-    const yocoResponse = await fetch("https://online.yoco.com/v2/checkout", {
+    const yocoResponse = await fetch("https://online.yoco.com/v2/checkout/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
