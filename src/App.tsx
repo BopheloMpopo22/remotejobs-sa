@@ -38,6 +38,7 @@ function App() {
   // Testing checkout endpoint
   // Using correct Yoco payments API
   // Fix checkoutUrl field mapping
+  // Add webhook registration endpoint
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
