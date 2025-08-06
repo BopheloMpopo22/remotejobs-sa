@@ -107,16 +107,19 @@ export default async function handler(req, res) {
       "Making Yoco API call with secret key:",
       process.env.YOCO_SECRET_KEY?.substring(0, 20) + "..."
     );
-    console.log("Yoco API endpoint: https://online.yoco.com/v1/checkout");
+    console.log("Yoco API endpoint: https://payments.yoco.com/api/checkouts");
 
-    const yocoResponse = await fetch("https://online.yoco.com/v1/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.YOCO_SECRET_KEY}`,
-      },
-      body: JSON.stringify(yocoPaymentData),
-    });
+    const yocoResponse = await fetch(
+      "https://payments.yoco.com/api/checkouts",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.YOCO_SECRET_KEY}`,
+        },
+        body: JSON.stringify(yocoPaymentData),
+      }
+    );
 
     if (!yocoResponse.ok) {
       const errorData = await yocoResponse.text();
