@@ -75,18 +75,19 @@ export default async function handler(req, res) {
     }
 
     // Create Yoco payment data
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app";
     const yocoPaymentData = {
       amount: 17900, // R179.00 in cents
       currency: "ZAR",
       source: "card",
-      chargeURL: `${process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app"}/api/yoco-webhook`,
+      chargeURL: `${baseUrl}/api/yoco-webhook`,
       metadata: {
         paymentReference,
         applicationId: application.id,
         userEmail: user.email,
       },
-      redirectUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app"}/?page=payment-success`,
-      cancelUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app"}/?page=payment-cancel`,
+      redirectUrl: `${baseUrl}/?page=payment-success`,
+      cancelUrl: `${baseUrl}/?page=payment-cancel`,
     };
 
     // Debug before Yoco API call
@@ -99,11 +100,13 @@ export default async function handler(req, res) {
     console.log("=== END BEFORE YOCO API CALL ===");
 
     // Create Yoco payment session
+    console.log("Making Yoco API call with secret key:", process.env.YOCO_SECRET_KEY?.substring(0, 20) + "...");
+    
     const yocoResponse = await fetch("https://online.yoco.com/v2/checkout/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Auth-Secret-Key": process.env.YOCO_SECRET_KEY || "",
+        "X-Auth-Secret-Key": process.env.YOCO_SECRET_KEY,
       },
       body: JSON.stringify(yocoPaymentData),
     });
