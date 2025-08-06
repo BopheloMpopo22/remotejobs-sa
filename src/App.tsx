@@ -37,6 +37,7 @@ function App() {
   // Force deployment for Yoco API endpoint fix
   // Testing checkout endpoint
   // Using correct Yoco payments API
+  // Fix checkoutUrl field mapping
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);

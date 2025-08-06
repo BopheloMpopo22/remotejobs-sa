@@ -154,7 +154,7 @@ export default async function handler(req, res) {
       paymentReference,
       applicationId: application.id,
       yocoPaymentData,
-      checkoutUrl: yocoSession.checkout_url,
+      checkoutUrl: yocoSession.redirectUrl,
     };
 
     console.log("Returning response data:", responseData);
