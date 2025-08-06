@@ -40,6 +40,7 @@ function App() {
   // Fix checkoutUrl field mapping
   // Add webhook registration endpoint
   // Allow GET requests for webhook registration
+  // Add webhook name field
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);

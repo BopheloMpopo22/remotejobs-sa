@@ -28,6 +28,7 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${process.env.YOCO_SECRET_KEY}`,
       },
       body: JSON.stringify({
+        name: "RemoteJobs SA Payment Webhook",
         url: webhookUrl,
         events: ["payment.succeeded", "payment.failed"],
       }),
