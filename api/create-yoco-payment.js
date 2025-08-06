@@ -8,6 +8,20 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
+  // Debug environment variables immediately
+  console.log("=== ENVIRONMENT VARIABLES DEBUG ===");
+  console.log(
+    "All env vars with YOCO:",
+    Object.keys(process.env).filter((key) => key.includes("YOCO"))
+  );
+  console.log("YOCO_SECRET_KEY exists:", !!process.env.YOCO_SECRET_KEY);
+  console.log("YOCO_SECRET_KEY length:", process.env.YOCO_SECRET_KEY?.length);
+  console.log(
+    "YOCO_SECRET_KEY starts with:",
+    process.env.YOCO_SECRET_KEY?.substring(0, 10)
+  );
+  console.log("=== END ENVIRONMENT VARIABLES DEBUG ===");
+
   // Enable CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -74,6 +88,15 @@ export default async function handler(req, res) {
       redirectUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app"}/?page=payment-success`,
       cancelUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "https://remotejobs-sa-i11c.vercel.app"}/?page=payment-cancel`,
     };
+
+    // Debug before Yoco API call
+    console.log("=== BEFORE YOCO API CALL ===");
+    console.log(
+      "YOCO_SECRET_KEY for API call:",
+      process.env.YOCO_SECRET_KEY?.substring(0, 20) + "..."
+    );
+    console.log("Yoco payment data:", yocoPaymentData);
+    console.log("=== END BEFORE YOCO API CALL ===");
 
     // Create Yoco payment session
     const yocoResponse = await fetch("https://online.yoco.com/v2/checkout/", {
