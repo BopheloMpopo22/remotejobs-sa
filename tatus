@@ -1,0 +1,5 @@
+[33mba0e9be[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m debug: add detailed Yoco credentials logging
+[33mcf2869f[m trigger: deployment for Yoco integration fixes
+[33m8c3ede7[m fix: remove duplicate Yoco API call and add credential debugging
+[33mf5e3d77[m fix: add required chargeURL field to Yoco payment data
+[33m042748f[m fix: implement proper Yoco API integration with payment session creation

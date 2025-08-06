@@ -1,0 +1,9 @@
+@echo off
+echo Adding files...
+git add .
+echo Committing changes...
+git commit -m "trigger: force deployment for Yoco debugging"
+echo Pushing to remote...
+git push
+echo Done!
+pause 
