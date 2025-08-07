@@ -18,6 +18,7 @@ export default async function handler(req, res) {
 
     console.log("Webhook event:", event);
     console.log("Webhook data:", data);
+    console.log("Full webhook body:", JSON.stringify(req.body, null, 2));
 
     if (event === "payment.succeeded") {
       const { id, amount, currency, metadata } = data;

@@ -23,7 +23,7 @@ export default async function handler(req, res) {
         amount: 17900,
         currency: "ZAR",
         metadata: {
-          paymentReference: "JA_1754500535535_hlq7gvxvg", // Use the actual payment reference from your test
+          paymentReference: "JA_1754500982294_3temdz662", // Latest test payment reference
           userEmail: "bophelompopo22@gmail.com"
         }
       }

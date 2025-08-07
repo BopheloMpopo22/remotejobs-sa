@@ -43,6 +43,9 @@ function App() {
   // Add webhook name field
   // Trigger deployment after 19-hour cooldown
   // Add webhook test endpoint
+  // Add payment listing endpoint
+  // Update test webhook with correct payment reference
+  // Add detailed webhook logging
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
