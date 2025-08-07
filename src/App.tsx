@@ -42,6 +42,7 @@ function App() {
   // Allow GET requests for webhook registration
   // Add webhook name field
   // Trigger deployment after 19-hour cooldown
+  // Add webhook test endpoint
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
