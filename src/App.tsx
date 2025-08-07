@@ -55,6 +55,8 @@ function App() {
   // Add email logging to database
   // Remove unused API files to stay under Vercel limit
   // Update daily digest to use payment email logs
+  // Update email system guide with new workflow
+  // Clean up UI and improve payment flow
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);

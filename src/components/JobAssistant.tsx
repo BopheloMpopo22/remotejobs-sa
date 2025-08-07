@@ -56,7 +56,6 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
   }, [user]);
 
   const [paymentData, setPaymentData] = useState<any>(null);
-  const [showPayPalButton, setShowPayPalButton] = useState(false);
 
   const industryOptions = [
     "Technology/IT",
@@ -310,16 +309,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
       }
 
       const result = await response.json();
-      console.log("=== FRONTEND DEBUG ===");
-      console.log("Full API response:", result);
-      console.log("Payment data:", result.yocoPaymentData);
-      console.log("=== END FRONTEND DEBUG ===");
-
-      // For Yoco payments, show payment button
-      console.log("Setting payment data for Yoco payment:", result);
       setPaymentData(result);
-      setShowPayPalButton(true);
-      console.log("showPayPalButton set to true");
     } catch (error: any) {
       console.error("Payment error:", error);
       alert(`Payment error: ${error.message}`);
@@ -922,9 +912,7 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
                 to paying one-time fees repeatedly.
                 <br />
                 <br />
-                <strong>💳 Payment Tip:</strong> Don't have a PayPal account? No
-                problem! You can pay with any credit/debit card. Just uncheck
-                "Create PayPal account" during checkout and use guest payment.
+
               </div>
             )}
           </div>
@@ -982,33 +970,16 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
             {user ? "Submit Application" : "Sign up to Submit Application"}
           </button>
 
-          {showPayPalButton && paymentData && (
+          {paymentData && (
             <div style={{ marginTop: "1rem", textAlign: "center" }}>
               <h4>Complete Payment</h4>
               <p>Click below to pay R179 for Job Assistant setup</p>
-              <p style={{ fontSize: "0.8rem", color: "#666" }}>
-                Debug: showPayPalButton={showPayPalButton.toString()},
-                paymentData exists={!!paymentData}
-              </p>
-              <p style={{ fontSize: "0.8rem", color: "#666" }}>
-                PayPal Script Status:{" "}
-                {typeof window !== "undefined" && (window as any).paypal
-                  ? "Loaded"
-                  : "Not Loaded"}
-              </p>
               <button
                 onClick={() => {
                   if (paymentData && paymentData.checkoutUrl) {
-                    console.log(
-                      "Redirecting to Yoco checkout:",
-                      paymentData.checkoutUrl
-                    );
-                    window.location.href = paymentData.checkoutUrl;
+                    // Open Yoco checkout in new tab
+                    window.open(paymentData.checkoutUrl, '_blank');
                   } else {
-                    console.error(
-                      "No checkout URL found in payment data:",
-                      paymentData
-                    );
                     alert("Payment setup error. Please try again.");
                   }
                 }}
@@ -1026,20 +997,6 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
               >
                 💳 Pay with Yoco (R179)
               </button>
-              <div
-                style={{
-                  marginTop: "1rem",
-                  padding: "1rem",
-                  backgroundColor: "#fef3c7",
-                  borderRadius: "0.5rem",
-                }}
-              >
-                <p style={{ margin: 0, fontSize: "0.9rem", color: "#92400e" }}>
-                  <strong>PayPal Button Debug:</strong> If you don't see the
-                  PayPal button above, it might be a script loading issue. Try
-                  refreshing the page.
-                </p>
-              </div>
             </div>
           )}
         </div>
