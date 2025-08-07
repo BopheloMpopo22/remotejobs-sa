@@ -23,36 +23,8 @@ export default async function handler(req, res) {
     if (type === "payment.succeeded") {
       const { id, amount, currency, metadata } = payload;
 
-      // Update application status
-      console.log(
-        "Attempting to update database for email:",
-        metadata.userEmail
-      );
-
-      const { data: updateData, error: updateError } = await supabase
-        .from("job_assistant_applications")
-        .update({
-          status: "paid",
-          payment_confirmed_at: new Date().toISOString(),
-          yoco_payment_id: id,
-        })
-        .eq("email", metadata.userEmail)
-        .eq("status", "pending")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .select();
-
-      if (updateError) {
-        console.error("Database update error:", updateError);
-        return res
-          .status(500)
-          .json({ error: "Failed to update payment status" });
-      }
-
-      console.log("Database update result:", updateData);
-      console.log("Rows updated:", updateData?.length || 0);
-
-      // Send confirmation email
+      // Send confirmation email first
+      console.log("Sending payment confirmation email...");
       try {
         const { data: emailData, error: emailError } = await resend.emails.send(
           {
@@ -110,11 +82,41 @@ export default async function handler(req, res) {
 
         if (emailError) {
           console.error("Email sending error:", emailError);
+          return res.status(500).json({ error: "Failed to send confirmation email" });
         } else {
           console.log("Payment success email sent to:", metadata.userEmail);
+          
+          // Now update database since email sent successfully
+          console.log("Email sent successfully, now updating database...");
+          
+          const { data: updateData, error: updateError } = await supabase
+            .from("job_assistant_applications")
+            .update({
+              status: "paid",
+              payment_confirmed_at: new Date().toISOString(),
+              yoco_payment_id: id,
+            })
+            .eq("email", metadata.userEmail)
+            .eq("status", "pending")
+            .select();
+
+          if (updateError) {
+            console.error("Database update error:", updateError);
+            return res.status(500).json({ error: "Failed to update payment status" });
+          }
+
+          console.log("Database update result:", updateData);
+          console.log("Rows updated:", updateData?.length || 0);
+          
+          if (updateData && updateData.length > 0) {
+            console.log("✅ Payment confirmed and database updated successfully!");
+          } else {
+            console.log("⚠️ Email sent but no database record found to update");
+          }
         }
       } catch (emailError) {
         console.error("Email sending failed:", emailError);
+        return res.status(500).json({ error: "Failed to send confirmation email" });
       }
 
       console.log("Payment processed successfully:", id);
