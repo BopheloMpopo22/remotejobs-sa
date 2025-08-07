@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     }
 
     const { data, error } = await resend.emails.send({
-      from: "RemoteJobs SA <noreply@remotejobs-sa.com>",
+      from: "RemoteJobs SA <onboarding@resend.dev>",
       to: [user.email],
       subject: "Welcome to RemoteJobs SA! 🚀",
       html: `

@@ -23,23 +23,35 @@ export default async function handler(req, res) {
 
     console.log("📅 Processing for date:", todayString);
 
-    // Get all paid job assistant applications
-    const { data: paidApplications, error: paidError } = await supabase
-      .from("job_assistant_applications")
-      .select("*")
-      .eq("status", "paid");
+    // Get all users who have payment confirmation emails (source of truth)
+    const { data: paymentLogs, error: paidError } = await supabase
+      .from("payment_email_logs")
+      .select(
+        `
+        user_email,
+        job_assistant_applications!inner(
+          full_name,
+          id
+        )
+      `
+      )
+      .eq("email_status", "sent")
+      .gte(
+        "sent_at",
+        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+      ); // Last 30 days
 
     if (paidError) {
-      console.error("❌ Error fetching paid applications:", paidError);
+      console.error("❌ Error fetching payment logs:", paidError);
       return res.status(500).json({ error: "Database error" });
     }
 
-    console.log(`✅ Found ${paidApplications.length} paid applications`);
+    console.log(`✅ Found ${paymentLogs.length} users with confirmed payments`);
 
-    if (paidApplications.length === 0) {
+    if (paymentLogs.length === 0) {
       return res.status(200).json({
         success: true,
-        message: "No paid applications found",
+        message: "No users with confirmed payments found",
         date: todayString,
         emailsSent: 0,
       });
@@ -48,11 +60,13 @@ export default async function handler(req, res) {
     let emailsSent = 0;
     const results = [];
 
-    // Process each paid user
-    for (const user of paidApplications) {
+    // Process each user with confirmed payment
+    for (const paymentLog of paymentLogs) {
       try {
-        const userEmail = user.email;
-        const userName = user.full_name || userEmail.split("@")[0];
+        const userEmail = paymentLog.user_email;
+        const userName =
+          paymentLog.job_assistant_applications?.full_name ||
+          userEmail.split("@")[0];
 
         console.log(`📧 Processing user: ${userEmail}`);
 
@@ -109,7 +123,7 @@ export default async function handler(req, res) {
         // Send email
         const { data: emailData, error: emailError } = await resend.emails.send(
           {
-            from: "RemoteJobs SA <noreply@remotejobs-sa.com>",
+            from: "RemoteJobs SA <onboarding@resend.dev>",
             to: [userEmail],
             subject: `📊 Daily Job Application Report - ${todayString}`,
             html: emailContent,
