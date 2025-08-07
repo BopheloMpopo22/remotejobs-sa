@@ -80,11 +80,44 @@ export default async function handler(req, res) {
           }
         );
 
-        if (emailError) {
-          console.error("Email sending error:", emailError);
-          return res.status(500).json({ error: "Failed to send confirmation email" });
-        } else {
-          console.log("Payment success email sent to:", metadata.userEmail);
+                 if (emailError) {
+           console.error("Email sending error:", emailError);
+           
+           // Log failed email attempt
+           try {
+             await supabase
+               .from("payment_email_logs")
+               .insert({
+                 user_email: metadata.userEmail,
+                 yoco_payment_id: id,
+                 amount: amount,
+                 payment_reference: metadata.paymentReference,
+                 email_status: "failed",
+                 error_message: emailError.message || "Unknown error"
+               });
+           } catch (logError) {
+             console.error("Failed to log email error:", logError);
+           }
+           
+           return res.status(500).json({ error: "Failed to send confirmation email" });
+         } else {
+           console.log("Payment success email sent to:", metadata.userEmail);
+           
+           // Log successful email
+           try {
+             await supabase
+               .from("payment_email_logs")
+               .insert({
+                 user_email: metadata.userEmail,
+                 yoco_payment_id: id,
+                 amount: amount,
+                 payment_reference: metadata.paymentReference,
+                 email_status: "sent"
+               });
+             console.log("✅ Email logged to database successfully");
+           } catch (logError) {
+             console.error("Failed to log email success:", logError);
+           }
           
           // Now update database since email sent successfully
           console.log("Email sent successfully, now updating database...");

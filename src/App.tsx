@@ -52,6 +52,7 @@ function App() {
   // Use application ID instead of payment reference for database update
   // Use email address to match database records
   // Email-triggered database update approach
+  // Add email logging to database
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
