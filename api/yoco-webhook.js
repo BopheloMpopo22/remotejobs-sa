@@ -14,14 +14,14 @@ export default async function handler(req, res) {
 
   try {
     console.log("=== YOCO WEBHOOK ===");
-    const { event, data } = req.body;
+    const { type, payload } = req.body;
 
-    console.log("Webhook event:", event);
-    console.log("Webhook data:", data);
+    console.log("Webhook type:", type);
+    console.log("Webhook payload:", payload);
     console.log("Full webhook body:", JSON.stringify(req.body, null, 2));
 
-    if (event === "payment.succeeded") {
-      const { id, amount, currency, metadata } = data;
+    if (type === "payment.succeeded") {
+      const { id, amount, currency, metadata } = payload;
 
       // Update application status
       const { error: updateError } = await supabase

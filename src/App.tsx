@@ -46,6 +46,7 @@ function App() {
   // Add payment listing endpoint
   // Update test webhook with correct payment reference
   // Add detailed webhook logging
+  // Fix webhook format to match Yoco's actual data structure
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
