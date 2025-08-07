@@ -25,8 +25,8 @@ export default async function handler(req, res) {
 
       // Update application status
       console.log(
-        "Attempting to update database for payment reference:",
-        metadata.paymentReference
+        "Attempting to update database for application ID:",
+        metadata.applicationId
       );
 
       const { data: updateData, error: updateError } = await supabase
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
           payment_confirmed_at: new Date().toISOString(),
           yoco_payment_id: id,
         })
-        .eq("payment_reference", metadata.paymentReference)
+        .eq("id", metadata.applicationId)
         .select();
 
       if (updateError) {

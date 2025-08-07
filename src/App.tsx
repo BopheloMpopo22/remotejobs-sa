@@ -49,6 +49,7 @@ function App() {
   // Fix webhook format to match Yoco's actual data structure
   // Fix email sender to use verified domain
   // Add detailed database update logging
+  // Use application ID instead of payment reference for database update
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
