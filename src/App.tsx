@@ -47,6 +47,8 @@ function App() {
   // Update test webhook with correct payment reference
   // Add detailed webhook logging
   // Fix webhook format to match Yoco's actual data structure
+  // Fix email sender to use verified domain
+  // Add detailed database update logging
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);

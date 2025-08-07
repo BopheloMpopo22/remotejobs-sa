@@ -24,14 +24,20 @@ export default async function handler(req, res) {
       const { id, amount, currency, metadata } = payload;
 
       // Update application status
-      const { error: updateError } = await supabase
+      console.log(
+        "Attempting to update database for payment reference:",
+        metadata.paymentReference
+      );
+
+      const { data: updateData, error: updateError } = await supabase
         .from("job_assistant_applications")
         .update({
           status: "paid",
           payment_confirmed_at: new Date().toISOString(),
           yoco_payment_id: id,
         })
-        .eq("payment_reference", metadata.paymentReference);
+        .eq("payment_reference", metadata.paymentReference)
+        .select();
 
       if (updateError) {
         console.error("Database update error:", updateError);
@@ -40,11 +46,14 @@ export default async function handler(req, res) {
           .json({ error: "Failed to update payment status" });
       }
 
+      console.log("Database update result:", updateData);
+      console.log("Rows updated:", updateData?.length || 0);
+
       // Send confirmation email
       try {
         const { data: emailData, error: emailError } = await resend.emails.send(
           {
-            from: "RemoteJobs SA <noreply@remotejobs-sa.com>",
+            from: "RemoteJobs SA <onboarding@resend.dev>",
             to: [metadata.userEmail],
             subject: "Payment Successful - Job Assistant Activated! 🎉",
             html: `
