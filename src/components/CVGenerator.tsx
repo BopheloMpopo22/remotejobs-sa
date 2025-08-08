@@ -338,7 +338,10 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
           Authorization: `Bearer ${session?.access_token}`,
         },
         body: JSON.stringify({
-          cvData: cvData,
+          cvData: {
+            ...cvData,
+            template: selectedTemplate,
+          },
         }),
       });
 
