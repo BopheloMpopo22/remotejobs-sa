@@ -72,8 +72,8 @@ interface CVGeneratorProps {
 const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedTemplate, setSelectedTemplate] = useState<
-    "modern" | "creative" | "classic"
-  >("modern");
+    "normal" | "modern" | "creative" | "classic"
+  >("normal");
   const [cvData, setCvData] = useState<CVData>({
     personalInfo: {
       fullName: "",
@@ -428,131 +428,170 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
   };
 
   const generateHTML = (
-    template: "modern" | "creative" | "classic" = selectedTemplate
+    template: "normal" | "modern" | "creative" | "classic" = selectedTemplate
   ) => {
     const getTemplateStyles = () => {
       switch (template) {
+        case "normal":
+          return `
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Arial', sans-serif; line-height: 1.4; color: #333; }
+            .cv-container { max-width: 210mm; min-height: 297mm; margin: 0 auto; background: white; padding: 0; }
+            .header { background: #f8f9fa; border-bottom: 2px solid #dee2e6; padding: 15px 20px; text-align: center; }
+            .header h1 { font-size: 1.8em; font-weight: 700; margin-bottom: 3px; color: #2c3e50; }
+            .header h2 { font-size: 0.9em; font-weight: 400; color: #6c757d; }
+            .content { display: block; min-height: calc(297mm - 60px); padding: 15px 20px; }
+            .section { margin-bottom: 15px; }
+            .section h3 { font-size: 0.9em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; color: #2c3e50; border-bottom: 1px solid #dee2e6; padding-bottom: 2px; }
+            .contact-item { display: flex; align-items: center; margin-bottom: 4px; font-size: 0.8em; }
+            .contact-icon { width: 12px; margin-right: 6px; color: #6c757d; }
+            .skills-list { list-style: none; }
+            .skills-list li { margin-bottom: 3px; padding-left: 12px; position: relative; font-size: 0.8em; }
+            .skills-list li:before { content: "•"; color: #6c757d; position: absolute; left: 0; }
+            .languages-list { list-style: none; }
+            .languages-list li { margin-bottom: 3px; padding-left: 12px; position: relative; font-size: 0.8em; }
+            .languages-list li:before { content: "•"; color: #6c757d; position: absolute; left: 0; }
+            .profile-photo { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin: 0 auto 10px; display: block; border: 1px solid #dee2e6; }
+            .experience-item { margin-bottom: 10px; }
+            .experience-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+            .job-title { font-weight: 600; font-size: 0.9em; color: #2c3e50; }
+            .company { font-weight: 500; color: #6c757d; font-size: 0.8em; }
+            .dates { color: #6c757d; font-size: 0.75em; }
+            .responsibilities { list-style: none; padding-left: 12px; }
+            .responsibilities li { margin-bottom: 2px; position: relative; font-size: 0.8em; }
+            .responsibilities li:before { content: "•"; color: #6c757d; position: absolute; left: -8px; }
+            .education-item { margin-bottom: 8px; }
+            .education-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+            .degree { font-weight: 600; color: #2c3e50; font-size: 0.85em; }
+            .institution { color: #6c757d; font-size: 0.8em; }
+            .summary { text-align: justify; line-height: 1.4; font-size: 0.8em; }
+            .references-item, .certification-item, .award-item, .volunteer-item, .project-item { margin-bottom: 6px; }
+            .references-item strong, .certification-item strong, .award-item strong, .volunteer-item strong, .project-item strong { color: #2c3e50; font-size: 0.85em; }
+            .references-item div, .certification-item div, .award-item div, .volunteer-item div, .project-item div { font-size: 0.75em; color: #6c757d; margin-top: 1px; }
+            .project-link { color: #007bff; text-decoration: none; font-size: 0.75em; }
+            @media print { body { margin: 0; } .cv-container { box-shadow: none; } }
+          `;
         case "modern":
           return `
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #333; }
+            body { font-family: 'Poppins', sans-serif; line-height: 1.5; color: #333; }
             .cv-container { max-width: 210mm; min-height: 297mm; margin: 0 auto; background: white; }
-            .header { background: #2c3e50; color: white; padding: 25px 30px; text-align: center; }
-            .header h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 5px; }
-            .header h2 { font-size: 1.1em; font-weight: 400; color: #3498db; }
-            .content { display: flex; min-height: calc(297mm - 80px); }
-            .sidebar { width: 35%; background: #34495e; color: white; padding: 25px; }
-            .main-content { width: 65%; padding: 25px; }
-            .section { margin-bottom: 20px; }
-            .section h3 { font-size: 1em; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 3px; }
-            .contact-item { display: flex; align-items: center; margin-bottom: 8px; font-size: 0.9em; }
+            .header { background: #2c3e50; color: white; padding: 20px 25px; text-align: center; }
+            .header h1 { font-size: 2.4em; font-weight: 700; margin-bottom: 5px; }
+            .header h2 { font-size: 1.2em; font-weight: 400; color: #3498db; }
+            .content { display: flex; min-height: calc(297mm - 70px); }
+            .sidebar { width: 35%; background: #34495e; color: white; padding: 20px; }
+            .main-content { width: 65%; padding: 20px; }
+            .section { margin-bottom: 18px; }
+            .section h3 { font-size: 1.1em; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 3px; }
+            .contact-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 0.95em; }
             .contact-icon { width: 16px; margin-right: 8px; color: #3498db; }
             .skills-list { list-style: none; }
-            .skills-list li { margin-bottom: 6px; padding-left: 16px; position: relative; font-size: 0.9em; }
+            .skills-list li { margin-bottom: 5px; padding-left: 16px; position: relative; font-size: 0.95em; }
             .skills-list li:before { content: "•"; color: #3498db; position: absolute; left: 0; }
             .languages-list { list-style: none; }
-            .languages-list li { margin-bottom: 6px; padding-left: 16px; position: relative; font-size: 0.9em; }
+            .languages-list li { margin-bottom: 5px; padding-left: 16px; position: relative; font-size: 0.95em; }
             .languages-list li:before { content: "•"; color: #3498db; position: absolute; left: 0; }
-            .profile-photo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; display: block; border: 3px solid #3498db; }
-            .experience-item { margin-bottom: 15px; }
-            .experience-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-            .job-title { font-weight: 600; font-size: 1em; color: #2c3e50; }
-            .company { font-weight: 500; color: #7f8c8d; font-size: 0.9em; }
-            .dates { color: #95a5a6; font-size: 0.85em; }
+            .profile-photo { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; display: block; border: 3px solid #3498db; }
+            .experience-item { margin-bottom: 12px; }
+            .experience-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+            .job-title { font-weight: 600; font-size: 1.05em; color: #2c3e50; }
+            .company { font-weight: 500; color: #7f8c8d; font-size: 0.95em; }
+            .dates { color: #95a5a6; font-size: 0.9em; }
             .responsibilities { list-style: none; padding-left: 16px; }
-            .responsibilities li { margin-bottom: 4px; position: relative; font-size: 0.9em; }
+            .responsibilities li { margin-bottom: 3px; position: relative; font-size: 0.95em; }
             .responsibilities li:before { content: "•"; color: #3498db; position: absolute; left: -12px; }
-            .education-item { margin-bottom: 12px; }
+            .education-item { margin-bottom: 10px; }
             .education-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-            .degree { font-weight: 600; color: #2c3e50; font-size: 0.95em; }
-            .institution { color: #7f8c8d; font-size: 0.9em; }
-            .summary { text-align: justify; line-height: 1.6; font-size: 0.9em; }
-            .references-item, .certification-item, .award-item, .volunteer-item, .project-item { margin-bottom: 10px; }
-            .references-item strong, .certification-item strong, .award-item strong, .volunteer-item strong, .project-item strong { color: #2c3e50; font-size: 0.95em; }
-            .references-item div, .certification-item div, .award-item div, .volunteer-item div, .project-item div { font-size: 0.85em; color: #7f8c8d; margin-top: 2px; }
-            .project-link { color: #3498db; text-decoration: none; font-size: 0.85em; }
+            .degree { font-weight: 600; color: #2c3e50; font-size: 1em; }
+            .institution { color: #7f8c8d; font-size: 0.95em; }
+            .summary { text-align: justify; line-height: 1.5; font-size: 0.95em; }
+            .references-item, .certification-item, .award-item, .volunteer-item, .project-item { margin-bottom: 8px; }
+            .references-item strong, .certification-item strong, .award-item strong, .volunteer-item strong, .project-item strong { color: #2c3e50; font-size: 1em; }
+            .references-item div, .certification-item div, .award-item div, .volunteer-item div, .project-item div { font-size: 0.9em; color: #7f8c8d; margin-top: 2px; }
+            .project-link { color: #3498db; text-decoration: none; font-size: 0.9em; }
             @media print { body { margin: 0; } .cv-container { box-shadow: none; } }
           `;
         case "creative":
           return `
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Poppins', sans-serif; line-height: 1.6; color: #333; }
+            body { font-family: 'Poppins', sans-serif; line-height: 1.5; color: #333; }
             .cv-container { max-width: 210mm; min-height: 297mm; margin: 0 auto; background: white; }
-            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
-            .header h1 { font-size: 2.4em; font-weight: 700; margin-bottom: 8px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+            .header { background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%); color: white; padding: 20px 25px; text-align: center; }
+            .header h1 { font-size: 2.4em; font-weight: 700; margin-bottom: 5px; }
             .header h2 { font-size: 1.2em; font-weight: 400; color: #e8f4fd; }
-            .content { display: flex; min-height: calc(297mm - 100px); }
-            .sidebar { width: 30%; background: #f8f9fa; padding: 25px; border-right: 3px solid #667eea; }
-            .main-content { width: 70%; padding: 25px; }
-            .section { margin-bottom: 25px; }
-            .section h3 { font-size: 1.1em; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; color: #667eea; border-bottom: 2px solid #667eea; padding-bottom: 6px; }
-            .contact-item { display: flex; align-items: center; margin-bottom: 10px; font-size: 0.9em; }
-            .contact-icon { width: 16px; margin-right: 10px; color: #667eea; }
+            .content { display: flex; min-height: calc(297mm - 70px); }
+            .sidebar { width: 30%; background: #f8f9fa; padding: 20px; border-right: 2px solid #4a90e2; }
+            .main-content { width: 70%; padding: 20px; }
+            .section { margin-bottom: 18px; }
+            .section h3 { font-size: 1.1em; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; color: #4a90e2; border-bottom: 2px solid #4a90e2; padding-bottom: 3px; }
+            .contact-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 0.95em; }
+            .contact-icon { width: 16px; margin-right: 8px; color: #4a90e2; }
             .skills-list { list-style: none; }
-            .skills-list li { margin-bottom: 8px; padding-left: 20px; position: relative; font-size: 0.9em; }
-            .skills-list li:before { content: "▸"; color: #667eea; position: absolute; left: 0; font-weight: bold; }
+            .skills-list li { margin-bottom: 5px; padding-left: 16px; position: relative; font-size: 0.95em; }
+            .skills-list li:before { content: "▸"; color: #4a90e2; position: absolute; left: 0; font-weight: bold; }
             .languages-list { list-style: none; }
-            .languages-list li { margin-bottom: 8px; padding-left: 20px; position: relative; font-size: 0.9em; }
-            .languages-list li:before { content: "▸"; color: #667eea; position: absolute; left: 0; font-weight: bold; }
-            .profile-photo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin: 0 auto 20px; display: block; border: 4px solid #667eea; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
-            .experience-item { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #667eea; }
-            .experience-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-            .job-title { font-weight: 600; font-size: 1em; color: #2c3e50; }
-            .company { font-weight: 500; color: #667eea; font-size: 0.9em; }
-            .dates { color: #95a5a6; font-size: 0.85em; }
+            .languages-list li { margin-bottom: 5px; padding-left: 16px; position: relative; font-size: 0.95em; }
+            .languages-list li:before { content: "▸"; color: #4a90e2; position: absolute; left: 0; font-weight: bold; }
+            .profile-photo { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; display: block; border: 3px solid #4a90e2; }
+            .experience-item { margin-bottom: 12px; padding: 12px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #4a90e2; }
+            .experience-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+            .job-title { font-weight: 600; font-size: 1.05em; color: #2c3e50; }
+            .company { font-weight: 500; color: #4a90e2; font-size: 0.95em; }
+            .dates { color: #95a5a6; font-size: 0.9em; }
             .responsibilities { list-style: none; padding-left: 16px; }
-            .responsibilities li { margin-bottom: 5px; position: relative; font-size: 0.9em; }
-            .responsibilities li:before { content: "•"; color: #667eea; position: absolute; left: -12px; font-weight: bold; }
-            .education-item { margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 5px; }
-            .education-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-            .degree { font-weight: 600; color: #2c3e50; font-size: 0.95em; }
-            .institution { color: #667eea; font-size: 0.9em; }
-            .summary { text-align: justify; line-height: 1.6; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #667eea; font-size: 0.9em; }
-            .references-item, .certification-item, .award-item, .volunteer-item, .project-item { margin-bottom: 12px; padding: 10px; background: #f8f9fa; border-radius: 5px; }
-            .references-item strong, .certification-item strong, .award-item strong, .volunteer-item strong, .project-item strong { color: #2c3e50; font-size: 0.95em; }
-            .references-item div, .certification-item div, .award-item div, .volunteer-item div, .project-item div { font-size: 0.85em; color: #7f8c8d; margin-top: 3px; }
-            .project-link { color: #667eea; text-decoration: none; font-size: 0.85em; }
+            .responsibilities li { margin-bottom: 3px; position: relative; font-size: 0.95em; }
+            .responsibilities li:before { content: "•"; color: #4a90e2; position: absolute; left: -12px; font-weight: bold; }
+            .education-item { margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+            .education-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+            .degree { font-weight: 600; color: #2c3e50; font-size: 1em; }
+            .institution { color: #4a90e2; font-size: 0.95em; }
+            .summary { text-align: justify; line-height: 1.5; padding: 12px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #4a90e2; font-size: 0.95em; }
+            .references-item, .certification-item, .award-item, .volunteer-item, .project-item { margin-bottom: 8px; padding: 8px; background: #f8f9fa; border-radius: 4px; }
+            .references-item strong, .certification-item strong, .award-item strong, .volunteer-item strong, .project-item strong { color: #2c3e50; font-size: 1em; }
+            .references-item div, .certification-item div, .award-item div, .volunteer-item div, .project-item div { font-size: 0.9em; color: #7f8c8d; margin-top: 2px; }
+            .project-link { color: #4a90e2; text-decoration: none; font-size: 0.9em; }
             @media print { body { margin: 0; } .cv-container { box-shadow: none; } }
           `;
         case "classic":
           return `
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Georgia', serif; line-height: 1.6; color: #2c3e50; }
+            body { font-family: 'Georgia', serif; line-height: 1.5; color: #2c3e50; }
             .cv-container { max-width: 210mm; min-height: 297mm; margin: 0 auto; background: white; }
-            .header { background: #f8f9fa; border-bottom: 3px solid #2c3e50; padding: 20px 30px; text-align: center; }
-            .header h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 6px; color: #2c3e50; }
-            .header h2 { font-size: 1em; font-weight: 400; color: #7f8c8d; font-style: italic; }
-            .content { display: flex; min-height: calc(297mm - 80px); }
-            .sidebar { width: 40%; background: #f8f9fa; padding: 20px; border-right: 2px solid #ecf0f1; }
-            .main-content { width: 60%; padding: 25px; }
-            .section { margin-bottom: 20px; }
-            .section h3 { font-size: 1em; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; color: #2c3e50; border-bottom: 1px solid #bdc3c7; padding-bottom: 4px; }
-            .contact-item { display: flex; align-items: center; margin-bottom: 6px; font-size: 0.9em; }
+            .header { background: #f8f9fa; border-bottom: 3px solid #2c3e50; padding: 18px 25px; text-align: center; }
+            .header h1 { font-size: 2.4em; font-weight: 700; margin-bottom: 5px; color: #2c3e50; }
+            .header h2 { font-size: 1.1em; font-weight: 400; color: #7f8c8d; font-style: italic; }
+            .content { display: flex; min-height: calc(297mm - 70px); }
+            .sidebar { width: 40%; background: #f8f9fa; padding: 18px; border-right: 2px solid #ecf0f1; }
+            .main-content { width: 60%; padding: 20px; }
+            .section { margin-bottom: 18px; }
+            .section h3 { font-size: 1.1em; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; color: #2c3e50; border-bottom: 1px solid #bdc3c7; padding-bottom: 3px; }
+            .contact-item { display: flex; align-items: center; margin-bottom: 5px; font-size: 0.95em; }
             .contact-icon { width: 14px; margin-right: 8px; color: #7f8c8d; }
             .skills-list { list-style: none; }
-            .skills-list li { margin-bottom: 5px; padding-left: 15px; position: relative; font-size: 0.9em; }
+            .skills-list li { margin-bottom: 4px; padding-left: 15px; position: relative; font-size: 0.95em; }
             .skills-list li:before { content: "▪"; color: #2c3e50; position: absolute; left: 0; }
             .languages-list { list-style: none; }
-            .languages-list li { margin-bottom: 5px; padding-left: 15px; position: relative; font-size: 0.9em; }
+            .languages-list li { margin-bottom: 4px; padding-left: 15px; position: relative; font-size: 0.95em; }
             .languages-list li:before { content: "▪"; color: #2c3e50; position: absolute; left: 0; }
-            .profile-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; display: block; border: 2px solid #bdc3c7; }
-            .experience-item { margin-bottom: 15px; }
-            .experience-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-            .job-title { font-weight: 600; font-size: 0.95em; color: #2c3e50; }
-            .company { font-weight: 500; color: #7f8c8d; font-size: 0.9em; }
-            .dates { color: #95a5a6; font-size: 0.85em; }
+            .profile-photo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px; display: block; border: 2px solid #bdc3c7; }
+            .experience-item { margin-bottom: 12px; }
+            .experience-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+            .job-title { font-weight: 600; font-size: 1.05em; color: #2c3e50; }
+            .company { font-weight: 500; color: #7f8c8d; font-size: 0.95em; }
+            .dates { color: #95a5a6; font-size: 0.9em; }
             .responsibilities { list-style: none; padding-left: 15px; }
-            .responsibilities li { margin-bottom: 3px; position: relative; font-size: 0.9em; }
+            .responsibilities li { margin-bottom: 3px; position: relative; font-size: 0.95em; }
             .responsibilities li:before { content: "•"; color: #2c3e50; position: absolute; left: -10px; }
-            .education-item { margin-bottom: 12px; }
+            .education-item { margin-bottom: 10px; }
             .education-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-            .degree { font-weight: 600; color: #2c3e50; font-size: 0.95em; }
-            .institution { color: #7f8c8d; font-size: 0.9em; }
-            .summary { text-align: justify; line-height: 1.6; font-style: italic; font-size: 0.9em; }
-            .references-item, .certification-item, .award-item, .volunteer-item, .project-item { margin-bottom: 10px; }
-            .references-item strong, .certification-item strong, .award-item strong, .volunteer-item strong, .project-item strong { color: #2c3e50; font-size: 0.95em; }
-            .references-item div, .certification-item div, .award-item div, .volunteer-item div, .project-item div { font-size: 0.85em; color: #7f8c8d; margin-top: 2px; }
-            .project-link { color: #2c3e50; text-decoration: none; font-size: 0.85em; }
+            .degree { font-weight: 600; color: #2c3e50; font-size: 1em; }
+            .institution { color: #7f8c8d; font-size: 0.95em; }
+            .summary { text-align: justify; line-height: 1.5; font-style: italic; font-size: 0.95em; }
+            .references-item, .certification-item, .award-item, .volunteer-item, .project-item { margin-bottom: 8px; }
+            .references-item strong, .certification-item strong, .award-item strong, .volunteer-item strong, .project-item strong { color: #2c3e50; font-size: 1em; }
+            .references-item div, .certification-item div, .award-item div, .volunteer-item div, .project-item div { font-size: 0.9em; color: #7f8c8d; margin-top: 2px; }
+            .project-link { color: #2c3e50; text-decoration: none; font-size: 0.9em; }
             @media print { body { margin: 0; } .cv-container { box-shadow: none; } }
           `;
         default:
@@ -622,7 +661,9 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
           </div>
           
           <div class="content">
-            <div class="sidebar">
+            ${template === "normal" ? `
+              <!-- Normal template: Single column layout -->
+              <div class="main-content">
               ${
                 cvData.personalInfo.photo
                   ? `<img src="${cvData.personalInfo.photo}" alt="Profile Photo" class="profile-photo" />`
@@ -660,6 +701,47 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                     : ""
                 }
               </div>
+            ` : `
+              <!-- Other templates: Two column layout -->
+              <div class="sidebar">
+              ${
+                cvData.personalInfo.photo
+                  ? `<img src="${cvData.personalInfo.photo}" alt="Profile Photo" class="profile-photo" />`
+                  : ""
+              }
+              
+              <div class="section">
+                <h3>CONTACT</h3>
+                <div class="contact-item">
+                  <span class="contact-icon">📧</span>
+                  <span>${cvData.personalInfo.email}</span>
+                </div>
+                <div class="contact-item">
+                  <span class="contact-icon">📱</span>
+                  <span>${cvData.personalInfo.phone}</span>
+                </div>
+                <div class="contact-item">
+                  <span class="contact-icon">📍</span>
+                  <span>${cvData.personalInfo.location}</span>
+                </div>
+                ${
+                  cvData.personalInfo.linkedin
+                    ? `<div class="contact-item">
+                        <span class="contact-icon">💼</span>
+                        <span>${cvData.personalInfo.linkedin}</span>
+                      </div>`
+                    : ""
+                }
+                ${
+                  cvData.personalInfo.portfolio
+                    ? `<div class="contact-item">
+                        <span class="contact-icon">🌐</span>
+                        <span>${cvData.personalInfo.portfolio}</span>
+                      </div>`
+                    : ""
+                }
+              </div>
+            `}
 
               ${
                 cvData.skills.length > 0
@@ -688,7 +770,38 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
               }
             </div>
 
-            <div class="main-content">
+            ${template === "normal" ? `
+              <!-- Normal template: All content in single column -->
+              
+              ${
+                cvData.skills.length > 0
+                  ? `<div class="section">
+                      <h3>SKILLS</h3>
+                      <ul class="skills-list">
+                        ${cvData.skills
+                          .map((skill) => `<li>${skill}</li>`)
+                          .join("")}
+                      </ul>
+                    </div>`
+                  : ""
+              }
+
+              ${
+                cvData.languages.length > 0
+                  ? `<div class="section">
+                      <h3>LANGUAGES</h3>
+                      <ul class="languages-list">
+                        ${cvData.languages
+                          .map((lang) => `<li>${lang}</li>`)
+                          .join("")}
+                      </ul>
+                    </div>`
+                  : ""
+              }
+            ` : `
+              <!-- Other templates: Main content in second column -->
+              <div class="main-content">
+            `}
               ${
                 cvData.summary
                   ? `<div class="section">
@@ -844,7 +957,13 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                     </div>`
                   : ""
               }
+            ${template === "normal" ? `
+              <!-- Normal template: Close main-content div -->
             </div>
+            ` : `
+              <!-- Other templates: Close main-content div -->
+            </div>
+            `}
           </div>
         </div>
       </body>
@@ -1772,6 +1891,36 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                   marginBottom: "1rem",
                 }}
               >
+                {/* Normal */}
+                <div
+                  onClick={() => setSelectedTemplate("normal")}
+                  style={{
+                    padding: "1.5rem",
+                    border:
+                      selectedTemplate === "normal"
+                        ? "3px solid #28a745"
+                        : "2px solid #dee2e6",
+                    borderRadius: "12px",
+                    background:
+                      selectedTemplate === "normal" ? "#e8f5e8" : "white",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    textAlign: "center",
+                  }}
+                >
+                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>
+                    📄
+                  </div>
+                  <h5 style={{ margin: "0 0 0.5rem 0", color: "#2c3e50" }}>
+                    Normal
+                  </h5>
+                  <p
+                    style={{ margin: 0, fontSize: "0.8rem", color: "#6c757d" }}
+                  >
+                    Simple, clean layout with minimal styling - perfect for any industry
+                  </p>
+                </div>
+
                 {/* Modern Professional */}
                 <div
                   onClick={() => setSelectedTemplate("modern")}
@@ -1829,7 +1978,8 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                   <p
                     style={{ margin: 0, fontSize: "0.8rem", color: "#6c757d" }}
                   >
-                    Clean layout with subtle gradient header and professional styling for creative industries
+                    Clean layout with subtle gradient header and professional
+                    styling for creative industries
                   </p>
                 </div>
 

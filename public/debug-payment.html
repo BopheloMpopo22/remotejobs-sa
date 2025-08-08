@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug Payment</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input[type="email"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: #f9f9f9;
+      }
+      .error {
+        background: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+      }
+      pre {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Debug Payment Status</h1>
+
+    <div class="form-group">
+      <label for="email">User Email:</label>
+      <input type="email" id="email" placeholder="Enter user email" />
+    </div>
+
+    <button onclick="debugPayment()">Debug Payment</button>
+
+    <div id="result" class="result" style="display: none"></div>
+
+    <script>
+      async function debugPayment() {
+        const email = document.getElementById("email").value;
+        const resultDiv = document.getElementById("result");
+
+        if (!email) {
+          alert("Please enter an email address");
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/debug-payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userEmail: email }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            resultDiv.className = "result";
+            resultDiv.style.display = "block";
+            resultDiv.innerHTML = `
+                        <h3>Debug Results for: ${email}</h3>
+                        <h4>Summary:</h4>
+                        <ul>
+                            <li>Total Records: ${data.summary.totalRecords}</li>
+                            <li>Pending Records: ${data.summary.pendingRecords}</li>
+                            <li>Paid Records: ${data.summary.paidRecords}</li>
+                            <li>Email Logs: ${data.summary.emailLogsCount}</li>
+                        </ul>
+                        
+                        <h4>All Records:</h4>
+                        <pre>${JSON.stringify(data.records, null, 2)}</pre>
+                        
+                        <h4>Payment Email Logs:</h4>
+                        <pre>${JSON.stringify(data.emailLogs, null, 2)}</pre>
+                    `;
+          } else {
+            resultDiv.className = "result error";
+            resultDiv.style.display = "block";
+            resultDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
+          }
+        } catch (error) {
+          resultDiv.className = "result error";
+          resultDiv.style.display = "block";
+          resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+        }
+      }
+    </script>
+  </body>
+</html>
