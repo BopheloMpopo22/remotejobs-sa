@@ -71,6 +71,8 @@ interface CVGeneratorProps {
 
 const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [selectedTemplate, setSelectedTemplate] = useState<'modern' | 'creative' | 'classic'>('modern');
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [cvData, setCvData] = useState<CVData>({
     personalInfo: {
       fullName: "",
@@ -346,267 +348,8 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
       const saveResult = await saveResponse.json();
       console.log("CV saved with ID:", saveResult.cvId);
 
-      const cvHTML = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>${cvData.personalInfo.fullName} - CV</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; background: #f9fafb; }
-            .header { border-bottom: 3px solid #222; padding-bottom: 20px; margin-bottom: 30px; background: #eef2ff; border-radius: 12px 12px 0 0; }
-            .header-content { display: flex; align-items: center; gap: 30px; }
-            .photo { flex-shrink: 0; }
-            .info { flex-grow: 1; }
-            .name { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; color: #111; }
-            .contact { font-size: 1.1em; color: #666; }
-            .section { margin-bottom: 30px; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #e0e7ff; padding: 20px; }
-            .section-title { font-size: 1.5em; font-weight: bold; margin-bottom: 15px; color: #111; border-bottom: 1px solid #222; padding-bottom: 5px; }
-            .experience-item, .education-item, .reference-item, .certification-item, .award-item, .volunteer-item, .project-item { margin-bottom: 20px; }
-            .job-title { font-weight: bold; font-size: 1.2em; }
-            .company { color: #666; font-style: italic; }
-            .date { color: #888; font-size: 0.9em; }
-            .skills-list, .languages-list { display: flex; flex-wrap: wrap; gap: 10px; }
-            .skill, .language { background: #e0e7ff; color: #222; padding: 5px 10px; border-radius: 15px; font-weight: 500; }
-            .divider { border-top: 2px solid #222; margin: 30px 0; }
-            a { color: #2563eb; text-decoration: underline; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="header-content">
-              ${
-                cvData.personalInfo.photo
-                  ? `<div class="photo"><img src="${cvData.personalInfo.photo}" alt="Profile" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #222;" /></div>`
-                  : ""
-              }
-              <div class="info">
-                <div class="name">${cvData.personalInfo.fullName}</div>
-                <div class="contact">
-                  ${cvData.personalInfo.email} | ${
-                    cvData.personalInfo.phone
-                  }<br>
-                  ${cvData.personalInfo.location}
-                  ${
-                    cvData.personalInfo.linkedin
-                      ? `<br>LinkedIn: ${cvData.personalInfo.linkedin}`
-                      : ""
-                  }
-                  ${
-                    cvData.personalInfo.portfolio
-                      ? `<br>Portfolio: ${cvData.personalInfo.portfolio}`
-                      : ""
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
-
-          ${
-            cvData.summary
-              ? `
-          <div class="section">
-            <div class="section-title">Professional Summary</div>
-            <p>${cvData.summary}</p>
-          </div>
-          <div class="divider"></div>
-          `
-              : ""
-          }
-
-          ${
-            cvData.experience.length > 0
-              ? `
-          <div class="section">
-            <div class="section-title">Professional Experience</div>
-            ${cvData.experience
-              .map(
-                (exp) => `
-              <div class="experience-item">
-                <div class="job-title">${exp.position}</div>
-                <div class="company">${exp.company}</div>
-                <div class="date">${exp.startDate} - ${
-                  exp.current ? "Present" : exp.endDate
-                }</div>
-                <p>${exp.description}</p>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-          <div class="divider"></div>
-          `
-              : ""
-          }
-
-          ${
-            cvData.education.length > 0
-              ? `
-          <div class="section">
-            <div class="section-title">Education</div>
-            ${cvData.education
-              .map(
-                (edu) => `
-              <div class="education-item">
-                <div class="job-title">${edu.degree} in ${edu.field}</div>
-                <div class="company">${edu.institution}</div>
-                <div class="date">${edu.graduationYear}</div>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-          <div class="divider"></div>
-          `
-              : ""
-          }
-
-          ${
-            cvData.skills.length > 0
-              ? `
-          <div class="section">
-            <div class="section-title">Skills</div>
-            <div class="skills-list">
-              ${cvData.skills
-                .map((skill) => `<span class="skill">${skill}</span>`)
-                .join("")}
-            </div>
-          </div>
-          <div class="divider"></div>
-          `
-              : ""
-          }
-
-          ${
-            cvData.languages.length > 0
-              ? `
-          <div class="section">
-            <div class="section-title">Languages</div>
-            <div class="languages-list">
-              ${cvData.languages
-                .map((lang) => `<span class="language">${lang}</span>`)
-                .join("")}
-            </div>
-          </div>
-          <div class="divider"></div>
-          `
-              : ""
-          }
-
-          ${
-            cvData.references.length > 0
-              ? `
-          <div class="section">
-            <div class="section-title">References</div>
-            ${cvData.references
-              .map(
-                (ref) => `
-              <div class="reference-item">
-                <strong>${ref.name}</strong> (${ref.relationship})
-                ${ref.company ? `- ${ref.company}` : ""}<br>
-                <span>${ref.email}${ref.phone ? ` | ${ref.phone}` : ""}</span>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-          <div class="divider"></div>
-          `
-              : ""
-          }
-
-          ${
-            cvData.certifications.length > 0
-              ? `
-          <div class="section">
-            <div class="section-title">Certifications & Courses</div>
-            ${cvData.certifications
-              .map(
-                (cert) => `
-              <div class="certification-item">
-                <strong>${cert.name}</strong> (${cert.issuer}) - ${cert.date}<br>
-                <span>${cert.description}</span>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-          <div class="divider"></div>
-          `
-              : ""
-          }
-
-          ${
-            cvData.awards.length > 0
-              ? `
-          <div class="section">
-            <div class="section-title">Awards & Achievements</div>
-            ${cvData.awards
-              .map(
-                (award) => `
-              <div class="award-item">
-                <strong>${award.name}</strong> (${award.issuer}) - ${award.date}<br>
-                <span>${award.description}</span>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-          <div class="divider"></div>
-          `
-              : ""
-          }
-
-          ${
-            cvData.volunteer.length > 0
-              ? `
-          <div class="section">
-            <div class="section-title">Volunteer Experience</div>
-            ${cvData.volunteer
-              .map(
-                (vol) => `
-              <div class="volunteer-item">
-                <strong>${vol.organization}</strong> (${vol.role}) - ${vol.dates}<br>
-                <span>${vol.description}</span>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-          <div class="divider"></div>
-          `
-              : ""
-          }
-
-          ${
-            cvData.projects.length > 0
-              ? `
-          <div class="section">
-            <div class="section-title">Projects</div>
-            ${cvData.projects
-              .map(
-                (proj) => `
-              <div class="project-item">
-                <strong>${proj.name}</strong> - ${proj.technologies}<br>
-                <span>${proj.description}</span>
-                ${
-                  proj.link
-                    ? `<br><a href="${proj.link}" target="_blank">${proj.link}</a>`
-                    : ""
-                }
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-          <div class="divider"></div>
-          `
-              : ""
-          }
-
-        </body>
-        </html>
-      `;
+      // Use the template system for PDF generation
+      const cvHTML = generateHTML();
 
       // Create a temporary div to render the HTML
       const tempDiv = document.createElement("div");
@@ -680,30 +423,195 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
     }
   };
 
-  const generateHTML = () => {
+  const generateHTML = (template: 'modern' | 'creative' | 'classic' = selectedTemplate) => {
+    const getTemplateStyles = () => {
+      switch (template) {
+        case 'modern':
+          return `
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              margin: 40px; 
+              line-height: 1.6; 
+              color: #2c3e50;
+              background: white;
+            }
+            .header { 
+              border-bottom: 3px solid #3498db; 
+              padding-bottom: 20px; 
+              margin-bottom: 30px; 
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 30px;
+              border-radius: 8px;
+            }
+            .header-content { display: flex; align-items: center; gap: 30px; }
+            .photo { flex-shrink: 0; }
+            .info { flex-grow: 1; }
+            .name { font-size: 2.8em; font-weight: 300; margin-bottom: 10px; }
+            .contact { font-size: 1.1em; opacity: 0.9; }
+            .section { margin-bottom: 35px; }
+            .section-title { 
+              font-size: 1.6em; 
+              font-weight: 600; 
+              border-bottom: 2px solid #3498db; 
+              margin-bottom: 20px; 
+              padding-bottom: 8px; 
+              color: #2c3e50;
+            }
+            .experience-item, .education-item { 
+              margin-bottom: 25px; 
+              padding: 20px;
+              background: #f8f9fa;
+              border-radius: 8px;
+              border-left: 4px solid #3498db;
+            }
+            .job-title { font-weight: 600; font-size: 1.2em; color: #2c3e50; }
+            .company { font-weight: 600; color: #3498db; }
+            .date { color: #7f8c8d; font-style: italic; }
+            .description { margin-top: 12px; }
+            .skills-list, .languages-list { display: flex; flex-wrap: wrap; gap: 12px; }
+            .skill, .language { 
+              background: #3498db; 
+              color: white;
+              padding: 8px 16px; 
+              border-radius: 20px; 
+              font-weight: 500;
+            }
+          `;
+        
+        case 'creative':
+          return `
+            body { 
+              font-family: 'Poppins', 'Segoe UI', sans-serif; 
+              margin: 40px; 
+              line-height: 1.6; 
+              color: #2d3436;
+              background: white;
+            }
+            .header { 
+              background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+              padding: 40px;
+              margin-bottom: 40px;
+              border-radius: 15px;
+              color: white;
+              text-align: center;
+            }
+            .header-content { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+            .photo { flex-shrink: 0; }
+            .info { flex-grow: 1; text-align: center; }
+            .name { font-size: 3em; font-weight: 700; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+            .contact { font-size: 1.2em; opacity: 0.95; }
+            .section { margin-bottom: 40px; }
+            .section-title { 
+              font-size: 1.8em; 
+              font-weight: 700; 
+              background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              margin-bottom: 25px; 
+              padding-bottom: 10px; 
+            }
+            .experience-item, .education-item { 
+              margin-bottom: 30px; 
+              padding: 25px;
+              background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+              border-radius: 12px;
+              box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+              border-left: 5px solid #ff6b6b;
+            }
+            .job-title { font-weight: 700; font-size: 1.3em; color: #2d3436; }
+            .company { font-weight: 600; color: #ff6b6b; }
+            .date { color: #636e72; font-style: italic; }
+            .description { margin-top: 15px; }
+            .skills-list, .languages-list { display: flex; flex-wrap: wrap; gap: 15px; }
+            .skill, .language { 
+              background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+              color: white;
+              padding: 10px 20px; 
+              border-radius: 25px; 
+              font-weight: 600;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            }
+          `;
+        
+        case 'classic':
+          return `
+            body { 
+              font-family: 'Times New Roman', serif; 
+              margin: 40px; 
+              line-height: 1.5; 
+              color: #000;
+              background: white;
+            }
+            .header { 
+              border-bottom: 2px solid #000; 
+              padding-bottom: 20px; 
+              margin-bottom: 30px; 
+              text-align: center;
+            }
+            .header-content { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+            .photo { flex-shrink: 0; }
+            .info { flex-grow: 1; text-align: center; }
+            .name { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
+            .contact { font-size: 1.1em; color: #333; }
+            .section { margin-bottom: 30px; }
+            .section-title { 
+              font-size: 1.5em; 
+              font-weight: bold; 
+              border-bottom: 1px solid #000; 
+              margin-bottom: 15px; 
+              padding-bottom: 5px; 
+              text-transform: uppercase;
+            }
+            .experience-item, .education-item { 
+              margin-bottom: 20px; 
+              padding: 15px;
+              border: 1px solid #ddd;
+            }
+            .job-title { font-weight: bold; font-size: 1.1em; }
+            .company { font-weight: bold; color: #000; }
+            .date { color: #666; font-style: italic; }
+            .description { margin-top: 10px; }
+            .skills-list, .languages-list { display: flex; flex-wrap: wrap; gap: 10px; }
+            .skill, .language { 
+              background: #f0f0f0; 
+              padding: 5px 10px; 
+              border-radius: 3px; 
+              border: 1px solid #ccc;
+            }
+          `;
+        
+        default:
+          return `
+            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+            .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+            .header-content { display: flex; align-items: center; gap: 30px; }
+            .photo { flex-shrink: 0; }
+            .info { flex-grow: 1; }
+            .name { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; }
+            .contact { font-size: 1.1em; color: #666; }
+            .section { margin-bottom: 30px; }
+            .section-title { font-size: 1.5em; font-weight: bold; border-bottom: 1px solid #ccc; margin-bottom: 15px; padding-bottom: 5px; }
+            .experience-item, .education-item { margin-bottom: 20px; }
+            .job-title { font-weight: bold; font-size: 1.1em; }
+            .company { font-weight: bold; color: #333; }
+            .date { color: #666; font-style: italic; }
+            .description { margin-top: 10px; }
+            .skills-list, .languages-list { display: flex; flex-wrap: wrap; gap: 10px; }
+            .skill, .language { background: #f0f0f0; padding: 5px 10px; border-radius: 15px; }
+          `;
+      }
+    };
+
     const cvHTML = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="UTF-8">
         <title>${cvData.personalInfo.fullName} - CV</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
-          body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-          .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-          .header-content { display: flex; align-items: center; gap: 30px; }
-          .photo { flex-shrink: 0; }
-          .info { flex-grow: 1; }
-          .name { font-size: 2.5em; font-weight: bold; margin-bottom: 10px; }
-          .contact { font-size: 1.1em; color: #666; }
-          .section { margin-bottom: 30px; }
-          .section-title { font-size: 1.5em; font-weight: bold; border-bottom: 1px solid #ccc; margin-bottom: 15px; padding-bottom: 5px; }
-          .experience-item, .education-item { margin-bottom: 20px; }
-          .job-title { font-weight: bold; font-size: 1.1em; }
-          .company { font-weight: bold; color: #333; }
-          .date { color: #666; font-style: italic; }
-          .description { margin-top: 10px; }
-          .skills-list, .languages-list { display: flex; flex-wrap: wrap; gap: 10px; }
-          .skill, .language { background: #f0f0f0; padding: 5px 10px; border-radius: 15px; }
+          ${getTemplateStyles()}
           @media print {
             body { margin: 20px; }
             .header-content { flex-direction: column; text-align: center; }
@@ -817,9 +725,122 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
           <div class="section-title">Languages</div>
           <div class="languages-list">
             ${cvData.languages
-              .map((lang) => `<span class="language">${lang}</span>`)
+              .map((language) => `<span class="language">${language}</span>`)
               .join("")}
           </div>
+        </div>
+        `
+            : ""
+        }
+
+        ${
+          cvData.certifications.length > 0
+            ? `
+        <div class="section">
+          <div class="section-title">Certifications</div>
+          ${cvData.certifications
+            .map(
+              (cert) => `
+            <div class="experience-item">
+              <div class="job-title">${cert.name}</div>
+              <div class="company">${cert.issuer}</div>
+              <div class="date">${cert.date}</div>
+              <div class="description">${cert.description}</div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+        `
+            : ""
+        }
+
+        ${
+          cvData.awards.length > 0
+            ? `
+        <div class="section">
+          <div class="section-title">Awards & Recognition</div>
+          ${cvData.awards
+            .map(
+              (award) => `
+            <div class="experience-item">
+              <div class="job-title">${award.name}</div>
+              <div class="company">${award.issuer}</div>
+              <div class="date">${award.date}</div>
+              <div class="description">${award.description}</div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+        `
+            : ""
+        }
+
+        ${
+          cvData.volunteer.length > 0
+            ? `
+        <div class="section">
+          <div class="section-title">Volunteer Experience</div>
+          ${cvData.volunteer
+            .map(
+              (vol) => `
+            <div class="experience-item">
+              <div class="job-title">${vol.role}</div>
+              <div class="company">${vol.organization}</div>
+              <div class="date">${vol.dates}</div>
+              <div class="description">${vol.description}</div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+        `
+            : ""
+        }
+
+        ${
+          cvData.projects.length > 0
+            ? `
+        <div class="section">
+          <div class="section-title">Projects</div>
+          ${cvData.projects
+            .map(
+              (project) => `
+            <div class="experience-item">
+              <div class="job-title">${project.name}</div>
+              <div class="description">${project.description}</div>
+              <div class="date">Technologies: ${project.technologies}</div>
+              ${
+                project.link
+                  ? `<div class="date">Link: <a href="${project.link}" target="_blank">${project.link}</a></div>`
+                  : ""
+              }
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+        `
+            : ""
+        }
+
+        ${
+          cvData.references.length > 0
+            ? `
+        <div class="section">
+          <div class="section-title">References</div>
+          ${cvData.references
+            .map(
+              (ref) => `
+            <div class="experience-item">
+              <div class="job-title">${ref.name}</div>
+              <div class="company">${ref.relationship}${ref.company ? ` at ${ref.company}` : ""}</div>
+              <div class="date">${ref.email} | ${ref.phone}</div>
+            </div>
+          `
+            )
+            .join("")}
         </div>
         `
             : ""
@@ -827,16 +848,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
       </body>
       </html>
     `;
-
-    const blob = new Blob([cvHTML], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    return cvHTML;
   };
 
   const generateCV = () => {
@@ -1724,6 +1736,102 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                 </div>
               )}
             </div>
+
+            {/* CV Template Selector */}
+            <div className="template-selector" style={{
+              marginTop: "2rem",
+              padding: "1.5rem",
+              background: "#f8f9fa",
+              borderRadius: "12px",
+              border: "1px solid #e9ecef"
+            }}>
+              <h4 style={{ margin: "0 0 1rem 0", color: "#495057" }}>
+                🎨 Choose Your CV Style
+              </h4>
+              <p style={{ margin: "0 0 1.5rem 0", color: "#6c757d", fontSize: "0.9rem" }}>
+                Select a template style that matches your industry and personality
+              </p>
+              
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                gap: "1rem",
+                marginBottom: "1rem"
+              }}>
+                {/* Modern Professional */}
+                <div 
+                  onClick={() => setSelectedTemplate('modern')}
+                  style={{
+                    padding: "1.5rem",
+                    border: selectedTemplate === 'modern' ? "3px solid #3498db" : "2px solid #dee2e6",
+                    borderRadius: "12px",
+                    background: selectedTemplate === 'modern' ? "#e3f2fd" : "white",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    textAlign: "center"
+                  }}
+                >
+                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>💼</div>
+                  <h5 style={{ margin: "0 0 0.5rem 0", color: "#2c3e50" }}>Modern Professional</h5>
+                  <p style={{ margin: 0, fontSize: "0.8rem", color: "#6c757d" }}>
+                    Clean, minimalist design perfect for corporate and tech industries
+                  </p>
+                </div>
+
+                {/* Creative Designer */}
+                <div 
+                  onClick={() => setSelectedTemplate('creative')}
+                  style={{
+                    padding: "1.5rem",
+                    border: selectedTemplate === 'creative' ? "3px solid #ff6b6b" : "2px solid #dee2e6",
+                    borderRadius: "12px",
+                    background: selectedTemplate === 'creative' ? "#fff5f5" : "white",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    textAlign: "center"
+                  }}
+                >
+                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎨</div>
+                  <h5 style={{ margin: "0 0 0.5rem 0", color: "#2c3e50" }}>Creative Designer</h5>
+                  <p style={{ margin: 0, fontSize: "0.8rem", color: "#6c757d" }}>
+                    Colorful, modern design for creative and design industries
+                  </p>
+                </div>
+
+                {/* Classic Traditional */}
+                <div 
+                  onClick={() => setSelectedTemplate('classic')}
+                  style={{
+                    padding: "1.5rem",
+                    border: selectedTemplate === 'classic' ? "3px solid #495057" : "2px solid #dee2e6",
+                    borderRadius: "12px",
+                    background: selectedTemplate === 'classic' ? "#f8f9fa" : "white",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    textAlign: "center"
+                  }}
+                >
+                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📋</div>
+                  <h5 style={{ margin: "0 0 0.5rem 0", color: "#2c3e50" }}>Classic Traditional</h5>
+                  <p style={{ margin: 0, fontSize: "0.8rem", color: "#6c757d" }}>
+                    Conservative, formal design for traditional industries
+                  </p>
+                </div>
+              </div>
+
+              <div style={{
+                background: "#e8f5e8",
+                border: "1px solid #28a745",
+                borderRadius: "8px",
+                padding: "1rem",
+                marginTop: "1rem"
+              }}>
+                <p style={{ margin: 0, fontSize: "0.9rem", color: "#155724" }}>
+                  <strong>💡 Tip:</strong> You can change your template style anytime before downloading. 
+                  Each style is optimized for different industries and will help your CV stand out!
+                </p>
+              </div>
+            </div>
             <div
               style={{
                 display: "flex",
@@ -1783,12 +1891,22 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                     ? "Generate & Download PDF"
                     : "Preview CV (Sign up to download)"}
                 </button>
-                <button
-                  onClick={generateHTML}
-                  className="generate-btn"
-                  style={{ backgroundColor: "#6b7280" }}
-                >
-                  Download HTML
+                                  <button
+                    onClick={() => {
+                      const cvHTML = generateHTML();
+                      const blob = new Blob([cvHTML], { type: "text/html" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.html`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="generate-btn"
+                  >
+                    Download HTML
                 </button>
               </div>
             </div>
