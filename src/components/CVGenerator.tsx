@@ -71,8 +71,9 @@ interface CVGeneratorProps {
 
 const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedTemplate, setSelectedTemplate] = useState<'modern' | 'creative' | 'classic'>('modern');
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<
+    "modern" | "creative" | "classic"
+  >("modern");
   const [cvData, setCvData] = useState<CVData>({
     personalInfo: {
       fullName: "",
@@ -423,10 +424,12 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
     }
   };
 
-  const generateHTML = (template: 'modern' | 'creative' | 'classic' = selectedTemplate) => {
+  const generateHTML = (
+    template: "modern" | "creative" | "classic" = selectedTemplate
+  ) => {
     const getTemplateStyles = () => {
       switch (template) {
-        case 'modern':
+        case "modern":
           return `
             body { 
               font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -478,8 +481,8 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
               font-weight: 500;
             }
           `;
-        
-        case 'creative':
+
+        case "creative":
           return `
             body { 
               font-family: 'Poppins', 'Segoe UI', sans-serif; 
@@ -533,8 +536,8 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
               box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             }
           `;
-        
-        case 'classic':
+
+        case "classic":
           return `
             body { 
               font-family: 'Times New Roman', serif; 
@@ -580,7 +583,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
               border: 1px solid #ccc;
             }
           `;
-        
+
         default:
           return `
             body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
@@ -1738,97 +1741,143 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             </div>
 
             {/* CV Template Selector */}
-            <div className="template-selector" style={{
-              marginTop: "2rem",
-              padding: "1.5rem",
-              background: "#f8f9fa",
-              borderRadius: "12px",
-              border: "1px solid #e9ecef"
-            }}>
+            <div
+              className="template-selector"
+              style={{
+                marginTop: "2rem",
+                padding: "1.5rem",
+                background: "#f8f9fa",
+                borderRadius: "12px",
+                border: "1px solid #e9ecef",
+              }}
+            >
               <h4 style={{ margin: "0 0 1rem 0", color: "#495057" }}>
                 🎨 Choose Your CV Style
               </h4>
-              <p style={{ margin: "0 0 1.5rem 0", color: "#6c757d", fontSize: "0.9rem" }}>
-                Select a template style that matches your industry and personality
+              <p
+                style={{
+                  margin: "0 0 1.5rem 0",
+                  color: "#6c757d",
+                  fontSize: "0.9rem",
+                }}
+              >
+                Select a template style that matches your industry and
+                personality
               </p>
-              
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-                gap: "1rem",
-                marginBottom: "1rem"
-              }}>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                  gap: "1rem",
+                  marginBottom: "1rem",
+                }}
+              >
                 {/* Modern Professional */}
-                <div 
-                  onClick={() => setSelectedTemplate('modern')}
+                <div
+                  onClick={() => setSelectedTemplate("modern")}
                   style={{
                     padding: "1.5rem",
-                    border: selectedTemplate === 'modern' ? "3px solid #3498db" : "2px solid #dee2e6",
+                    border:
+                      selectedTemplate === "modern"
+                        ? "3px solid #3498db"
+                        : "2px solid #dee2e6",
                     borderRadius: "12px",
-                    background: selectedTemplate === 'modern' ? "#e3f2fd" : "white",
+                    background:
+                      selectedTemplate === "modern" ? "#e3f2fd" : "white",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
-                    textAlign: "center"
+                    textAlign: "center",
                   }}
                 >
-                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>💼</div>
-                  <h5 style={{ margin: "0 0 0.5rem 0", color: "#2c3e50" }}>Modern Professional</h5>
-                  <p style={{ margin: 0, fontSize: "0.8rem", color: "#6c757d" }}>
-                    Clean, minimalist design perfect for corporate and tech industries
+                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>
+                    💼
+                  </div>
+                  <h5 style={{ margin: "0 0 0.5rem 0", color: "#2c3e50" }}>
+                    Modern Professional
+                  </h5>
+                  <p
+                    style={{ margin: 0, fontSize: "0.8rem", color: "#6c757d" }}
+                  >
+                    Clean, minimalist design perfect for corporate and tech
+                    industries
                   </p>
                 </div>
 
                 {/* Creative Designer */}
-                <div 
-                  onClick={() => setSelectedTemplate('creative')}
+                <div
+                  onClick={() => setSelectedTemplate("creative")}
                   style={{
                     padding: "1.5rem",
-                    border: selectedTemplate === 'creative' ? "3px solid #ff6b6b" : "2px solid #dee2e6",
+                    border:
+                      selectedTemplate === "creative"
+                        ? "3px solid #ff6b6b"
+                        : "2px solid #dee2e6",
                     borderRadius: "12px",
-                    background: selectedTemplate === 'creative' ? "#fff5f5" : "white",
+                    background:
+                      selectedTemplate === "creative" ? "#fff5f5" : "white",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
-                    textAlign: "center"
+                    textAlign: "center",
                   }}
                 >
-                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎨</div>
-                  <h5 style={{ margin: "0 0 0.5rem 0", color: "#2c3e50" }}>Creative Designer</h5>
-                  <p style={{ margin: 0, fontSize: "0.8rem", color: "#6c757d" }}>
+                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>
+                    🎨
+                  </div>
+                  <h5 style={{ margin: "0 0 0.5rem 0", color: "#2c3e50" }}>
+                    Creative Designer
+                  </h5>
+                  <p
+                    style={{ margin: 0, fontSize: "0.8rem", color: "#6c757d" }}
+                  >
                     Colorful, modern design for creative and design industries
                   </p>
                 </div>
 
                 {/* Classic Traditional */}
-                <div 
-                  onClick={() => setSelectedTemplate('classic')}
+                <div
+                  onClick={() => setSelectedTemplate("classic")}
                   style={{
                     padding: "1.5rem",
-                    border: selectedTemplate === 'classic' ? "3px solid #495057" : "2px solid #dee2e6",
+                    border:
+                      selectedTemplate === "classic"
+                        ? "3px solid #495057"
+                        : "2px solid #dee2e6",
                     borderRadius: "12px",
-                    background: selectedTemplate === 'classic' ? "#f8f9fa" : "white",
+                    background:
+                      selectedTemplate === "classic" ? "#f8f9fa" : "white",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
-                    textAlign: "center"
+                    textAlign: "center",
                   }}
                 >
-                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📋</div>
-                  <h5 style={{ margin: "0 0 0.5rem 0", color: "#2c3e50" }}>Classic Traditional</h5>
-                  <p style={{ margin: 0, fontSize: "0.8rem", color: "#6c757d" }}>
+                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>
+                    📋
+                  </div>
+                  <h5 style={{ margin: "0 0 0.5rem 0", color: "#2c3e50" }}>
+                    Classic Traditional
+                  </h5>
+                  <p
+                    style={{ margin: 0, fontSize: "0.8rem", color: "#6c757d" }}
+                  >
                     Conservative, formal design for traditional industries
                   </p>
                 </div>
               </div>
 
-              <div style={{
-                background: "#e8f5e8",
-                border: "1px solid #28a745",
-                borderRadius: "8px",
-                padding: "1rem",
-                marginTop: "1rem"
-              }}>
+              <div
+                style={{
+                  background: "#e8f5e8",
+                  border: "1px solid #28a745",
+                  borderRadius: "8px",
+                  padding: "1rem",
+                  marginTop: "1rem",
+                }}
+              >
                 <p style={{ margin: 0, fontSize: "0.9rem", color: "#155724" }}>
-                  <strong>💡 Tip:</strong> You can change your template style anytime before downloading. 
-                  Each style is optimized for different industries and will help your CV stand out!
+                  <strong>💡 Tip:</strong> You can change your template style
+                  anytime before downloading. Each style is optimized for
+                  different industries and will help your CV stand out!
                 </p>
               </div>
             </div>
@@ -1891,22 +1940,22 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                     ? "Generate & Download PDF"
                     : "Preview CV (Sign up to download)"}
                 </button>
-                                  <button
-                    onClick={() => {
-                      const cvHTML = generateHTML();
-                      const blob = new Blob([cvHTML], { type: "text/html" });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.html`;
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                      URL.revokeObjectURL(url);
-                    }}
-                    className="generate-btn"
-                  >
-                    Download HTML
+                <button
+                  onClick={() => {
+                    const cvHTML = generateHTML();
+                    const blob = new Blob([cvHTML], { type: "text/html" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.html`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="generate-btn"
+                >
+                  Download HTML
                 </button>
               </div>
             </div>
