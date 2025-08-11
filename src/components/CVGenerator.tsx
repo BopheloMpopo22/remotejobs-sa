@@ -483,12 +483,12 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             .header h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 6px; }
             .header h2 { font-size: 1.1em; font-weight: 400; color: #3498db; }
             .content { display: flex; min-height: calc(297mm - 60px); align-items: stretch; }
-            .sidebar { width: 35%; background: #34495e; color: white; padding: 15px; overflow: visible; word-wrap: break-word; }
-            .main-content { width: 65%; padding: 15px; }
+            .sidebar { width: 40%; background: #34495e; color: white; padding: 15px; overflow: visible; word-wrap: break-word; }
+            .main-content { width: 60%; padding: 12px; }
             .section { margin-bottom: 15px; }
             .section h3 { font-size: 1.2em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 3px; }
             .contact-item { display: flex; align-items: center; margin-bottom: 4px; font-size: 0.95em; word-wrap: break-word; }
-            .contact-icon { width: 16px; margin-right: 8px; color: #3498db; flex-shrink: 0; }
+            .contact-icon { width: 14px; margin-right: 8px; color: #3498db; flex-shrink: 0; }
             .skills-list { list-style: none; }
             .skills-list li { margin-bottom: 3px; padding-left: 15px; position: relative; font-size: 0.95em; word-wrap: break-word; }
             .skills-list li:before { content: "•"; color: #3498db; position: absolute; left: 0; }
@@ -505,7 +505,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             .responsibilities li { margin-bottom: 2px; position: relative; font-size: 0.95em; }
             .responsibilities li:before { content: "•"; color: #3498db; position: absolute; left: -12px; }
             .education-item { margin-bottom: 10px; }
-            .education-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+            .education-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; flex-wrap: wrap; }
             .degree { font-weight: 600; color: #2c3e50; font-size: 1.05em; }
             .institution { color: #7f8c8d; font-size: 1em; }
             .summary { text-align: justify; line-height: 1.4; font-size: 0.95em; }
@@ -524,12 +524,12 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             .header h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 6px; }
             .header h2 { font-size: 1.1em; font-weight: 400; color: #e8f4fd; }
             .content { display: flex; min-height: calc(297mm - 60px); align-items: stretch; }
-            .sidebar { width: 30%; background: #f8f9fa; padding: 15px; border-right: 2px solid #4a90e2; overflow: visible; word-wrap: break-word; }
-            .main-content { width: 70%; padding: 15px; }
+            .sidebar { width: 40%; background: #f8f9fa; padding: 15px; border-right: 2px solid #4a90e2; overflow: visible; word-wrap: break-word; }
+            .main-content { width: 60%; padding: 12px; }
             .section { margin-bottom: 15px; }
             .section h3 { font-size: 1.2em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; color: #4a90e2; border-bottom: 2px solid #4a90e2; padding-bottom: 3px; }
             .contact-item { display: flex; align-items: center; margin-bottom: 4px; font-size: 0.95em; word-wrap: break-word; }
-            .contact-icon { width: 16px; margin-right: 8px; color: #4a90e2; flex-shrink: 0; }
+            .contact-icon { width: 14px; margin-right: 8px; color: #4a90e2; flex-shrink: 0; }
             .skills-list { list-style: none; }
             .skills-list li { margin-bottom: 3px; padding-left: 15px; position: relative; font-size: 0.95em; word-wrap: break-word; }
             .skills-list li:before { content: "▸"; color: #4a90e2; position: absolute; left: 0; font-weight: bold; }
@@ -566,7 +566,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             .header h2 { font-size: 1.1em; font-weight: 400; color: #7f8c8d; font-style: italic; }
             .content { display: flex; min-height: calc(297mm - 60px); align-items: stretch; }
             .sidebar { width: 40%; background: #f8f9fa; padding: 15px; border-right: 2px solid #ecf0f1; }
-            .main-content { width: 60%; padding: 15px; }
+            .main-content { width: 60%; padding: 12px; }
             .section { margin-bottom: 15px; }
             .section h3 { font-size: 1.2em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; color: #2c3e50; border-bottom: 1px solid #bdc3c7; padding-bottom: 3px; }
             .contact-item { display: flex; align-items: center; margin-bottom: 4px; font-size: 0.95em; }
