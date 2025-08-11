@@ -483,17 +483,17 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             .header h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 6px; }
             .header h2 { font-size: 1.1em; font-weight: 400; color: #3498db; }
             .content { display: flex; min-height: calc(297mm - 60px); }
-            .sidebar { width: 35%; background: #34495e; color: white; padding: 15px; }
+            .sidebar { width: 35%; background: #34495e; color: white; padding: 15px; overflow: hidden; word-wrap: break-word; }
             .main-content { width: 65%; padding: 15px; }
             .section { margin-bottom: 15px; }
             .section h3 { font-size: 1.2em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 3px; }
-            .contact-item { display: flex; align-items: center; margin-bottom: 4px; font-size: 0.95em; }
-            .contact-icon { width: 16px; margin-right: 8px; color: #3498db; }
+            .contact-item { display: flex; align-items: center; margin-bottom: 4px; font-size: 0.95em; word-wrap: break-word; }
+            .contact-icon { width: 16px; margin-right: 8px; color: #3498db; flex-shrink: 0; }
             .skills-list { list-style: none; }
-            .skills-list li { margin-bottom: 3px; padding-left: 15px; position: relative; font-size: 0.95em; }
+            .skills-list li { margin-bottom: 3px; padding-left: 15px; position: relative; font-size: 0.95em; word-wrap: break-word; }
             .skills-list li:before { content: "•"; color: #3498db; position: absolute; left: 0; }
             .languages-list { list-style: none; }
-            .languages-list li { margin-bottom: 3px; padding-left: 15px; position: relative; font-size: 0.95em; }
+            .languages-list li { margin-bottom: 3px; padding-left: 15px; position: relative; font-size: 0.95em; word-wrap: break-word; }
             .languages-list li:before { content: "•"; color: #3498db; position: absolute; left: 0; }
             .profile-photo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px; display: block; border: 3px solid #3498db; }
             .experience-item { margin-bottom: 12px; }
@@ -524,17 +524,17 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             .header h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 6px; }
             .header h2 { font-size: 1.1em; font-weight: 400; color: #e8f4fd; }
             .content { display: flex; min-height: calc(297mm - 60px); }
-            .sidebar { width: 30%; background: #f8f9fa; padding: 15px; border-right: 2px solid #4a90e2; }
+            .sidebar { width: 30%; background: #f8f9fa; padding: 15px; border-right: 2px solid #4a90e2; overflow: hidden; word-wrap: break-word; }
             .main-content { width: 70%; padding: 15px; }
             .section { margin-bottom: 15px; }
             .section h3 { font-size: 1.2em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; color: #4a90e2; border-bottom: 2px solid #4a90e2; padding-bottom: 3px; }
-            .contact-item { display: flex; align-items: center; margin-bottom: 4px; font-size: 0.95em; }
-            .contact-icon { width: 16px; margin-right: 8px; color: #4a90e2; }
+            .contact-item { display: flex; align-items: center; margin-bottom: 4px; font-size: 0.95em; word-wrap: break-word; }
+            .contact-icon { width: 16px; margin-right: 8px; color: #4a90e2; flex-shrink: 0; }
             .skills-list { list-style: none; }
-            .skills-list li { margin-bottom: 3px; padding-left: 15px; position: relative; font-size: 0.95em; }
+            .skills-list li { margin-bottom: 3px; padding-left: 15px; position: relative; font-size: 0.95em; word-wrap: break-word; }
             .skills-list li:before { content: "▸"; color: #4a90e2; position: absolute; left: 0; font-weight: bold; }
             .languages-list { list-style: none; }
-            .languages-list li { margin-bottom: 3px; padding-left: 15px; position: relative; font-size: 0.95em; }
+            .languages-list li { margin-bottom: 3px; padding-left: 15px; position: relative; font-size: 0.95em; word-wrap: break-word; }
             .languages-list li:before { content: "▸"; color: #4a90e2; position: absolute; left: 0; font-weight: bold; }
             .profile-photo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px; display: block; border: 3px solid #4a90e2; }
             .experience-item { margin-bottom: 12px; padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #4a90e2; }
