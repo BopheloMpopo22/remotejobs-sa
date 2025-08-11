@@ -435,43 +435,39 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
         case "normal":
           return `
             * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: 'Arial', sans-serif; line-height: 1.4; color: #333; }
-            .cv-container { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; padding: 0; }
-            .header { background: #f8f9fa; border-bottom: 2px solid #dee2e6; padding: 15px 20px; }
-            .header-content { display: flex; align-items: center; justify-content: space-between; }
-            .header-left { display: flex; align-items: center; }
-            .profile-photo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #dee2e6; margin-right: 20px; }
-            .header-text h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 6px; color: #2c3e50; }
-            .header-text h2 { font-size: 1.1em; font-weight: 400; color: #6c757d; margin-bottom: 8px; }
-            .contact-info { display: flex; flex-direction: column; gap: 3px; }
-            .contact-item { display: flex; align-items: center; font-size: 0.95em; }
-            .contact-icon { width: 14px; margin-right: 6px; color: #6c757d; }
-            .content { display: block; padding: 15px 20px; }
-            .section { margin-bottom: 15px; }
-            .section h3 { font-size: 1.2em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; color: #2c3e50; background: #f8f9fa; padding: 6px 12px; border-left: 3px solid #007bff; }
-            .skills-list { list-style: none; }
-            .skills-list li { margin-bottom: 3px; padding-left: 12px; position: relative; font-size: 0.95em; }
-            .skills-list li:before { content: "•"; color: #6c757d; position: absolute; left: 0; }
-            .languages-list { list-style: none; }
-            .languages-list li { margin-bottom: 3px; padding-left: 12px; position: relative; font-size: 0.95em; }
-            .languages-list li:before { content: "•"; color: #6c757d; position: absolute; left: 0; }
-            .experience-item { margin-bottom: 12px; }
-            .experience-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-            .job-title { font-weight: 600; font-size: 1.05em; color: #2c3e50; }
-            .company { font-weight: 500; color: #6c757d; font-size: 1em; }
-            .dates { color: #6c757d; font-size: 0.9em; }
-            .responsibilities { list-style: none; padding-left: 12px; }
-            .responsibilities li { margin-bottom: 2px; position: relative; font-size: 0.95em; }
-            .responsibilities li:before { content: "•"; color: #6c757d; position: absolute; left: -8px; }
-            .education-item { margin-bottom: 10px; }
-            .education-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
-            .degree { font-weight: 600; color: #2c3e50; font-size: 1.05em; }
-            .institution { color: #6c757d; font-size: 1em; }
-            .summary { text-align: justify; line-height: 1.4; font-size: 0.95em; }
-            .references-item, .certification-item, .award-item, .volunteer-item, .project-item { margin-bottom: 6px; }
-            .references-item strong, .certification-item strong, .award-item strong, .volunteer-item strong, .project-item strong { color: #2c3e50; font-size: 1em; }
-            .references-item div, .certification-item div, .award-item div, .volunteer-item div, .project-item div { font-size: 0.9em; color: #6c757d; margin-top: 1px; }
-            .project-link { color: #007bff; text-decoration: none; font-size: 0.9em; }
+            body { font-family: 'Arial', sans-serif; line-height: 1.4; color: #000; }
+            .cv-container { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; padding: 20px; }
+            .header { margin-bottom: 20px; }
+            .header-content { display: flex; justify-content: space-between; align-items: flex-start; }
+            .header-left { flex: 1; }
+            .header-text h1 { font-size: 2.2em; font-weight: bold; margin-bottom: 8px; color: #000; }
+            .header-text h2 { font-size: 1.1em; font-weight: normal; color: #000; margin-bottom: 4px; }
+            .contact-item { margin-bottom: 3px; font-size: 0.95em; color: #000; }
+            .contact-icon { margin-right: 8px; }
+            .profile-photo { width: 100px; height: 120px; object-fit: cover; border: 1px solid #000; }
+            .divider { border-bottom: 1px solid #000; margin: 15px 0; }
+            .section { margin-bottom: 20px; }
+            .section h3 { font-size: 1.2em; font-weight: bold; margin-bottom: 8px; color: #000; text-transform: uppercase; }
+            .summary { text-align: justify; line-height: 1.5; margin-bottom: 15px; color: #000; }
+            .experience-item { margin-bottom: 15px; }
+            .experience-header { margin-bottom: 5px; }
+            .job-title { font-weight: bold; font-size: 1.05em; color: #000; }
+            .company { font-style: italic; color: #000; font-size: 1em; }
+            .dates { color: #000; font-size: 0.9em; }
+            .responsibilities { list-style: disc; padding-left: 20px; margin-top: 5px; }
+            .responsibilities li { margin-bottom: 3px; font-size: 0.95em; color: #000; }
+            .education-item { margin-bottom: 12px; }
+            .education-header { margin-bottom: 3px; }
+            .degree { font-weight: bold; color: #000; font-size: 1.05em; }
+            .institution { font-style: italic; color: #000; font-size: 1em; }
+            .skills-list { list-style: disc; padding-left: 20px; }
+            .skills-list li { margin-bottom: 3px; font-size: 0.95em; color: #000; }
+            .languages-list { list-style: disc; padding-left: 20px; }
+            .languages-list li { margin-bottom: 3px; font-size: 0.95em; color: #000; }
+            .references-item, .certification-item, .award-item, .volunteer-item, .project-item { margin-bottom: 8px; }
+            .references-item strong, .certification-item strong, .award-item strong, .volunteer-item strong, .project-item strong { color: #000; font-size: 1em; }
+            .references-item div, .certification-item div, .award-item div, .volunteer-item div, .project-item div { font-size: 0.9em; color: #000; margin-top: 2px; }
+            .project-link { color: #000; text-decoration: underline; font-size: 0.9em; }
             @media print { body { margin: 0; } .cv-container { box-shadow: none; } }
           `;
         case "modern":
