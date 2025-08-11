@@ -482,8 +482,8 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             .header { background: #2c3e50; color: white; padding: 15px 20px; text-align: center; }
             .header h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 6px; }
             .header h2 { font-size: 1.1em; font-weight: 400; color: #3498db; }
-            .content { display: flex; min-height: calc(297mm - 60px); }
-            .sidebar { width: 35%; background: #34495e; color: white; padding: 15px; overflow: hidden; word-wrap: break-word; }
+            .content { display: flex; min-height: calc(297mm - 60px); align-items: stretch; }
+            .sidebar { width: 35%; background: #34495e; color: white; padding: 15px; overflow: visible; word-wrap: break-word; }
             .main-content { width: 65%; padding: 15px; }
             .section { margin-bottom: 15px; }
             .section h3 { font-size: 1.2em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 3px; }
@@ -523,8 +523,8 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             .header { background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%); color: white; padding: 15px 20px; text-align: center; }
             .header h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 6px; }
             .header h2 { font-size: 1.1em; font-weight: 400; color: #e8f4fd; }
-            .content { display: flex; min-height: calc(297mm - 60px); }
-            .sidebar { width: 30%; background: #f8f9fa; padding: 15px; border-right: 2px solid #4a90e2; overflow: hidden; word-wrap: break-word; }
+            .content { display: flex; min-height: calc(297mm - 60px); align-items: stretch; }
+            .sidebar { width: 30%; background: #f8f9fa; padding: 15px; border-right: 2px solid #4a90e2; overflow: visible; word-wrap: break-word; }
             .main-content { width: 70%; padding: 15px; }
             .section { margin-bottom: 15px; }
             .section h3 { font-size: 1.2em; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; color: #4a90e2; border-bottom: 2px solid #4a90e2; padding-bottom: 3px; }
@@ -564,7 +564,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
             .header { background: #f8f9fa; border-bottom: 3px solid #2c3e50; padding: 15px 20px; text-align: center; }
             .header h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 6px; color: #2c3e50; }
             .header h2 { font-size: 1.1em; font-weight: 400; color: #7f8c8d; font-style: italic; }
-            .content { display: flex; min-height: calc(297mm - 60px); }
+            .content { display: flex; min-height: calc(297mm - 60px); align-items: stretch; }
             .sidebar { width: 40%; background: #f8f9fa; padding: 15px; border-right: 2px solid #ecf0f1; }
             .main-content { width: 60%; padding: 15px; }
             .section { margin-bottom: 15px; }
@@ -658,17 +658,17 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
       </head>
       <body>
         <div class="cv-container">
-          <div class="header">
+        <div class="header">
             ${
               template === "normal"
                 ? `
-              <div class="header-content">
+          <div class="header-content">
                 <div class="header-left">
-                  ${
-                    cvData.personalInfo.photo
-                      ? `<img src="${cvData.personalInfo.photo}" alt="Profile Photo" class="profile-photo" />`
-                      : ""
-                  }
+            ${
+              cvData.personalInfo.photo
+                ? `<img src="${cvData.personalInfo.photo}" alt="Profile Photo" class="profile-photo" />`
+                : ""
+            }
                   <div class="header-text">
                     <h1>${cvData.personalInfo.fullName}</h1>
                     <h2>${cvData.personalInfo.email}</h2>
@@ -683,32 +683,32 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                     <span class="contact-icon">📍</span>
                     <span>${cvData.personalInfo.location}</span>
                   </div>
-                  ${
-                    cvData.personalInfo.linkedin
-                      ? `<div class="contact-item">
+                ${
+                  cvData.personalInfo.linkedin
+                    ? `<div class="contact-item">
                           <span class="contact-icon">💼</span>
                           <span>${cvData.personalInfo.linkedin}</span>
                         </div>`
-                      : ""
-                  }
-                  ${
-                    cvData.personalInfo.portfolio
-                      ? `<div class="contact-item">
+                    : ""
+                }
+                ${
+                  cvData.personalInfo.portfolio
+                    ? `<div class="contact-item">
                           <span class="contact-icon">🌐</span>
                           <span>${cvData.personalInfo.portfolio}</span>
                         </div>`
-                      : ""
-                  }
-                </div>
+                    : ""
+                }
               </div>
+            </div>
             `
                 : `
               <h1>${cvData.personalInfo.fullName}</h1>
               <h2>${cvData.personalInfo.email}</h2>
             `
             }
-          </div>
-          
+        </div>
+
           <div class="content">
             ${
               template === "normal"
@@ -725,7 +725,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                   : ""
               }
               
-              <div class="section">
+        <div class="section">
                 <h3>CONTACT</h3>
                 <div class="contact-item">
                   <span class="contact-icon">📧</span>
@@ -755,8 +755,8 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                       </div>`
                     : ""
                 }
-              </div>
-            `
+        </div>
+        `
             }
 
               ${
@@ -772,9 +772,9 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                   : ""
               }
 
-              ${
-                cvData.languages.length > 0
-                  ? `<div class="section">
+        ${
+          cvData.languages.length > 0
+            ? `<div class="section">
                       <h3>LANGUAGES</h3>
                       <ul class="languages-list">
                         ${cvData.languages
@@ -782,8 +782,8 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                           .join("")}
                       </ul>
                     </div>`
-                  : ""
-              }
+            : ""
+        }
             </div>
 
             ${
@@ -835,16 +835,16 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                 cvData.experience.length > 0
                   ? `<div class="section">
                       <h3>WORK EXPERIENCE</h3>
-                      ${cvData.experience
-                        .map(
-                          (exp) => `
-                        <div class="experience-item">
+          ${cvData.experience
+            .map(
+              (exp) => `
+            <div class="experience-item">
                           <div class="experience-header">
-                            <div class="job-title">${exp.position}</div>
+              <div class="job-title">${exp.position}</div>
                             <div class="dates">${exp.startDate} - ${
                               exp.current ? "Present" : exp.endDate
                             }</div>
-                          </div>
+            </div>
                           <div class="company">${exp.company}</div>
                           <ul class="responsibilities">
                             ${exp.description
@@ -853,96 +853,96 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                               .map((line) => `<li>${line.trim()}</li>`)
                               .join("")}
                           </ul>
-                        </div>
-                      `
-                        )
-                        .join("")}
+        </div>
+        `
+            )
+            .join("")}
                     </div>`
                   : ""
               }
 
-              ${
-                cvData.education.length > 0
-                  ? `<div class="section">
+        ${
+          cvData.education.length > 0
+            ? `<div class="section">
                       <h3>EDUCATION</h3>
-                      ${cvData.education
-                        .map(
-                          (edu) => `
-                        <div class="education-item">
+          ${cvData.education
+            .map(
+              (edu) => `
+            <div class="education-item">
                           <div class="education-header">
                             <div class="degree">${edu.degree} in ${edu.field}</div>
                             <div class="dates">${edu.graduationYear}</div>
                           </div>
                           <div class="institution">${edu.institution}</div>
-                        </div>
-                      `
-                        )
-                        .join("")}
+            </div>
+          `
+            )
+            .join("")}
                     </div>`
-                  : ""
-              }
+            : ""
+        }
 
-              ${
-                cvData.certifications.length > 0
-                  ? `<div class="section">
+        ${
+          cvData.certifications.length > 0
+            ? `<div class="section">
                       <h3>CERTIFICATIONS</h3>
-                      ${cvData.certifications
-                        .map(
-                          (cert) => `
+          ${cvData.certifications
+            .map(
+              (cert) => `
                         <div class="certification-item">
                           <strong>${cert.name}</strong> (${cert.issuer}) - ${cert.date}
                           <div>${cert.description}</div>
-                        </div>
-                      `
-                        )
-                        .join("")}
+            </div>
+          `
+            )
+            .join("")}
                     </div>`
-                  : ""
-              }
+            : ""
+        }
 
-              ${
-                cvData.awards.length > 0
-                  ? `<div class="section">
+        ${
+          cvData.awards.length > 0
+            ? `<div class="section">
                       <h3>AWARDS & ACHIEVEMENTS</h3>
-                      ${cvData.awards
-                        .map(
-                          (award) => `
+          ${cvData.awards
+            .map(
+              (award) => `
                         <div class="award-item">
                           <strong>${award.name}</strong> (${award.issuer}) - ${award.date}
                           <div>${award.description}</div>
-                        </div>
-                      `
-                        )
-                        .join("")}
+            </div>
+          `
+            )
+            .join("")}
                     </div>`
-                  : ""
-              }
+            : ""
+        }
 
-              ${
-                cvData.volunteer.length > 0
-                  ? `<div class="section">
+        ${
+          cvData.volunteer.length > 0
+            ? `<div class="section">
                       <h3>VOLUNTEER EXPERIENCE</h3>
-                      ${cvData.volunteer
-                        .map(
-                          (vol) => `
+          ${cvData.volunteer
+            .map(
+              (vol) => `
                         <div class="volunteer-item">
                           <strong>${vol.organization}</strong> (${vol.role}) - ${vol.dates}
                           <div>${vol.description}</div>
-                        </div>
-                      `
-                        )
-                        .join("")}
+            </div>
+          `
+            )
+            .join("")}
                     </div>`
-                  : ""
-              }
+            : ""
+        }
 
-              ${
-                cvData.projects.length > 0
-                  ? `<div class="section">
+        ${
+          cvData.projects.length > 0
+            ? `<div class="section">
                       <h3>PROJECTS</h3>
-                      ${cvData.projects
-                        .map(
-                          (proj) => `
+          ${cvData.projects
+            .map(
+              (proj) => `
                         <div class="project-item">
                           <strong>${proj.name}</strong> - ${proj.technologies}
                           <div>${proj.description}</div>
@@ -951,38 +951,38 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
                               ? `<div><a href="${proj.link}" class="project-link" target="_blank">${proj.link}</a></div>`
                               : ""
                           }
-                        </div>
-                      `
-                        )
-                        .join("")}
+            </div>
+          `
+            )
+            .join("")}
                     </div>`
-                  : ""
-              }
+            : ""
+        }
 
-              ${
-                cvData.references.length > 0
-                  ? `<div class="section">
+        ${
+          cvData.references.length > 0
+            ? `<div class="section">
                       <h3>REFERENCES</h3>
-                      ${cvData.references
-                        .map(
-                          (ref) => `
+          ${cvData.references
+            .map(
+              (ref) => `
                         <div class="references-item">
                           <strong>${ref.name}</strong> (${ref.relationship})
                           ${ref.company ? ` - ${ref.company}` : ""}
                           <div>${ref.email} ${ref.phone ? `| ${ref.phone}` : ""}</div>
-                        </div>
-                      `
-                        )
-                        .join("")}
+            </div>
+          `
+            )
+            .join("")}
                     </div>`
-                  : ""
-              }
+            : ""
+        }
             ${
               template === "normal"
                 ? `
               <!-- Normal template: Close main-content div -->
-            </div>
-            `
+        </div>
+        `
                 : `
               <!-- Other templates: Close main-content div -->
             </div>
