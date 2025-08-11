@@ -384,15 +384,28 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
 
-      // Simple approach: let jsPDF handle the scaling and pagination
+      // Multi-page approach: manually handle pagination
       const pageWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
 
       // Calculate dimensions to fit width
       const imgWidth = pageWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      // Add the image - jsPDF will automatically handle pagination
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      // Calculate how many pages we need
+      const totalPages = Math.ceil(imgHeight / pageHeight);
+
+      for (let page = 0; page < totalPages; page++) {
+        if (page > 0) {
+          pdf.addPage();
+        }
+
+        // Calculate the Y position for this page
+        const yPosition = -(page * pageHeight);
+
+        // Add the full image with offset to show the correct portion
+        pdf.addImage(imgData, "PNG", 0, yPosition, imgWidth, imgHeight);
+      }
 
       // Download the PDF
       pdf.save(`${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.pdf`);
