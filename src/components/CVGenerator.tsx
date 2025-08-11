@@ -386,7 +386,6 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
 
       // Simple approach: let jsPDF handle the scaling and pagination
       const pageWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
 
       // Calculate dimensions to fit width
       const imgWidth = pageWidth;
