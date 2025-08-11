@@ -361,19 +361,18 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
       tempDiv.style.position = "absolute";
       tempDiv.style.left = "-9999px";
       tempDiv.style.width = "210mm"; // A4 width
-      tempDiv.style.height = "297mm"; // A4 height
       tempDiv.style.backgroundColor = "white";
       tempDiv.style.padding = "0";
       tempDiv.style.margin = "0";
       document.body.appendChild(tempDiv);
 
-      // Convert to canvas with proper A4 dimensions
+      // Convert to canvas with proper A4 dimensions - let content determine height
       const canvas = await html2canvas(tempDiv, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         width: 794, // 210mm in pixels at 96 DPI
-        height: 1123, // 297mm in pixels at 96 DPI
+        height: tempDiv.scrollHeight, // Let content determine height
         backgroundColor: "#ffffff",
       });
 
@@ -384,7 +383,7 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
 
-      // Multi-page approach: manually handle pagination
+      // Simple and reliable multi-page approach
       const pageWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
 
@@ -392,19 +391,24 @@ const CVGenerator: React.FC<CVGeneratorProps> = ({ onAuthRequired, user }) => {
       const imgWidth = pageWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      // Calculate how many pages we need
-      const totalPages = Math.ceil(imgHeight / pageHeight);
+      // If content fits on one page
+      if (imgHeight <= pageHeight) {
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      } else {
+        // Content needs multiple pages
+        const totalPages = Math.ceil(imgHeight / pageHeight);
 
-      for (let page = 0; page < totalPages; page++) {
-        if (page > 0) {
-          pdf.addPage();
+        for (let page = 0; page < totalPages; page++) {
+          if (page > 0) {
+            pdf.addPage();
+          }
+
+          // Calculate the Y position for this page
+          const yPosition = -(page * pageHeight);
+
+          // Add the full image with offset to show the correct portion
+          pdf.addImage(imgData, "PNG", 0, yPosition, imgWidth, imgHeight);
         }
-
-        // Calculate the Y position for this page
-        const yPosition = -(page * pageHeight);
-
-        // Add the full image with offset to show the correct portion
-        pdf.addImage(imgData, "PNG", 0, yPosition, imgWidth, imgHeight);
       }
 
       // Download the PDF
