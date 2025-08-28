@@ -9,19 +9,40 @@ export default async function handler(req, res) {
   console.log("=== FEEDBACK API CALLED ===");
   console.log("Method:", req.method);
   console.log("Body:", req.body);
-  
+
   // Check environment variables
   console.log("Environment check:");
   console.log("SUPABASE_URL exists:", !!process.env.NEXT_PUBLIC_SUPABASE_URL);
-  console.log("SUPABASE_SERVICE_ROLE_KEY exists:", !!process.env.SUPABASE_SERVICE_ROLE_KEY);
-  
+  console.log(
+    "SUPABASE_SERVICE_ROLE_KEY exists:",
+    !!process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  // Validate environment variables
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY
+  ) {
+    console.error("Missing required environment variables");
+    return res.status(500).json({
+      error: "Server configuration error",
+      details: "Missing Supabase credentials",
+    });
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
     const { rating, feedback, email, userAgent, pageUrl } = req.body;
-    console.log("Extracted data:", { rating, feedback, email, userAgent, pageUrl });
+    console.log("Extracted data:", {
+      rating,
+      feedback,
+      email,
+      userAgent,
+      pageUrl,
+    });
 
     // Validate required fields
     if (!rating || !feedback) {
