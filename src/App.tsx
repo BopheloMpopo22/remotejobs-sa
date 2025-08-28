@@ -537,7 +537,7 @@ function App() {
           </h3>
           <p style={{ color: "#6b7280", marginBottom: "10px" }}>
             For immediate assistance, email us at:{" "}
-            <strong>support@remotejobs-sa.com</strong>
+            <strong>bophelompopo22@gmail.com</strong>
           </p>
           <p style={{ color: "#6b7280", fontSize: "14px" }}>
             We typically respond within 24 hours during business days.
@@ -556,7 +556,7 @@ function App() {
             📱 WhatsApp Support
           </h3>
           <p style={{ color: "#6b7280", marginBottom: "10px" }}>
-            For quick questions: <strong>+27 60 123 4567</strong>
+            For quick questions: <strong>+27 72 528 9455</strong>
           </p>
           <p style={{ color: "#6b7280", fontSize: "14px" }}>
             Available Monday-Friday, 9 AM - 5 PM SAST.
