@@ -308,6 +308,18 @@ function App() {
       }
     };
 
+    const handleStarClick = (starValue: number) => {
+      setFeedbackRating(starValue);
+    };
+
+    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setFeedbackText(e.target.value);
+    };
+
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFeedbackEmail(e.target.value);
+    };
+
     return (
       <div
         style={{
@@ -357,19 +369,29 @@ function App() {
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
-                onClick={() => setFeedbackRating(star)}
+                type="button"
+                onClick={() => handleStarClick(star)}
                 style={{
                   background: "none",
                   border: "none",
                   fontSize: "24px",
                   cursor: "pointer",
                   color: feedbackRating >= star ? "#fbbf24" : "#d1d5db",
+                  transition: "color 0.2s ease",
                 }}
+                title={`${star} star${star > 1 ? "s" : ""}`}
               >
                 ⭐
               </button>
             ))}
           </div>
+          {feedbackRating > 0 && (
+            <div
+              style={{ fontSize: "14px", color: "#059669", marginTop: "5px" }}
+            >
+              You selected {feedbackRating} star{feedbackRating > 1 ? "s" : ""}
+            </div>
+          )}
         </div>
 
         <div style={{ marginBottom: "15px" }}>
@@ -380,7 +402,7 @@ function App() {
           </label>
           <textarea
             value={feedbackText}
-            onChange={(e) => setFeedbackText(e.target.value)}
+            onChange={handleTextChange}
             placeholder="Share your thoughts, suggestions, or report issues..."
             style={{
               width: "100%",
@@ -389,6 +411,8 @@ function App() {
               border: "1px solid #d1d5db",
               borderRadius: "6px",
               resize: "vertical",
+              fontFamily: "inherit",
+              fontSize: "14px",
             }}
           />
         </div>
@@ -402,13 +426,15 @@ function App() {
           <input
             type="email"
             value={feedbackEmail}
-            onChange={(e) => setFeedbackEmail(e.target.value)}
+            onChange={handleEmailChange}
             placeholder="your@email.com"
             style={{
               width: "100%",
               padding: "8px 10px",
               border: "1px solid #d1d5db",
               borderRadius: "6px",
+              fontFamily: "inherit",
+              fontSize: "14px",
             }}
           />
         </div>
@@ -425,6 +451,7 @@ function App() {
             padding: "10px",
             fontWeight: "600",
             cursor: feedbackSubmitting ? "not-allowed" : "pointer",
+            transition: "background-color 0.2s ease",
           }}
         >
           {feedbackSubmitting ? "Submitting..." : "Submit Feedback"}
