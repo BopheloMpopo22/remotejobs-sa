@@ -306,15 +306,18 @@ function App() {
           setFeedbackText("");
           setFeedbackEmail("");
         } else {
-          throw new Error(`Failed to submit feedback: ${responseData.error || 'Unknown error'}`);
-        }
-              } catch (error) {
-          console.error("Feedback submission error:", error);
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          alert(
-            `Sorry, there was an error submitting your feedback: ${errorMessage}. Please try again.`
+          throw new Error(
+            `Failed to submit feedback: ${responseData.error || "Unknown error"}`
           );
-        } finally {
+        }
+      } catch (error) {
+        console.error("Feedback submission error:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        alert(
+          `Sorry, there was an error submitting your feedback: ${errorMessage}. Please try again.`
+        );
+      } finally {
         setFeedbackSubmitting(false);
       }
     };
@@ -329,13 +332,15 @@ function App() {
           position: "fixed",
           top: "20px",
           right: "20px",
+          left: window.innerWidth <= 768 ? "20px" : "auto",
           zIndex: 1000,
           background: "white",
           border: "1px solid #e2e8f0",
           borderRadius: "12px",
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           padding: "20px",
-          maxWidth: "350px",
+          maxWidth: window.innerWidth <= 768 ? "none" : "350px",
+          width: window.innerWidth <= 768 ? "auto" : "350px",
           display: showFeedbackModal ? "block" : "none",
         }}
       >
