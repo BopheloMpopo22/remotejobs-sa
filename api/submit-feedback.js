@@ -6,12 +6,17 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export default async function handler(req, res) {
+  console.log("=== FEEDBACK API CALLED ===");
+  console.log("Method:", req.method);
+  console.log("Body:", req.body);
+  
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
     const { rating, feedback, email, userAgent, pageUrl } = req.body;
+    console.log("Extracted data:", { rating, feedback, email, userAgent, pageUrl });
 
     // Validate required fields
     if (!rating || !feedback) {

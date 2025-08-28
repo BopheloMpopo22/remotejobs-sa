@@ -273,6 +273,12 @@ function App() {
       setFeedbackSubmitting(true);
 
       try {
+        console.log("Submitting feedback:", {
+          rating: feedbackRating,
+          feedback: feedbackText,
+          email: feedbackEmail || null,
+        });
+
         const response = await fetch("/api/submit-feedback", {
           method: "POST",
           headers: {
@@ -287,6 +293,10 @@ function App() {
           }),
         });
 
+        console.log("Response status:", response.status);
+        const responseData = await response.json();
+        console.log("Response data:", responseData);
+
         if (response.ok) {
           alert(
             "Thank you for your feedback! We'll use it to improve our service."
@@ -296,14 +306,15 @@ function App() {
           setFeedbackText("");
           setFeedbackEmail("");
         } else {
-          throw new Error("Failed to submit feedback");
+          throw new Error(`Failed to submit feedback: ${responseData.error || 'Unknown error'}`);
         }
-      } catch (error) {
-        console.error("Feedback submission error:", error);
-        alert(
-          "Sorry, there was an error submitting your feedback. Please try again."
-        );
-      } finally {
+              } catch (error) {
+          console.error("Feedback submission error:", error);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          alert(
+            `Sorry, there was an error submitting your feedback: ${errorMessage}. Please try again.`
+          );
+        } finally {
         setFeedbackSubmitting(false);
       }
     };
@@ -395,7 +406,6 @@ function App() {
           <textarea
             value={feedbackText}
             onChange={(e) => setFeedbackText(e.target.value)}
-            onInput={(e) => setFeedbackText(e.currentTarget.value)}
             placeholder="Share your thoughts, suggestions, or report issues..."
             style={{
               width: "100%",
@@ -420,7 +430,6 @@ function App() {
             type="email"
             value={feedbackEmail}
             onChange={(e) => setFeedbackEmail(e.target.value)}
-            onInput={(e) => setFeedbackEmail(e.currentTarget.value)}
             placeholder="your@email.com"
             style={{
               width: "100%",
