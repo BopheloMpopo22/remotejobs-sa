@@ -63,9 +63,9 @@ function App() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobLoading, setJobLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<"jobs" | "cv" | "assistant">(
-    "jobs"
-  );
+  const [currentView, setCurrentView] = useState<
+    "jobs" | "cv" | "assistant" | "help-feedback"
+  >("jobs");
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -78,10 +78,16 @@ function App() {
     | "terms"
     | "payment-success"
     | "payment-cancel"
+    | "help-feedback"
   >(null);
 
   // Add social proof state
   const [showSocialProof, setShowSocialProof] = useState(true);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackEmail, setFeedbackEmail] = useState("");
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
 
   useEffect(() => {
     // Check for existing session
@@ -165,17 +171,22 @@ function App() {
 
   // Add social proof banner component
   const SocialProofBanner = () => (
-    <div style={{
-      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-      color: "white",
-      padding: "12px 20px",
-      textAlign: "center",
-      fontSize: "14px",
-      fontWeight: "500",
-      position: "relative"
-    }}>
-      <span>🎉 <strong>60+ professionals</strong> have already joined! Join them in finding remote work opportunities.</span>
-      <button 
+    <div
+      style={{
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        color: "white",
+        padding: "12px 20px",
+        textAlign: "center",
+        fontSize: "14px",
+        fontWeight: "500",
+        position: "relative",
+      }}
+    >
+      <span>
+        🎉 <strong>60+ professionals</strong> have already joined! Join them in
+        finding remote work opportunities.
+      </span>
+      <button
         onClick={() => setShowSocialProof(false)}
         style={{
           position: "absolute",
@@ -186,7 +197,7 @@ function App() {
           border: "none",
           color: "white",
           cursor: "pointer",
-          fontSize: "18px"
+          fontSize: "18px",
         }}
       >
         ×
@@ -196,37 +207,388 @@ function App() {
 
   // Add value proposition section
   const ValueProposition = () => (
-    <div style={{
-      background: "#f8fafc",
-      padding: "40px 20px",
-      textAlign: "center",
-      marginBottom: "30px"
-    }}>
-      <h2 style={{ color: "#1e293b", marginBottom: "20px", fontSize: "2.5rem" }}>
+    <div
+      style={{
+        background: "#f8fafc",
+        padding: "40px 20px",
+        textAlign: "center",
+        marginBottom: "30px",
+      }}
+    >
+      <h2
+        style={{ color: "#1e293b", marginBottom: "20px", fontSize: "2.5rem" }}
+      >
         Find Your Dream Remote Job in South Africa
       </h2>
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-        gap: "30px",
-        maxWidth: "1200px",
-        margin: "0 auto"
-      }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+          gap: "30px",
+          maxWidth: "1200px",
+          margin: "0 auto",
+        }}
+      >
         <div style={{ padding: "20px" }}>
           <div style={{ fontSize: "3rem", marginBottom: "10px" }}>💼</div>
-          <h3 style={{ color: "#1e293b", marginBottom: "10px" }}>Professional CV Builder</h3>
-          <p style={{ color: "#64748b" }}>Create stunning CVs with 4 professional templates. Stand out from the crowd.</p>
+          <h3 style={{ color: "#1e293b", marginBottom: "10px" }}>
+            Professional CV Builder
+          </h3>
+          <p style={{ color: "#64748b" }}>
+            Create stunning CVs with 4 professional templates. Stand out from
+            the crowd.
+          </p>
         </div>
         <div style={{ padding: "20px" }}>
           <div style={{ fontSize: "3rem", marginBottom: "10px" }}>🎯</div>
-          <h3 style={{ color: "#1e293b", marginBottom: "10px" }}>Job Application Assistant</h3>
-          <p style={{ color: "#64748b" }}>Get personalized help with applications. Only R179 for professional guidance.</p>
+          <h3 style={{ color: "#1e293b", marginBottom: "10px" }}>
+            Job Application Assistant
+          </h3>
+          <p style={{ color: "#64748b" }}>
+            Get personalized help with applications. Only R179 for professional
+            guidance.
+          </p>
         </div>
         <div style={{ padding: "20px" }}>
           <div style={{ fontSize: "3rem", marginBottom: "10px" }}>📧</div>
-          <h3 style={{ color: "#1e293b", marginBottom: "10px" }}>Daily Job Alerts</h3>
-          <p style={{ color: "#64748b" }}>Receive curated remote job opportunities directly to your inbox.</p>
+          <h3 style={{ color: "#1e293b", marginBottom: "10px" }}>
+            Daily Job Alerts
+          </h3>
+          <p style={{ color: "#64748b" }}>
+            Receive curated remote job opportunities directly to your inbox.
+          </p>
         </div>
+      </div>
+    </div>
+  );
+
+  // Feedback Widget Component
+  const FeedbackWidget = () => {
+    const handleSubmitFeedback = async () => {
+      if (!feedbackRating || !feedbackText.trim()) {
+        alert("Please provide both a rating and feedback.");
+        return;
+      }
+
+      setFeedbackSubmitting(true);
+
+      try {
+        const response = await fetch("/api/submit-feedback", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            rating: feedbackRating,
+            feedback: feedbackText,
+            email: feedbackEmail || null,
+            userAgent: navigator.userAgent,
+            pageUrl: window.location.href,
+          }),
+        });
+
+        if (response.ok) {
+          alert(
+            "Thank you for your feedback! We'll use it to improve our service."
+          );
+          setShowFeedbackModal(false);
+          setFeedbackRating(0);
+          setFeedbackText("");
+          setFeedbackEmail("");
+        } else {
+          throw new Error("Failed to submit feedback");
+        }
+      } catch (error) {
+        console.error("Feedback submission error:", error);
+        alert(
+          "Sorry, there was an error submitting your feedback. Please try again."
+        );
+      } finally {
+        setFeedbackSubmitting(false);
+      }
+    };
+
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: "20px",
+          right: "20px",
+          zIndex: 1000,
+          background: "white",
+          border: "1px solid #e2e8f0",
+          borderRadius: "12px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          padding: "20px",
+          maxWidth: "350px",
+          display: showFeedbackModal ? "block" : "none",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "15px",
+          }}
+        >
+          <h3 style={{ margin: 0, color: "#1e293b" }}>💬 Help Us Improve</h3>
+          <button
+            onClick={() => setShowFeedbackModal(false)}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: "20px",
+              cursor: "pointer",
+              color: "#64748b",
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <div style={{ marginBottom: "15px" }}>
+          <label
+            style={{ display: "block", marginBottom: "5px", fontWeight: "500" }}
+          >
+            How would you rate your experience?
+          </label>
+          <div style={{ display: "flex", gap: "5px", marginBottom: "15px" }}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => setFeedbackRating(star)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  color: feedbackRating >= star ? "#fbbf24" : "#d1d5db",
+                }}
+              >
+                ⭐
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: "15px" }}>
+          <label
+            style={{ display: "block", marginBottom: "5px", fontWeight: "500" }}
+          >
+            What could we improve?
+          </label>
+          <textarea
+            value={feedbackText}
+            onChange={(e) => setFeedbackText(e.target.value)}
+            placeholder="Share your thoughts, suggestions, or report issues..."
+            style={{
+              width: "100%",
+              minHeight: "80px",
+              padding: "10px",
+              border: "1px solid #d1d5db",
+              borderRadius: "6px",
+              resize: "vertical",
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: "15px" }}>
+          <label
+            style={{ display: "block", marginBottom: "5px", fontWeight: "500" }}
+          >
+            Contact email (optional)
+          </label>
+          <input
+            type="email"
+            value={feedbackEmail}
+            onChange={(e) => setFeedbackEmail(e.target.value)}
+            placeholder="your@email.com"
+            style={{
+              width: "100%",
+              padding: "8px 10px",
+              border: "1px solid #d1d5db",
+              borderRadius: "6px",
+            }}
+          />
+        </div>
+
+        <button
+          onClick={handleSubmitFeedback}
+          disabled={feedbackSubmitting}
+          style={{
+            width: "100%",
+            background: feedbackSubmitting ? "#9ca3af" : "#059669",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            padding: "10px",
+            fontWeight: "600",
+            cursor: feedbackSubmitting ? "not-allowed" : "pointer",
+          }}
+        >
+          {feedbackSubmitting ? "Submitting..." : "Submit Feedback"}
+        </button>
+      </div>
+    );
+  };
+
+  // Feedback Button (always visible)
+  const FeedbackButton = () => (
+    <button
+      onClick={() => setShowFeedbackModal(true)}
+      style={{
+        position: "fixed",
+        top: "20px",
+        right: "20px",
+        zIndex: 999,
+        background: "#059669",
+        color: "white",
+        border: "none",
+        borderRadius: "50px",
+        padding: "10px 15px",
+        fontSize: "14px",
+        fontWeight: "600",
+        cursor: "pointer",
+        boxShadow: "0 2px 8px rgba(5,150,105,0.3)",
+        display: showFeedbackModal ? "none" : "block",
+      }}
+    >
+      💬 Feedback
+    </button>
+  );
+
+  // Help & Feedback Page Component
+  const HelpFeedbackPage = () => (
+    <div
+      style={{
+        maxWidth: "800px",
+        margin: "0 auto",
+        padding: "20px",
+      }}
+    >
+      <h1 style={{ color: "#1e293b", marginBottom: "30px" }}>
+        ❓ Help & Feedback
+      </h1>
+
+      {/* FAQ Section */}
+      <div style={{ marginBottom: "40px" }}>
+        <h2 style={{ color: "#374151", marginBottom: "20px" }}>
+          Frequently Asked Questions
+        </h2>
+
+        <div style={{ marginBottom: "20px" }}>
+          <h3 style={{ color: "#4b5563", marginBottom: "10px" }}>
+            How does the Job Assistant work?
+          </h3>
+          <p style={{ color: "#6b7280", lineHeight: "1.6" }}>
+            Our Job Assistant applies to 5 relevant jobs daily on your behalf.
+            We match jobs to your experience, location, and salary requirements,
+            then send customized applications with professional cover letters.
+          </p>
+        </div>
+
+        <div style={{ marginBottom: "20px" }}>
+          <h3 style={{ color: "#4b5563", marginBottom: "10px" }}>
+            How much does it cost?
+          </h3>
+          <p style={{ color: "#6b7280", lineHeight: "1.6" }}>
+            One-time setup: R179, or Monthly subscription: R179 setup +
+            R59/month. Cancel anytime.
+          </p>
+        </div>
+
+        <div style={{ marginBottom: "20px" }}>
+          <h3 style={{ color: "#4b5563", marginBottom: "10px" }}>
+            Is the CV builder free?
+          </h3>
+          <p style={{ color: "#6b7280", lineHeight: "1.6" }}>
+            Yes! Our CV builder with 4 professional templates is completely free
+            to use.
+          </p>
+        </div>
+
+        <div style={{ marginBottom: "20px" }}>
+          <h3 style={{ color: "#4b5563", marginBottom: "10px" }}>
+            How long until I get job responses?
+          </h3>
+          <p style={{ color: "#6b7280", lineHeight: "1.6" }}>
+            Most users start receiving responses within 1-2 weeks. We provide
+            weekly progress reports so you can track your applications.
+          </p>
+        </div>
+      </div>
+
+      {/* Contact Section */}
+      <div style={{ marginBottom: "40px" }}>
+        <h2 style={{ color: "#374151", marginBottom: "20px" }}>Get in Touch</h2>
+
+        <div
+          style={{
+            background: "#f8fafc",
+            border: "1px solid #e2e8f0",
+            borderRadius: "12px",
+            padding: "20px",
+            marginBottom: "20px",
+          }}
+        >
+          <h3 style={{ color: "#4b5563", marginBottom: "10px" }}>
+            📧 Email Support
+          </h3>
+          <p style={{ color: "#6b7280", marginBottom: "10px" }}>
+            For immediate assistance, email us at:{" "}
+            <strong>support@remotejobs-sa.com</strong>
+          </p>
+          <p style={{ color: "#6b7280", fontSize: "14px" }}>
+            We typically respond within 24 hours during business days.
+          </p>
+        </div>
+
+        <div
+          style={{
+            background: "#f8fafc",
+            border: "1px solid #e2e8f0",
+            borderRadius: "12px",
+            padding: "20px",
+          }}
+        >
+          <h3 style={{ color: "#4b5563", marginBottom: "10px" }}>
+            📱 WhatsApp Support
+          </h3>
+          <p style={{ color: "#6b7280", marginBottom: "10px" }}>
+            For quick questions: <strong>+27 60 123 4567</strong>
+          </p>
+          <p style={{ color: "#6b7280", fontSize: "14px" }}>
+            Available Monday-Friday, 9 AM - 5 PM SAST.
+          </p>
+        </div>
+      </div>
+
+      {/* Feedback Section */}
+      <div>
+        <h2 style={{ color: "#374151", marginBottom: "20px" }}>
+          Share Your Feedback
+        </h2>
+        <p style={{ color: "#6b7280", marginBottom: "20px" }}>
+          Your feedback helps us improve our service for everyone. We'd love to
+          hear your thoughts!
+        </p>
+
+        <button
+          onClick={() => setShowFeedbackModal(true)}
+          style={{
+            background: "#059669",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            padding: "12px 24px",
+            fontSize: "16px",
+            fontWeight: "600",
+            cursor: "pointer",
+          }}
+        >
+          💬 Open Feedback Form
+        </button>
       </div>
     </div>
   );
@@ -235,7 +597,7 @@ function App() {
     <div className="app-root">
       {/* Social Proof Banner */}
       {showSocialProof && <SocialProofBanner />}
-      
+
       <style>{`
         @media (max-width: 600px) {
           .app-root, .main-content, .nav-bar, .progress-bar, .job-list, .job-card, .cv-generator, .job-assistant {
@@ -346,6 +708,17 @@ function App() {
               }}
             >
               🤖 Job Assistant
+            </button>
+            <button
+              className={`nav-tab ${
+                currentView === "help-feedback" ? "active" : ""
+              }`}
+              onClick={() => {
+                setStaticPage(null);
+                setCurrentView("help-feedback");
+              }}
+            >
+              ❓ Help & Feedback
             </button>
           </nav>
         </div>
@@ -558,6 +931,10 @@ function App() {
                 </>
               ) : currentView === "cv" ? (
                 <CVGenerator onAuthRequired={handleAuthRequired} user={user} />
+              ) : currentView === "assistant" ? (
+                <JobAssistant onAuthRequired={handleAuthRequired} user={user} />
+              ) : currentView === "help-feedback" ? (
+                <HelpFeedbackPage />
               ) : (
                 <JobAssistant onAuthRequired={handleAuthRequired} user={user} />
               )}
@@ -628,6 +1005,10 @@ function App() {
           </div>
         </div>
       )}
+      {/* Feedback Widget */}
+      <FeedbackWidget />
+      {/* Feedback Button */}
+      <FeedbackButton />
     </div>
   );
 }
