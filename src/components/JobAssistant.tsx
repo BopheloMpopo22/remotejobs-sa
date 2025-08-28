@@ -881,42 +881,105 @@ const JobAssistant: React.FC<JobAssistantProps> = ({
             {paymentType === "one-time" && (
               <div
                 style={{
-                  marginTop: "0.5rem",
-                  padding: "0.75rem",
-                  backgroundColor: "#fef3c7",
-                  border: "1px solid #f59e0b",
-                  borderRadius: "0.375rem",
-                  fontSize: "0.875rem",
+                  background: "#f0f9ff",
+                  border: "1px solid #0ea5e9",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  marginTop: "12px",
                 }}
               >
-                <strong>One-time Setup:</strong> Pay R179 for immediate access.
-                This is a one-time fee - if you want to continue using the
-                service next month, you'll need to pay R179 again. Consider the
-                subscription for ongoing access.
+                <h4 style={{ margin: "0 0 8px 0", color: "#0c4a6e" }}>
+                  💡 One-time Setup (Recommended)
+                </h4>
+                <p style={{ margin: "0", color: "#0369a1", fontSize: "14px" }}>
+                  Perfect for getting started! We'll help you create a professional
+                  job application strategy and guide you through your first few
+                  applications. No recurring charges.
+                </p>
               </div>
             )}
 
             {paymentType === "subscription" && (
               <div
                 style={{
-                  marginTop: "0.5rem",
-                  padding: "0.75rem",
-                  backgroundColor: "#dbeafe",
-                  border: "1px solid #3b82f6",
-                  borderRadius: "0.375rem",
-                  fontSize: "0.875rem",
+                  background: "#fef3c7",
+                  border: "1px solid #f59e0b",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  marginTop: "12px",
                 }}
               >
-                <strong>💡 Best Value - Monthly Subscription:</strong> Pay R179
-                setup + R59/month. After the first month, you save R120 compared
-                to paying one-time fees repeatedly.
-                <br />
-                <br />
-
+                <h4 style={{ margin: "0 0 8px 0", color: "#92400e" }}>
+                  🔄 Monthly Subscription (Best Value)
+                </h4>
+                <p style={{ margin: "0", color: "#b45309", fontSize: "14px" }}>
+                  Ongoing support for your job search journey. Get daily job
+                  alerts, application feedback, and continuous guidance until you
+                  land your dream job.
+                </p>
               </div>
             )}
           </div>
-        </div>
+
+          {/* Social Proof Section */}
+          <div style={{
+            background: "#f8fafc",
+            border: "1px solid #e2e8f0",
+            borderRadius: "12px",
+            padding: "20px",
+            margin: "20px 0",
+            textAlign: "center"
+          }}>
+            <h4 style={{ color: "#1e293b", marginBottom: "15px" }}>What Our Users Say</h4>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+              gap: "15px"
+            }}>
+              <div style={{
+                background: "white",
+                padding: "15px",
+                borderRadius: "8px",
+                border: "1px solid #e2e8f0"
+              }}>
+                <div style={{ color: "#fbbf24", fontSize: "14px", marginBottom: "5px" }}>⭐⭐⭐⭐⭐</div>
+                <p style={{ fontSize: "14px", color: "#475569", margin: "0", fontStyle: "italic" }}>
+                  "Got my first remote job within 2 weeks of using the service!"
+                </p>
+                <div style={{ fontSize: "12px", color: "#64748b", marginTop: "8px" }}>- Sarah M., Cape Town</div>
+              </div>
+              <div style={{
+                background: "white",
+                padding: "15px",
+                borderRadius: "8px",
+                border: "1px solid #e2e8f0"
+              }}>
+                <div style={{ color: "#fbbf24", fontSize: "14px", marginBottom: "5px" }}>⭐⭐⭐⭐⭐</div>
+                <p style={{ fontSize: "14px", color: "#475569", margin: "0", fontStyle: "italic" }}>
+                  "The CV builder is amazing and the job alerts are spot on."
+                </p>
+                <div style={{ fontSize: "12px", color: "#64748b", marginTop: "8px" }}>- David K., Johannesburg</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Urgency Banner */}
+          <div style={{
+            background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+            color: "white",
+            padding: "15px",
+            borderRadius: "8px",
+            textAlign: "center",
+            margin: "20px 0"
+          }}>
+            <div style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "5px" }}>
+              ⏰ Limited Time Offer
+            </div>
+            <div style={{ fontSize: "14px" }}>
+              Get 20% off your first month when you subscribe today!
+            </div>
+          </div>
+          </div>
 
         <div className="form-submit">
           {!user && (

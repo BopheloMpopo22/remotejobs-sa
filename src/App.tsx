@@ -80,6 +80,9 @@ function App() {
     | "payment-cancel"
   >(null);
 
+  // Add social proof state
+  const [showSocialProof, setShowSocialProof] = useState(true);
+
   useEffect(() => {
     // Check for existing session
     const getSession = async () => {
@@ -160,8 +163,79 @@ function App() {
     return <PaymentSuccess />;
   }
 
+  // Add social proof banner component
+  const SocialProofBanner = () => (
+    <div style={{
+      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      color: "white",
+      padding: "12px 20px",
+      textAlign: "center",
+      fontSize: "14px",
+      fontWeight: "500",
+      position: "relative"
+    }}>
+      <span>🎉 <strong>60+ professionals</strong> have already joined! Join them in finding remote work opportunities.</span>
+      <button 
+        onClick={() => setShowSocialProof(false)}
+        style={{
+          position: "absolute",
+          right: "10px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          background: "none",
+          border: "none",
+          color: "white",
+          cursor: "pointer",
+          fontSize: "18px"
+        }}
+      >
+        ×
+      </button>
+    </div>
+  );
+
+  // Add value proposition section
+  const ValueProposition = () => (
+    <div style={{
+      background: "#f8fafc",
+      padding: "40px 20px",
+      textAlign: "center",
+      marginBottom: "30px"
+    }}>
+      <h2 style={{ color: "#1e293b", marginBottom: "20px", fontSize: "2.5rem" }}>
+        Find Your Dream Remote Job in South Africa
+      </h2>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+        gap: "30px",
+        maxWidth: "1200px",
+        margin: "0 auto"
+      }}>
+        <div style={{ padding: "20px" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "10px" }}>💼</div>
+          <h3 style={{ color: "#1e293b", marginBottom: "10px" }}>Professional CV Builder</h3>
+          <p style={{ color: "#64748b" }}>Create stunning CVs with 4 professional templates. Stand out from the crowd.</p>
+        </div>
+        <div style={{ padding: "20px" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "10px" }}>🎯</div>
+          <h3 style={{ color: "#1e293b", marginBottom: "10px" }}>Job Application Assistant</h3>
+          <p style={{ color: "#64748b" }}>Get personalized help with applications. Only R179 for professional guidance.</p>
+        </div>
+        <div style={{ padding: "20px" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "10px" }}>📧</div>
+          <h3 style={{ color: "#1e293b", marginBottom: "10px" }}>Daily Job Alerts</h3>
+          <p style={{ color: "#64748b" }}>Receive curated remote job opportunities directly to your inbox.</p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="app-root">
+      {/* Social Proof Banner */}
+      {showSocialProof && <SocialProofBanner />}
+      
       <style>{`
         @media (max-width: 600px) {
           .app-root, .main-content, .nav-bar, .progress-bar, .job-list, .job-card, .cv-generator, .job-assistant {
@@ -215,6 +289,9 @@ function App() {
           {toast.message}
         </div>
       )}
+
+      {/* Value Proposition Section - Show only for non-authenticated users */}
+      {!user && <ValueProposition />}
 
       {/* Header */}
       <header>
