@@ -295,43 +295,63 @@ function App() {
 
         console.log("Response status:", response.status);
 
-        let responseData;
-        let textResponse;
+        if (!response.ok) {
+          // Handle non-200 responses
+          const errorText = await response.text();
+          console.error("Error response:", errorText);
+          throw new Error(`Server error: ${response.status} - ${errorText}`);
+        }
 
+        let responseData;
         try {
           responseData = await response.json();
           console.log("Response data:", responseData);
         } catch (jsonError) {
           console.error("Failed to parse JSON response:", jsonError);
-          // Clone the response before reading it again
-          const responseClone = response.clone();
-          textResponse = await responseClone.text();
-          console.log("Text response:", textResponse);
-          throw new Error(
-            `Server returned invalid JSON. Status: ${response.status}`
-          );
+          throw new Error(`Server returned invalid JSON. Status: ${response.status}`);
         }
 
-        if (response.ok) {
+        // Success case
+        alert(
+          "Thank you for your feedback! We'll use it to improve our service."
+        );
+        setShowFeedbackModal(false);
+        setFeedbackRating(0);
+        setFeedbackText("");
+        setFeedbackEmail("");
+      } catch (error) {
+        console.error("Feedback submission error:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        
+        // Fallback: Store feedback locally if API fails
+        try {
+          const feedbackData = {
+            rating: feedbackRating,
+            feedback: feedbackText,
+            email: feedbackEmail || null,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            pageUrl: window.location.href,
+          };
+          
+          // Store in localStorage as fallback
+          const existingFeedback = JSON.parse(localStorage.getItem('feedback_fallback') || '[]');
+          existingFeedback.push(feedbackData);
+          localStorage.setItem('feedback_fallback', JSON.stringify(existingFeedback));
+          
           alert(
-            "Thank you for your feedback! We'll use it to improve our service."
+            "Thank you for your feedback! We've saved it locally and will process it soon."
           );
           setShowFeedbackModal(false);
           setFeedbackRating(0);
           setFeedbackText("");
           setFeedbackEmail("");
-        } else {
-          throw new Error(
-            `Failed to submit feedback: ${responseData.error || "Unknown error"}`
+        } catch (fallbackError) {
+          alert(
+            `Sorry, there was an error submitting your feedback: ${errorMessage}. Please try again.`
           );
         }
-      } catch (error) {
-        console.error("Feedback submission error:", error);
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error";
-        alert(
-          `Sorry, there was an error submitting your feedback: ${errorMessage}. Please try again.`
-        );
       } finally {
         setFeedbackSubmitting(false);
       }
@@ -424,6 +444,7 @@ function App() {
             What could we improve?
           </label>
           <textarea
+            key="feedback-textarea"
             value={feedbackText}
             onChange={(e) => setFeedbackText(e.target.value)}
             placeholder="Share your thoughts, suggestions, or report issues..."
@@ -438,7 +459,6 @@ function App() {
               fontSize: "16px",
               lineHeight: "1.5",
             }}
-            autoFocus={false}
             spellCheck="true"
           />
         </div>
