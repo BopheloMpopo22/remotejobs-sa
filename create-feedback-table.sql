@@ -25,13 +25,9 @@ CREATE POLICY "Allow anonymous feedback insertion" ON user_feedback
 -- Only allow users to view their own feedback (if they provided email)
 CREATE POLICY "Allow users to view own feedback" ON user_feedback
   FOR SELECT USING (
-    email IS NULL OR 
+    email IS NULL OR
     email = auth.jwt() ->> 'email'
   );
-
--- Allow admins to view all feedback (you can add admin role later)
--- CREATE POLICY "Allow admins to view all feedback" ON user_feedback
---   FOR ALL USING (auth.jwt() ->> 'role' = 'admin');
 
 -- Add trigger to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -42,7 +38,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_user_feedback_updated_at 
-  BEFORE UPDATE ON user_feedback 
-  FOR EACH ROW 
+CREATE TRIGGER update_user_feedback_updated_at
+  BEFORE UPDATE ON user_feedback
+  FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();

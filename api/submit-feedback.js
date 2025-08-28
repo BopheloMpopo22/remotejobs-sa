@@ -20,6 +20,13 @@ export default async function handler(req, res) {
       });
     }
 
+    // Validate rating is between 1-5
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({
+        error: "Rating must be between 1 and 5",
+      });
+    }
+
     // Insert feedback into database
     const { data, error } = await supabase
       .from("user_feedback")

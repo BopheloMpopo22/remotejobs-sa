@@ -402,7 +402,8 @@ function App() {
           </label>
           <textarea
             value={feedbackText}
-            onChange={handleTextChange}
+            onChange={(e) => setFeedbackText(e.target.value)}
+            onInput={(e) => setFeedbackText(e.currentTarget.value)}
             placeholder="Share your thoughts, suggestions, or report issues..."
             style={{
               width: "100%",
@@ -426,7 +427,8 @@ function App() {
           <input
             type="email"
             value={feedbackEmail}
-            onChange={handleEmailChange}
+            onChange={(e) => setFeedbackEmail(e.target.value)}
+            onInput={(e) => setFeedbackEmail(e.currentTarget.value)}
             placeholder="your@email.com"
             style={{
               width: "100%",
