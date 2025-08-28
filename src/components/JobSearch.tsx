@@ -47,7 +47,6 @@ const JobSearch: React.FC<JobSearchProps> = ({
   const [totalJobs, setTotalJobs] = useState(0);
   const [jobsPerPage] = useState(12);
   const [allJobs, setAllJobs] = useState<Job[]>([]);
-  const [displayJobs, setDisplayJobs] = useState<Job[]>([]);
 
   // Your Adzuna API keys
   const APP_ID = "6d779b8f";
@@ -194,7 +193,6 @@ const JobSearch: React.FC<JobSearchProps> = ({
     const startIndex = (page - 1) * jobsPerPage;
     const endIndex = startIndex + jobsPerPage;
     const pageJobs = jobs.slice(startIndex, endIndex);
-    setDisplayJobs(pageJobs);
     onJobsChange(pageJobs);
   };
 
