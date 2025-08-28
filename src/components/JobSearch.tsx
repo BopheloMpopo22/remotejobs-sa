@@ -46,6 +46,8 @@ const JobSearch: React.FC<JobSearchProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalJobs, setTotalJobs] = useState(0);
   const [jobsPerPage] = useState(12);
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
+  const [displayJobs, setDisplayJobs] = useState<Job[]>([]);
 
   // Your Adzuna API keys
   const APP_ID = "6d779b8f";
@@ -55,6 +57,12 @@ const JobSearch: React.FC<JobSearchProps> = ({
   const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
   const CACHE_PREFIX = "remotejobs_cache_";
   const MAX_CACHE_SIZE = 50; // Maximum number of cached entries
+  const TOTAL_JOBS_TO_FETCH = 50; // Fetch 50 jobs for client-side pagination
+
+  // Calculate total pages for client-side pagination
+  const totalPages = Math.ceil(
+    Math.min(totalJobs, TOTAL_JOBS_TO_FETCH) / jobsPerPage
+  );
 
   // Available countries (Adzuna supports)
   const countries = [
@@ -135,8 +143,7 @@ const JobSearch: React.FC<JobSearchProps> = ({
       selectedCategory,
       salaryRange,
       experienceLevel,
-      currentPage,
-      jobsPerPage,
+      // Remove currentPage and jobsPerPage from cache key since we're doing client-side pagination
     };
     return CACHE_PREFIX + btoa(JSON.stringify(params));
   };
@@ -180,6 +187,15 @@ const JobSearch: React.FC<JobSearchProps> = ({
     } catch (error) {
       console.error("Error writing cache:", error);
     }
+  };
+
+  // Function to update displayed jobs based on current page
+  const updateDisplayJobs = (jobs: Job[], page: number) => {
+    const startIndex = (page - 1) * jobsPerPage;
+    const endIndex = startIndex + jobsPerPage;
+    const pageJobs = jobs.slice(startIndex, endIndex);
+    setDisplayJobs(pageJobs);
+    onJobsChange(pageJobs);
   };
 
   const cleanupCache = (): void => {
@@ -323,8 +339,9 @@ const JobSearch: React.FC<JobSearchProps> = ({
     const cachedData = getCachedData();
     if (cachedData) {
       console.log("📦 Using cached data");
-      onJobsChange(cachedData.data);
+      setAllJobs(cachedData.data);
       setTotalJobs(cachedData.totalJobs);
+      updateDisplayJobs(cachedData.data, currentPage);
       onLoadingChange(false);
       return;
     }
@@ -335,7 +352,7 @@ const JobSearch: React.FC<JobSearchProps> = ({
       // Build search query - keep it simple for better results
       let searchQuery = searchTerm;
 
-      let url = `https://api.adzuna.com/v1/api/jobs/${selectedCountry}/search/${currentPage}?app_id=${APP_ID}&app_key=${API_KEY}&results_per_page=${jobsPerPage}&what=${encodeURIComponent(
+      let url = `https://api.adzuna.com/v1/api/jobs/${selectedCountry}/search/1?app_id=${APP_ID}&app_key=${API_KEY}&results_per_page=${TOTAL_JOBS_TO_FETCH}&what=${encodeURIComponent(
         searchQuery
       )}`;
 
@@ -377,11 +394,13 @@ const JobSearch: React.FC<JobSearchProps> = ({
         total = jobs.length;
       }
 
+      // Store all jobs and update display
+      setAllJobs(jobs);
+      setTotalJobs(total);
+      updateDisplayJobs(jobs, currentPage);
+
       // Cache the results
       setCachedData(jobs, total);
-
-      onJobsChange(jobs);
-      setTotalJobs(total);
     } catch (err) {
       onErrorChange(
         err instanceof Error ? err.message : "Failed to fetch jobs"
@@ -400,20 +419,27 @@ const JobSearch: React.FC<JobSearchProps> = ({
     selectedCategory,
     salaryRange,
     experienceLevel,
-    currentPage,
+    // Remove currentPage from dependencies since we handle pagination client-side
   ]);
+
+  // Handle page changes
+  useEffect(() => {
+    if (allJobs.length > 0) {
+      updateDisplayJobs(allJobs, currentPage);
+    }
+  }, [currentPage, allJobs]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
+    fetchJobs();
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
+    // No need to fetch jobs again - just update display
   };
-
-  const totalPages = Math.ceil(totalJobs / jobsPerPage);
 
   return (
     <div className="search-container">
