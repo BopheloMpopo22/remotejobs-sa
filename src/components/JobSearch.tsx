@@ -47,6 +47,8 @@ const JobSearch: React.FC<JobSearchProps> = ({
   const [totalJobs, setTotalJobs] = useState(0);
   const [jobsPerPage] = useState(12);
   const [allJobs, setAllJobs] = useState<Job[]>([]);
+  const [hasMoreJobs, setHasMoreJobs] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Your Adzuna API keys
   const APP_ID = "6d779b8f";
@@ -379,6 +381,20 @@ const JobSearch: React.FC<JobSearchProps> = ({
       let jobs = data.results || [];
       let total = data.count || 0;
 
+      // Debug: Log total available jobs vs what we're fetching
+      console.log(
+        `📊 Job Coverage: Fetching ${jobs.length} out of ${total} total available jobs`
+      );
+
+      // Check if there are more jobs available
+      setHasMoreJobs(total > TOTAL_JOBS_TO_FETCH);
+
+      if (total > TOTAL_JOBS_TO_FETCH) {
+        console.log(
+          `📋 More jobs available: ${total - TOTAL_JOBS_TO_FETCH} additional jobs can be loaded`
+        );
+      }
+
       // Sort jobs by creation date (newest first)
       jobs.sort((a: Job, b: Job) => {
         const dateA = new Date(a.created).getTime();
@@ -437,6 +453,88 @@ const JobSearch: React.FC<JobSearchProps> = ({
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
     // No need to fetch jobs again - just update display
+  };
+
+  const handleLoadMore = async () => {
+    if (isLoadingMore || !hasMoreJobs) return;
+
+    setIsLoadingMore(true);
+    try {
+      console.log("🔄 Loading more jobs...");
+
+      // Calculate the next page to fetch from Adzuna API
+      const nextAdzunaPage =
+        Math.floor(allJobs.length / TOTAL_JOBS_TO_FETCH) + 1;
+      const jobsToFetch = Math.min(
+        TOTAL_JOBS_TO_FETCH,
+        totalJobs - allJobs.length
+      );
+
+      // Build search query
+      let searchQuery = searchTerm;
+      let url = `https://api.adzuna.com/v1/api/jobs/${selectedCountry}/search/${nextAdzunaPage}?app_id=${APP_ID}&app_key=${API_KEY}&results_per_page=${jobsToFetch}&what=${encodeURIComponent(
+        searchQuery
+      )}`;
+
+      // Add category filter
+      if (selectedCategory !== "all") {
+        url += `&category=${selectedCategory}`;
+      }
+
+      // Add salary filter
+      if (salaryRange !== "all") {
+        const [min, max] = salaryRange.split("-");
+        if (max === "+") {
+          url += `&salary_min=${min}`;
+        } else {
+          url += `&salary_min=${min}&salary_max=${max}`;
+        }
+      }
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      let newJobs = data.results || [];
+
+      // Sort new jobs by creation date (newest first)
+      newJobs.sort((a: Job, b: Job) => {
+        const dateA = new Date(a.created).getTime();
+        const dateB = new Date(b.created).getTime();
+        return dateB - dateA; // Newest first
+      });
+
+      // Apply client-side experience level filtering
+      if (experienceLevel !== "all") {
+        newJobs = filterJobsByExperience(newJobs, experienceLevel);
+      }
+
+      // Combine with existing jobs and sort by date
+      const combinedJobs = [...allJobs, ...newJobs].sort((a: Job, b: Job) => {
+        const dateA = new Date(a.created).getTime();
+        const dateB = new Date(b.created).getTime();
+        return dateB - dateA; // Newest first
+      });
+
+      // Update state
+      setAllJobs(combinedJobs);
+      setTotalJobs(Math.max(totalJobs, combinedJobs.length));
+      setHasMoreJobs(combinedJobs.length < totalJobs);
+
+      // Update display to show new jobs
+      updateDisplayJobs(combinedJobs, currentPage);
+
+      console.log(
+        `✅ Loaded ${newJobs.length} more jobs. Total: ${combinedJobs.length}`
+      );
+    } catch (err) {
+      console.error("Error loading more jobs:", err);
+      alert("Failed to load more jobs. Please try again.");
+    } finally {
+      setIsLoadingMore(false);
+    }
   };
 
   return (
@@ -537,15 +635,18 @@ const JobSearch: React.FC<JobSearchProps> = ({
         </div>
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div
-          style={{
-            marginTop: "2rem",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+      {/* Pagination and Load More */}
+      <div
+        style={{
+          marginTop: "2rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "1rem",
+        }}
+      >
+        {/* Pagination */}
+        {totalPages > 1 && (
           <nav
             style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
           >
@@ -606,8 +707,43 @@ const JobSearch: React.FC<JobSearchProps> = ({
               Next
             </button>
           </nav>
+        )}
+
+        {/* Load More Button */}
+        {hasMoreJobs && (
+          <button
+            onClick={handleLoadMore}
+            disabled={isLoadingMore}
+            style={{
+              padding: "0.75rem 2rem",
+              background: isLoadingMore ? "#9ca3af" : "#10b981",
+              color: "white",
+              border: "none",
+              borderRadius: "0.75rem",
+              fontSize: "1rem",
+              fontWeight: "600",
+              cursor: isLoadingMore ? "not-allowed" : "pointer",
+              transition: "all 0.2s",
+              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            {isLoadingMore ? "Loading..." : "Load More Jobs"}
+          </button>
+        )}
+
+        {/* Job Count Info */}
+        <div
+          style={{
+            fontSize: "0.875rem",
+            color: "#6b7280",
+            textAlign: "center",
+          }}
+        >
+          Showing {allJobs.length} of {totalJobs.toLocaleString()} jobs
+          {hasMoreJobs &&
+            " • Click 'Load More' to see additional opportunities"}
         </div>
-      )}
+      </div>
     </div>
   );
 };
