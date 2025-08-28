@@ -10,6 +10,11 @@ export default async function handler(req, res) {
   console.log("Method:", req.method);
   console.log("Body:", req.body);
   
+  // Check environment variables
+  console.log("Environment check:");
+  console.log("SUPABASE_URL exists:", !!process.env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log("SUPABASE_SERVICE_ROLE_KEY exists:", !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+  
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }

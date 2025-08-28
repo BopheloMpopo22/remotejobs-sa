@@ -294,8 +294,17 @@ function App() {
         });
 
         console.log("Response status:", response.status);
-        const responseData = await response.json();
-        console.log("Response data:", responseData);
+        
+        let responseData;
+        try {
+          responseData = await response.json();
+          console.log("Response data:", responseData);
+        } catch (jsonError) {
+          console.error("Failed to parse JSON response:", jsonError);
+          const textResponse = await response.text();
+          console.log("Text response:", textResponse);
+          throw new Error(`Server returned invalid JSON. Status: ${response.status}`);
+        }
 
         if (response.ok) {
           alert(
@@ -411,6 +420,7 @@ function App() {
           <textarea
             value={feedbackText}
             onChange={(e) => setFeedbackText(e.target.value)}
+            onFocus={(e) => e.target.select()}
             placeholder="Share your thoughts, suggestions, or report issues..."
             style={{
               width: "100%",
@@ -420,7 +430,8 @@ function App() {
               borderRadius: "6px",
               resize: "vertical",
               fontFamily: "inherit",
-              fontSize: "14px",
+              fontSize: "16px",
+              lineHeight: "1.5",
             }}
           />
         </div>
