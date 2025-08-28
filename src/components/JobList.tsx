@@ -63,6 +63,14 @@ const JobList: React.FC<JobListProps> = ({ jobs, loading, error }) => {
     return `${Math.floor(diffDays / 365)} years ago`;
   };
 
+  const isRecentJob = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 3; // Consider jobs posted within 3 days as "recent"
+  };
+
   const truncateDescription = (
     description: string,
     maxLength: number = 150
@@ -201,57 +209,89 @@ const JobList: React.FC<JobListProps> = ({ jobs, loading, error }) => {
 
           return (
             <div key={job.id} className="job-card">
-              <h3 className="job-title">
-                <a href={directUrl} target="_blank" rel="noopener noreferrer">
-                  {job.title}
-                </a>
-              </h3>
+              <div style={{ position: "relative" }}>
+                {isRecentJob(job.created) && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "-8px",
+                      right: "-8px",
+                      background: "#10b981",
+                      color: "white",
+                      padding: "4px 8px",
+                      borderRadius: "12px",
+                      fontSize: "0.75rem",
+                      fontWeight: "600",
+                      zIndex: 1,
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    NEW
+                  </div>
+                )}
 
-              <div className="job-company">
-                <span>🏢</span>
-                <span>{job.company.display_name}</span>
-              </div>
+                <h3 className="job-title">
+                  <a href={directUrl} target="_blank" rel="noopener noreferrer">
+                    {job.title}
+                  </a>
+                </h3>
 
-              <div className="job-location">
-                <span>📍</span>
-                <span>{job.location.display_name}</span>
-              </div>
-
-              {job.salary_min || job.salary_max ? (
-                <div className="job-salary">
-                  {formatSalary(job.salary_min, job.salary_max)}
+                <div className="job-company">
+                  <span>🏢</span>
+                  <span>{job.company.display_name}</span>
                 </div>
-              ) : null}
 
-              <div className="job-date">Posted {formatDate(job.created)}</div>
+                <div className="job-location">
+                  <span>📍</span>
+                  <span>{job.location.display_name}</span>
+                </div>
 
-              <p className="job-description">
-                {truncateDescription(job.description)}
-              </p>
+                {job.salary_min || job.salary_max ? (
+                  <div className="job-salary">
+                    {formatSalary(job.salary_min, job.salary_max)}
+                  </div>
+                ) : null}
 
-              <div className="job-footer">
-                <a
-                  href={directUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="apply-button"
+                <div
+                  className="job-date"
                   style={{
-                    backgroundColor: "#3b82f6",
-                    color: "white",
-                    padding: "0.5rem 1rem",
-                    border: "none",
-                    borderRadius: "0.75rem",
+                    color: isRecentJob(job.created) ? "#10b981" : "#6b7280",
+                    fontWeight: isRecentJob(job.created) ? "600" : "400",
                     fontSize: "0.875rem",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    textDecoration: "none",
-                    display: "inline-block",
+                    marginBottom: "0.75rem",
                   }}
-                  title="Click to view job details and apply on the original job site"
                 >
-                  View & Apply
-                </a>
+                  📅 Posted {formatDate(job.created)}
+                </div>
+
+                <p className="job-description">
+                  {truncateDescription(job.description)}
+                </p>
+
+                <div className="job-footer">
+                  <a
+                    href={directUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="apply-button"
+                    style={{
+                      backgroundColor: "#3b82f6",
+                      color: "white",
+                      padding: "0.5rem 1rem",
+                      border: "none",
+                      borderRadius: "0.75rem",
+                      fontSize: "0.875rem",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      textDecoration: "none",
+                      display: "inline-block",
+                    }}
+                    title="Click to view job details and apply on the original job site"
+                  >
+                    View & Apply
+                  </a>
+                </div>
               </div>
             </div>
           );

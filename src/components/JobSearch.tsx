@@ -364,6 +364,13 @@ const JobSearch: React.FC<JobSearchProps> = ({
       let jobs = data.results || [];
       let total = data.count || 0;
 
+      // Sort jobs by creation date (newest first)
+      jobs.sort((a: Job, b: Job) => {
+        const dateA = new Date(a.created).getTime();
+        const dateB = new Date(b.created).getTime();
+        return dateB - dateA; // Newest first
+      });
+
       // Apply client-side experience level filtering
       if (experienceLevel !== "all") {
         jobs = filterJobsByExperience(jobs, experienceLevel);
