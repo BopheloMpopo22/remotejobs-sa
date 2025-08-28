@@ -312,14 +312,6 @@ function App() {
       setFeedbackRating(starValue);
     };
 
-    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setFeedbackText(e.target.value);
-    };
-
-    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFeedbackEmail(e.target.value);
-    };
-
     return (
       <div
         style={{
