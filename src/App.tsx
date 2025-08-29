@@ -84,10 +84,6 @@ function App() {
   // Add social proof state
   const [showSocialProof, setShowSocialProof] = useState(true);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [feedbackRating, setFeedbackRating] = useState(0);
-  const [feedbackText, setFeedbackText] = useState("");
-  const [feedbackEmail, setFeedbackEmail] = useState("");
-  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
 
   useEffect(() => {
     // Check for existing session
@@ -262,105 +258,8 @@ function App() {
     </div>
   );
 
-  // Feedback Widget Component
-  const FeedbackWidget = () => {
-    const handleSubmitFeedback = async () => {
-      if (!feedbackRating || !feedbackText.trim()) {
-        alert("Please provide both a rating and feedback.");
-        return;
-      }
-
-      setFeedbackSubmitting(true);
-
-      try {
-        console.log("Submitting feedback:", {
-          rating: feedbackRating,
-          feedback: feedbackText,
-          email: feedbackEmail || null,
-        });
-
-        const response = await fetch("/api/submit-feedback", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            rating: feedbackRating,
-            feedback: feedbackText,
-            email: feedbackEmail || null,
-            userAgent: navigator.userAgent,
-            pageUrl: window.location.href,
-          }),
-        });
-
-        console.log("Response status:", response.status);
-
-        if (!response.ok) {
-          // Handle non-200 responses
-          const errorText = await response.text();
-          console.error("Error response:", errorText);
-          throw new Error(`Server error: ${response.status} - ${errorText}`);
-        }
-
-        let responseData;
-        try {
-          responseData = await response.json();
-          console.log("Response data:", responseData);
-        } catch (jsonError) {
-          console.error("Failed to parse JSON response:", jsonError);
-          throw new Error(`Server returned invalid JSON. Status: ${response.status}`);
-        }
-
-        // Success case
-        alert(
-          "Thank you for your feedback! We'll use it to improve our service."
-        );
-        setShowFeedbackModal(false);
-        setFeedbackRating(0);
-        setFeedbackText("");
-        setFeedbackEmail("");
-      } catch (error) {
-        console.error("Feedback submission error:", error);
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error";
-        
-        // Fallback: Store feedback locally if API fails
-        try {
-          const feedbackData = {
-            rating: feedbackRating,
-            feedback: feedbackText,
-            email: feedbackEmail || null,
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            pageUrl: window.location.href,
-          };
-          
-          // Store in localStorage as fallback
-          const existingFeedback = JSON.parse(localStorage.getItem('feedback_fallback') || '[]');
-          existingFeedback.push(feedbackData);
-          localStorage.setItem('feedback_fallback', JSON.stringify(existingFeedback));
-          
-          alert(
-            "Thank you for your feedback! We've saved it locally and will process it soon."
-          );
-          setShowFeedbackModal(false);
-          setFeedbackRating(0);
-          setFeedbackText("");
-          setFeedbackEmail("");
-        } catch (fallbackError) {
-          alert(
-            `Sorry, there was an error submitting your feedback: ${errorMessage}. Please try again.`
-          );
-        }
-      } finally {
-        setFeedbackSubmitting(false);
-      }
-    };
-
-    const handleStarClick = (starValue: number) => {
-      setFeedbackRating(starValue);
-    };
-
+  // Simple Feedback Options Component
+  const FeedbackOptions = () => {
     return (
       <div
         style={{
@@ -384,7 +283,7 @@ function App() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "15px",
+            marginBottom: "20px",
           }}
         >
           <h3 style={{ margin: 0, color: "#1e293b" }}>💬 Help Us Improve</h3>
@@ -402,106 +301,113 @@ function App() {
           </button>
         </div>
 
-        <div style={{ marginBottom: "15px" }}>
-          <label
-            style={{ display: "block", marginBottom: "5px", fontWeight: "500" }}
-          >
-            How would you rate your experience?
-          </label>
-          <div style={{ display: "flex", gap: "5px", marginBottom: "15px" }}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => handleStarClick(star)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  fontSize: "24px",
-                  cursor: "pointer",
-                  color: feedbackRating >= star ? "#fbbf24" : "#d1d5db",
-                  transition: "color 0.2s ease",
-                }}
-                title={`${star} star${star > 1 ? "s" : ""}`}
-              >
-                ⭐
-              </button>
-            ))}
-          </div>
-          {feedbackRating > 0 && (
-            <div
-              style={{ fontSize: "14px", color: "#059669", marginTop: "5px" }}
-            >
-              You selected {feedbackRating} star{feedbackRating > 1 ? "s" : ""}
-            </div>
-          )}
-        </div>
+        <p style={{ color: "#64748b", marginBottom: "20px", fontSize: "14px" }}>
+          We'd love to hear your thoughts! Choose how you'd like to share your
+          feedback:
+        </p>
 
-        <div style={{ marginBottom: "15px" }}>
-          <label
-            style={{ display: "block", marginBottom: "5px", fontWeight: "500" }}
-          >
-            What could we improve?
-          </label>
-          <textarea
-            key="feedback-textarea"
-            value={feedbackText}
-            onChange={(e) => setFeedbackText(e.target.value)}
-            placeholder="Share your thoughts, suggestions, or report issues..."
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {/* Email Option */}
+          <a
+            href="mailto:feedback@remotejobssa.co.za?subject=Remote Jobs SA Feedback&body=Hi Remote Jobs SA team,%0D%0A%0D%0AI'd like to share some feedback about your service:%0D%0A%0D%0A[Please share your thoughts, suggestions, or report any issues here]%0D%0A%0D%0AThanks!"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
-              width: "100%",
-              minHeight: "80px",
-              padding: "10px",
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              resize: "vertical",
-              fontFamily: "inherit",
-              fontSize: "16px",
-              lineHeight: "1.5",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "12px 16px",
+              background: "#f8fafc",
+              border: "1px solid #e2e8f0",
+              borderRadius: "8px",
+              textDecoration: "none",
+              color: "#1e293b",
+              fontWeight: "500",
+              transition: "all 0.2s ease",
             }}
-            spellCheck="true"
-          />
-        </div>
-
-        <div style={{ marginBottom: "15px" }}>
-          <label
-            style={{ display: "block", marginBottom: "5px", fontWeight: "500" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#f1f5f9";
+              e.currentTarget.style.borderColor = "#cbd5e1";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "#f8fafc";
+              e.currentTarget.style.borderColor = "#e2e8f0";
+            }}
           >
-            Contact email (optional)
-          </label>
-          <input
-            type="email"
-            value={feedbackEmail}
-            onChange={(e) => setFeedbackEmail(e.target.value)}
-            placeholder="your@email.com"
+            📧 Send Email Feedback
+          </a>
+
+          {/* Google Forms Option */}
+          <a
+            href="https://forms.google.com/your-feedback-form-link"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
-              width: "100%",
-              padding: "8px 10px",
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              fontFamily: "inherit",
-              fontSize: "14px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "12px 16px",
+              background: "#f0f9ff",
+              border: "1px solid #bae6fd",
+              borderRadius: "8px",
+              textDecoration: "none",
+              color: "#1e293b",
+              fontWeight: "500",
+              transition: "all 0.2s ease",
             }}
-          />
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#e0f2fe";
+              e.currentTarget.style.borderColor = "#7dd3fc";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "#f0f9ff";
+              e.currentTarget.style.borderColor = "#bae6fd";
+            }}
+          >
+            📝 Fill Feedback Form
+          </a>
+
+          {/* WhatsApp Option */}
+          <a
+            href="https://wa.me/your-whatsapp-number?text=Hi Remote Jobs SA team! I'd like to share some feedback about your service."
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "12px 16px",
+              background: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              borderRadius: "8px",
+              textDecoration: "none",
+              color: "#1e293b",
+              fontWeight: "500",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#dcfce7";
+              e.currentTarget.style.borderColor = "#86efac";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "#f0fdf4";
+              e.currentTarget.style.borderColor = "#bbf7d0";
+            }}
+          >
+            💬 WhatsApp Feedback
+          </a>
         </div>
 
-        <button
-          onClick={handleSubmitFeedback}
-          disabled={feedbackSubmitting}
+        <div
           style={{
-            width: "100%",
-            background: feedbackSubmitting ? "#9ca3af" : "#059669",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            padding: "10px",
-            fontWeight: "600",
-            cursor: feedbackSubmitting ? "not-allowed" : "pointer",
-            transition: "background-color 0.2s ease",
+            marginTop: "15px",
+            fontSize: "12px",
+            color: "#64748b",
+            textAlign: "center",
           }}
         >
-          {feedbackSubmitting ? "Submitting..." : "Submit Feedback"}
-        </button>
+          Choose the option that works best for you!
+        </div>
       </div>
     );
   };
@@ -1078,8 +984,8 @@ function App() {
           </div>
         </div>
       )}
-      {/* Feedback Widget */}
-      <FeedbackWidget />
+      {/* Feedback Options */}
+      <FeedbackOptions />
       {/* Feedback Button */}
       <FeedbackButton />
     </div>
