@@ -309,7 +309,7 @@ function App() {
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {/* Email Option */}
           <a
-            href="mailto:feedback@remotejobssa.co.za?subject=Remote Jobs SA Feedback&body=Hi Remote Jobs SA team,%0D%0A%0D%0AI'd like to share some feedback about your service:%0D%0A%0D%0A[Please share your thoughts, suggestions, or report any issues here]%0D%0A%0D%0AThanks!"
+            href="mailto:bophelompopo22@gmail.com?subject=Remote Jobs SA Feedback&body=Hi Remote Jobs SA team,%0D%0A%0D%0AI'd like to share some feedback about your service:%0D%0A%0D%0A[Please share your thoughts, suggestions, or report any issues here]%0D%0A%0D%0AThanks!"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -339,7 +339,7 @@ function App() {
 
           {/* Google Forms Option */}
           <a
-            href="https://forms.google.com/your-feedback-form-link"
+            href="https://docs.google.com/forms/d/e/1FAIpQLSdDKoLkTMdBCkOuxrbfmGl8nvLBP5jZ5O4FvTghPXz36HOkSA/viewform?usp=header"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -369,7 +369,7 @@ function App() {
 
           {/* WhatsApp Option */}
           <a
-            href="https://wa.me/your-whatsapp-number?text=Hi Remote Jobs SA team! I'd like to share some feedback about your service."
+            href="https://wa.me/272725289455?text=Hi Remote Jobs SA team! I'd like to share some feedback about your service."
             target="_blank"
             rel="noopener noreferrer"
             style={{
