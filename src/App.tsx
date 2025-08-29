@@ -369,7 +369,7 @@ function App() {
 
           {/* WhatsApp Option */}
           <a
-            href="https://wa.me/272725289455?text=Hi Remote Jobs SA team! I'd like to share some feedback about your service."
+            href="https://wa.me/27725289455?text=Hi Remote Jobs SA team! I'd like to share some feedback about your service."
             target="_blank"
             rel="noopener noreferrer"
             style={{
