@@ -138,39 +138,73 @@ export default async function handler(req, res) {
 
 async function getTopJobsByCategory() {
   try {
-    // Define job categories
-    const categories = [
-      "Software Development",
-      "Data & Analytics",
-      "Design & Creative",
-      "Marketing & Sales",
-      "Customer Support",
-      "Project Management",
-      "Writing & Content",
-      "Finance & Accounting",
-    ];
+    // Define job categories and their Adzuna category mappings
+    const categoryMappings = {
+      "Software Development": [
+        "IT Jobs",
+        "Software Development",
+        "Programming",
+      ],
+      "Data & Analytics": [
+        "Data Science",
+        "Analytics",
+        "Business Intelligence",
+      ],
+      "Design & Creative": ["Design", "Creative", "UX/UI"],
+      "Marketing & Sales": ["Marketing", "Sales", "Digital Marketing"],
+      "Customer Support": ["Customer Service", "Support", "Help Desk"],
+      "Project Management": ["Project Management", "Management", "Operations"],
+      "Writing & Content": ["Content Writing", "Copywriting", "Editorial"],
+      "Finance & Accounting": ["Finance", "Accounting", "Bookkeeping"],
+    };
 
     const topJobs = {};
 
-    for (const category of categories) {
-      // Get top 2 jobs for this category (you'll need to implement this based on your job data structure)
-      // For now, we'll create placeholder jobs
-      topJobs[category] = [
-        {
-          title: `Senior ${category.split(" ")[0]} Specialist`,
-          company: `${category.split(" ")[0]}Corp`,
-          salary: "R35,000 - R45,000/month",
-          location: "Remote",
-          description: `Exciting opportunity for a ${category} professional`,
-        },
-        {
-          title: `${category.split(" ")[0]} Manager`,
-          company: `${category.split(" ")[0]}Tech`,
-          salary: "R40,000 - R50,000/month",
-          location: "Remote",
-          description: `Lead ${category} initiatives in a growing company`,
-        },
-      ];
+    for (const [category, searchTerms] of Object.entries(categoryMappings)) {
+      try {
+        // Fetch jobs from Adzuna API for this category
+        const jobs = await fetchJobsFromAdzuna(searchTerms);
+
+        // Get top 2 jobs (highest salary or most recent)
+        const top2Jobs = jobs
+          .sort((a, b) => {
+            // Sort by salary first, then by date
+            const salaryA = extractSalary(a.salary_max || a.salary_min || 0);
+            const salaryB = extractSalary(b.salary_max || b.salary_min || 0);
+            if (salaryA !== salaryB) return salaryB - salaryA;
+            return new Date(b.created) - new Date(a.created);
+          })
+          .slice(0, 2)
+          .map((job) => ({
+            title: job.title,
+            company: job.company.display_name,
+            salary: formatSalary(job.salary_min, job.salary_max),
+            location: job.location.display_name,
+            description: job.description.substring(0, 100) + "...",
+            url: job.redirect_url,
+          }));
+
+        topJobs[category] = top2Jobs;
+      } catch (error) {
+        console.error(`❌ Error fetching jobs for ${category}:`, error);
+        // Fallback to placeholder jobs
+        topJobs[category] = [
+          {
+            title: `Senior ${category.split(" ")[0]} Specialist`,
+            company: `${category.split(" ")[0]}Corp`,
+            salary: "R35,000 - R45,000/month",
+            location: "Remote",
+            description: `Exciting opportunity for a ${category} professional`,
+          },
+          {
+            title: `${category.split(" ")[0]} Manager`,
+            company: `${category.split(" ")[0]}Tech`,
+            salary: "R40,000 - R50,000/month",
+            location: "Remote",
+            description: `Lead ${category} initiatives in a growing company`,
+          },
+        ];
+      }
     }
 
     return topJobs;
@@ -178,6 +212,51 @@ async function getTopJobsByCategory() {
     console.error("❌ Error fetching top jobs:", error);
     return {};
   }
+}
+
+async function fetchJobsFromAdzuna(searchTerms) {
+  try {
+    const allJobs = [];
+
+    for (const term of searchTerms) {
+      const response = await fetch(
+        `https://api.adzuna.com/v1/api/jobs/za/search/1?app_id=${process.env.ADZUNA_APP_ID}&app_key=${process.env.ADZUNA_APP_KEY}&results_per_page=10&what=${encodeURIComponent(term)}&where=remote&content-type=application/json`
+      );
+
+      if (!response.ok) {
+        console.error(`❌ Adzuna API error for ${term}:`, response.status);
+        continue;
+      }
+
+      const data = await response.json();
+      if (data.results) {
+        allJobs.push(...data.results);
+      }
+    }
+
+    return allJobs;
+  } catch (error) {
+    console.error("❌ Error fetching from Adzuna:", error);
+    return [];
+  }
+}
+
+function extractSalary(salary) {
+  if (typeof salary === "number") return salary;
+  if (typeof salary === "string") {
+    const match = salary.match(/[\d,]+/);
+    return match ? parseInt(match[0].replace(/,/g, "")) : 0;
+  }
+  return 0;
+}
+
+function formatSalary(min, max) {
+  if (!min && !max) return "Salary not specified";
+  if (min && max) {
+    return `R${(min / 1000).toFixed(0)}k - R${(max / 1000).toFixed(0)}k/month`;
+  }
+  const salary = min || max;
+  return `R${(salary / 1000).toFixed(0)}k/month`;
 }
 
 function generateDailyDigestEmail({
@@ -195,7 +274,8 @@ function generateDailyDigestEmail({
           (job) =>
             `<li><strong>${job.title}</strong> at <strong>${job.company}</strong><br>
        💰 ${job.salary} | 📍 ${job.location}<br>
-       <small>${job.description}</small></li>`
+       <small>${job.description}</small><br>
+       <a href="${job.url}" style="color: #059669; font-size: 12px;">View Job →</a></li>`
         )
         .join("");
 
@@ -261,11 +341,11 @@ function generateDailyDigestEmail({
           
           ${ctaSection}
           
-          <div class="preferences">
-            <h3>📋 Help Us Send Better Jobs</h3>
-            <p>Tell us which job categories interest you most:</p>
-            <a href="https://forms.gle/your-google-form-link" class="cta-button">Update Preferences</a>
-          </div>
+                      <div class="preferences">
+              <h3>📋 Help Us Send Better Jobs</h3>
+              <p>Tell us which job categories interest you most:</p>
+              <a href="https://forms.gle/YOUR_ACTUAL_FORM_ID" class="cta-button">Update Preferences</a>
+            </div>
           
           <p>See all available jobs: <a href="https://remotejobs-sa-i11c.vercel.app/?page=job-search">Browse All Jobs</a></p>
           
