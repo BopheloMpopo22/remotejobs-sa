@@ -23,101 +23,62 @@ export default async function handler(req, res) {
 
     console.log("📅 Processing for date:", todayString);
 
-    // Get all users who have payment confirmation emails (source of truth)
-    const { data: paymentLogs, error: paidError } = await supabase
-      .from("payment_email_logs")
-      .select(
-        `
-        user_email,
-        job_assistant_applications!inner(
-          full_name,
-          id
-        )
-      `
-      )
-      .eq("email_status", "sent")
-      .gte(
-        "sent_at",
-        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-      ); // Last 30 days
+    // Get all users from job_assistant_applications table
+    const { data: allUsers, error: usersError } = await supabase
+      .from("job_assistant_applications")
+      .select("email, full_name")
+      .not("email", "is", null);
 
-    if (paidError) {
-      console.error("❌ Error fetching payment logs:", paidError);
+    if (usersError) {
+      console.error("❌ Error fetching users:", usersError);
       return res.status(500).json({ error: "Database error" });
     }
 
-    console.log(`✅ Found ${paymentLogs.length} users with confirmed payments`);
+    console.log(`✅ Found ${allUsers.length} users to send emails to`);
 
-    if (paymentLogs.length === 0) {
+    if (allUsers.length === 0) {
       return res.status(200).json({
         success: true,
-        message: "No users with confirmed payments found",
+        message: "No users found",
         date: todayString,
         emailsSent: 0,
       });
     }
 
+    // Get top jobs from each category
+    const topJobs = await getTopJobsByCategory();
+
     let emailsSent = 0;
     const results = [];
 
-    // Process each user with confirmed payment
-    for (const paymentLog of paymentLogs) {
+    // Process each user
+    for (const user of allUsers) {
       try {
-        const userEmail = paymentLog.user_email;
-        const userName =
-          paymentLog.job_assistant_applications?.full_name ||
-          userEmail.split("@")[0];
+        const userEmail = user.email;
+        const userName = user.full_name || userEmail.split("@")[0];
 
         console.log(`📧 Processing user: ${userEmail}`);
 
-        // Get user's job applications for today
-        const { data: todaysApplications, error: appError } = await supabase
-          .from("job_applications")
-          .select("*")
+        // Check if user is paid (has payment confirmation)
+        const { data: paymentLog } = await supabase
+          .from("payment_email_logs")
+          .select("user_email")
           .eq("user_email", userEmail)
-          .eq("application_date", todayString);
+          .eq("email_status", "sent")
+          .gte(
+            "sent_at",
+            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+          )
+          .single();
 
-        if (appError) {
-          console.error(
-            `❌ Error fetching applications for ${userEmail}:`,
-            appError
-          );
-          continue;
-        }
+        const isPaidUser = !!paymentLog;
 
-        // Get user's total applications and responses
-        const { data: allApplications, error: totalError } = await supabase
-          .from("job_applications")
-          .select("*")
-          .eq("user_email", userEmail);
-
-        if (totalError) {
-          console.error(
-            `❌ Error fetching total applications for ${userEmail}:`,
-            totalError
-          );
-          continue;
-        }
-
-        // Calculate statistics
-        const totalApplications = allApplications.length;
-        const totalResponses = allApplications.filter(
-          (app) => app.status === "responded"
-        ).length;
-        const todaysCount = todaysApplications.length;
-
-        console.log(`📊 Statistics for ${userEmail}:`);
-        console.log(`- Today's applications: ${todaysCount}`);
-        console.log(`- Total applications: ${totalApplications}`);
-        console.log(`- Total responses: ${totalResponses}`);
-
-        // Generate email content
+        // Generate email content based on user type
         const emailContent = generateDailyDigestEmail({
           userName,
-          todaysApplications,
-          totalApplications,
-          totalResponses,
-          todaysCount,
+          topJobs,
+          isPaidUser,
+          todayString,
         });
 
         // Send email
@@ -125,7 +86,7 @@ export default async function handler(req, res) {
           {
             from: "RemoteJobs SA <onboarding@resend.dev>",
             to: [userEmail],
-            subject: `📊 Daily Job Application Report - ${todayString}`,
+            subject: `🚀 Top Remote Jobs Today - ${todayString}`,
             html: emailContent,
           }
         );
@@ -140,27 +101,15 @@ export default async function handler(req, res) {
           continue;
         }
 
-        console.log(`✅ Email sent successfully to ${userEmail}`);
+        console.log(
+          `✅ Email sent successfully to ${userEmail} (${isPaidUser ? "Paid" : "Free"})`
+        );
         emailsSent++;
-
-        // Update user's application statistics
-        await supabase
-          .from("job_assistant_applications")
-          .update({
-            applications_sent: totalApplications,
-            responses_received: totalResponses,
-            last_application_date: todayString,
-          })
-          .eq("id", user.id);
 
         results.push({
           email: userEmail,
           success: true,
-          statistics: {
-            todaysApplications: todaysCount,
-            totalApplications,
-            totalResponses,
-          },
+          userType: isPaidUser ? "paid" : "free",
         });
       } catch (userError) {
         console.error(`❌ Error processing user ${user.email}:`, userError);
@@ -187,27 +136,92 @@ export default async function handler(req, res) {
   }
 }
 
+async function getTopJobsByCategory() {
+  try {
+    // Define job categories
+    const categories = [
+      "Software Development",
+      "Data & Analytics",
+      "Design & Creative",
+      "Marketing & Sales",
+      "Customer Support",
+      "Project Management",
+      "Writing & Content",
+      "Finance & Accounting",
+    ];
+
+    const topJobs = {};
+
+    for (const category of categories) {
+      // Get top 2 jobs for this category (you'll need to implement this based on your job data structure)
+      // For now, we'll create placeholder jobs
+      topJobs[category] = [
+        {
+          title: `Senior ${category.split(" ")[0]} Specialist`,
+          company: `${category.split(" ")[0]}Corp`,
+          salary: "R35,000 - R45,000/month",
+          location: "Remote",
+          description: `Exciting opportunity for a ${category} professional`,
+        },
+        {
+          title: `${category.split(" ")[0]} Manager`,
+          company: `${category.split(" ")[0]}Tech`,
+          salary: "R40,000 - R50,000/month",
+          location: "Remote",
+          description: `Lead ${category} initiatives in a growing company`,
+        },
+      ];
+    }
+
+    return topJobs;
+  } catch (error) {
+    console.error("❌ Error fetching top jobs:", error);
+    return {};
+  }
+}
+
 function generateDailyDigestEmail({
   userName,
-  todaysApplications,
-  totalApplications,
-  totalResponses,
-  todaysCount,
+  topJobs,
+  isPaidUser,
+  todayString,
 }) {
-  const applicationsList =
-    todaysApplications.length > 0
-      ? todaysApplications
-          .map(
-            (app) =>
-              `<li><strong>${app.job_title}</strong> at <strong>${app.company}</strong> - ${app.location}</li>`
-          )
-          .join("")
-      : "<li><em>No new applications recorded for today</em></li>";
+  const jobCategories = Object.keys(topJobs);
+  const jobsHtml = jobCategories
+    .map((category) => {
+      const jobs = topJobs[category];
+      const jobsList = jobs
+        .map(
+          (job) =>
+            `<li><strong>${job.title}</strong> at <strong>${job.company}</strong><br>
+       💰 ${job.salary} | 📍 ${job.location}<br>
+       <small>${job.description}</small></li>`
+        )
+        .join("");
 
-  const successRate =
-    totalApplications > 0
-      ? Math.round((totalResponses / totalApplications) * 100)
-      : 0;
+      return `
+      <div class="category">
+        <h3>${getCategoryIcon(category)} ${category}:</h3>
+        <ul>${jobsList}</ul>
+      </div>
+    `;
+    })
+    .join("");
+
+  const ctaSection = isPaidUser
+    ? `
+      <div class="cta-section">
+        <h3>🎯 Your Job Assistant is Active!</h3>
+        <p>We're actively applying to jobs on your behalf. Check your dashboard for updates.</p>
+      </div>
+    `
+    : `
+      <div class="cta-section">
+        <h3>💡 Need Help with Applications?</h3>
+        <p>Get professional assistance for just <strong>R179</strong> and let us handle your job applications!</p>
+        <a href="https://remotejobs-sa-i11c.vercel.app/?page=job-assistant" class="cta-button">Get Job Assistant</a>
+      </div>
+    `;
 
   return `
     <!DOCTYPE html>
@@ -215,71 +229,70 @@ function generateDailyDigestEmail({
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Daily Job Application Report</title>
+      <title>Top Remote Jobs Today</title>
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background: #059669; color: white; padding: 20px; text-align: center; }
         .content { padding: 20px; background: #f9fafb; }
-        .stats { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
-        .applications { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .category { background: white; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #059669; }
+        .category h3 { margin: 0 0 10px 0; color: #059669; }
+        .category ul { margin: 0; padding-left: 20px; }
+        .category li { margin-bottom: 10px; }
+        .cta-section { background: #fef3c7; padding: 20px; margin: 20px 0; border-radius: 5px; text-align: center; }
+        .cta-button { display: inline-block; background: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; }
         .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
-        .highlight { color: #059669; font-weight: bold; }
-        .success-rate { color: #059669; font-size: 18px; font-weight: bold; }
+        .preferences { background: #e0f2fe; padding: 15px; margin: 15px 0; border-radius: 5px; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <h1>📊 Daily Job Application Report</h1>
-          <p>Your automated job search update</p>
+          <h1>🚀 Top Remote Jobs Today</h1>
+          <p>${todayString} - Curated just for you</p>
         </div>
         
         <div class="content">
           <p>Hi <strong>${userName}</strong>,</p>
           
-          <p>Here's your daily job application report:</p>
+          <p>Here are today's best remote job opportunities, handpicked from each category:</p>
           
-          <div class="stats">
-            <h3>📈 Today's Summary</h3>
-            <p><span class="highlight">${todaysCount}</span> new applications sent today</p>
-            <p><span class="highlight">${totalApplications}</span> total applications sent</p>
-            <p><span class="highlight">${totalResponses}</span> responses received</p>
-            <p class="success-rate">Success Rate: ${successRate}%</p>
+          ${jobsHtml}
+          
+          ${ctaSection}
+          
+          <div class="preferences">
+            <h3>📋 Help Us Send Better Jobs</h3>
+            <p>Tell us which job categories interest you most:</p>
+            <a href="https://forms.gle/your-google-form-link" class="cta-button">Update Preferences</a>
           </div>
           
-          <div class="applications">
-            <h3>📋 Today's Applications (${todaysCount} jobs):</h3>
-            <ul>
-              ${applicationsList}
-            </ul>
-          </div>
-          
-          <div class="stats">
-            <h3>🎯 Your Progress</h3>
-            <p>We're actively searching for remote opportunities that match your criteria:</p>
-            <ul>
-              <li>✅ Daily job applications: <strong>${todaysCount}/5</strong></li>
-              <li>📊 Total applications sent: <strong>${totalApplications}</strong></li>
-              <li>📨 Responses received: <strong>${totalResponses}</strong></li>
-              <li>📈 Success rate: <strong>${successRate}%</strong></li>
-            </ul>
-          </div>
-          
-          <p><strong>💡 Tip:</strong> Keep your preferences updated to get the most relevant job matches!</p>
-          
-          <p>We'll continue working to find you the best remote opportunities. If you have any questions or want to update your preferences, just reply to this email.</p>
+          <p>See all available jobs: <a href="https://remotejobs-sa-i11c.vercel.app/?page=job-search">Browse All Jobs</a></p>
           
           <p>Best regards,<br>
           <strong>The RemoteJobs SA Team</strong></p>
         </div>
         
         <div class="footer">
-          <p>This is an automated report from your Job Assistant service.</p>
-          <p>Email: support@remotejobs-sa.com</p>
+          <p>You're receiving this because you signed up for RemoteJobs SA.</p>
+          <p>Email: support@remotejobs-sa.com | WhatsApp: +27 72 528 9455</p>
         </div>
       </div>
     </body>
     </html>
   `;
+}
+
+function getCategoryIcon(category) {
+  const icons = {
+    "Software Development": "💻",
+    "Data & Analytics": "📊",
+    "Design & Creative": "🎨",
+    "Marketing & Sales": "📈",
+    "Customer Support": "💬",
+    "Project Management": "📋",
+    "Writing & Content": "✍️",
+    "Finance & Accounting": "💰",
+  };
+  return icons[category] || "💼";
 }

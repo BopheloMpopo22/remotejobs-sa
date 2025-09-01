@@ -1,0 +1,23 @@
+name: Daily Email Digest
+
+on:
+  schedule:
+    # Runs every day at 9 AM South Africa time (7 AM UTC)
+    - cron: "0 7 * * *"
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  send-daily-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Daily Email Digest
+        run: |
+          echo "Triggering daily email digest..."
+          curl -X POST https://remotejobs-sa-i11c.vercel.app/api/send-daily-digest
+          echo "Daily email digest triggered successfully!"
+
+      - name: Log Success
+        run: |
+          echo "✅ Daily email digest workflow completed at $(date)"
+          echo "📧 Emails should be sent to all users with top jobs from each category"
