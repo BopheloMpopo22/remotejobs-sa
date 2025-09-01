@@ -141,24 +141,40 @@ export default async function handler(req, res) {
 
 async function getTopJobsByCategory() {
   try {
-    // Define job categories and their Adzuna category mappings
+    // Define job categories and their Adzuna category mappings (using actual Adzuna category values)
     const categoryMappings = {
       "Software Development": [
-        "IT Jobs",
-        "Software Development",
-        "Programming",
+        "it-jobs",
+        "engineering-jobs",
+        "scientific-qa-jobs",
       ],
-      "Data & Analytics": [
-        "Data Science",
-        "Analytics",
-        "Business Intelligence",
+      "Data & Analytics": ["it-jobs", "scientific-qa-jobs", "consultancy-jobs"],
+      "Design & Creative": [
+        "creative-design-jobs",
+        "it-jobs",
+        "pr-advertising-marketing-jobs",
       ],
-      "Design & Creative": ["Design", "Creative", "UX/UI"],
-      "Marketing & Sales": ["Marketing", "Sales", "Digital Marketing"],
-      "Customer Support": ["Customer Service", "Support", "Help Desk"],
-      "Project Management": ["Project Management", "Management", "Operations"],
-      "Writing & Content": ["Content Writing", "Copywriting", "Editorial"],
-      "Finance & Accounting": ["Finance", "Accounting", "Bookkeeping"],
+      "Marketing & Sales": [
+        "pr-advertising-marketing-jobs",
+        "sales-jobs",
+        "consultancy-jobs",
+      ],
+      "Customer Support": [
+        "customer-services-jobs",
+        "admin-jobs",
+        "retail-jobs",
+      ],
+      "Project Management": ["admin-jobs", "consultancy-jobs", "hr-jobs"],
+      "Writing & Content": [
+        "creative-design-jobs",
+        "pr-advertising-marketing-jobs",
+        "other-general-jobs",
+      ],
+      "Finance & Accounting": [
+        "accounting-finance-jobs",
+        "admin-jobs",
+        "consultancy-jobs",
+      ],
     };
 
     const topJobs = {};
@@ -221,16 +237,14 @@ async function fetchJobsFromAdzuna(searchTerms) {
   try {
     const allJobs = [];
 
-    // Check if Adzuna credentials are available
-    if (!process.env.ADZUNA_APP_ID || !process.env.ADZUNA_APP_KEY) {
-      console.log("⚠️ Adzuna credentials not found, using fallback jobs");
-      return [];
-    }
+    // Use the same Adzuna credentials as the frontend
+    const APP_ID = "6d779b8f";
+    const API_KEY = "9854bcbf1e37c466be4206d7a2114d8a";
 
     for (const term of searchTerms) {
       try {
         const response = await fetch(
-          `https://api.adzuna.com/v1/api/jobs/za/search/1?app_id=${process.env.ADZUNA_APP_ID}&app_key=${process.env.ADZUNA_APP_KEY}&results_per_page=10&what=${encodeURIComponent(term)}&where=remote&content-type=application/json`
+          `https://api.adzuna.com/v1/api/jobs/za/search/1?app_id=${APP_ID}&app_key=${API_KEY}&results_per_page=10&category=${term}&what=remote&content-type=application/json`
         );
 
         if (!response.ok) {
