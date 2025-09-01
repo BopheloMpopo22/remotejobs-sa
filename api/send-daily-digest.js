@@ -23,16 +23,27 @@ export default async function handler(req, res) {
 
     console.log("📅 Processing for date:", todayString);
 
-    // Get all users from job_assistant_applications table
-    const { data: allUsers, error: usersError } = await supabase
-      .from("job_assistant_applications")
-      .select("email, full_name")
-      .not("email", "is", null);
+    // Get all users from authentication table (Supabase auth.users)
+    const { data: authUsers, error: authError } =
+      await supabase.auth.admin.listUsers();
 
-    if (usersError) {
-      console.error("❌ Error fetching users:", usersError);
+    if (authError) {
+      console.error("❌ Error fetching auth users:", authError);
       return res.status(500).json({ error: "Database error" });
     }
+
+    // Filter out users without email and format them
+    const allUsers = authUsers.users
+      .filter((user) => user.email && user.email_confirmed_at) // Only confirmed email users
+      .map((user) => ({
+        email: user.email,
+        full_name:
+          user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          user.email.split("@")[0],
+      }));
+
+    console.log(`✅ Found ${allUsers.length} users from authentication table`);
 
     console.log(`✅ Found ${allUsers.length} users to send emails to`);
 
@@ -73,11 +84,21 @@ export default async function handler(req, res) {
 
         const isPaidUser = !!paymentLog;
 
+        // Check if user has made a job assistant application
+        const { data: jobApplication } = await supabase
+          .from("job_assistant_applications")
+          .select("id")
+          .eq("email", userEmail)
+          .single();
+
+        const hasJobApplication = !!jobApplication;
+
         // Generate email content based on user type
         const emailContent = generateDailyDigestEmail({
           userName,
           topJobs,
           isPaidUser,
+          hasJobApplication,
           todayString,
         });
 
@@ -294,6 +315,7 @@ function generateDailyDigestEmail({
   userName,
   topJobs,
   isPaidUser,
+  hasJobApplication,
   todayString,
 }) {
   const jobCategories = Object.keys(topJobs);
@@ -319,20 +341,32 @@ function generateDailyDigestEmail({
     })
     .join("");
 
-  const ctaSection = isPaidUser
-    ? `
+  let ctaSection;
+
+  if (isPaidUser) {
+    ctaSection = `
       <div class="cta-section">
         <h3>🎯 Your Job Assistant is Active!</h3>
         <p>We're actively applying to jobs on your behalf. Check your dashboard for updates.</p>
       </div>
-    `
-    : `
+    `;
+  } else if (hasJobApplication) {
+    ctaSection = `
+      <div class="cta-section">
+        <h3>💡 Ready to Upgrade?</h3>
+        <p>Complete your payment to activate your Job Assistant and start getting applications sent automatically!</p>
+        <a href="https://remotejobs-sa-i11c.vercel.app/?page=job-assistant" class="cta-button">Complete Payment</a>
+      </div>
+    `;
+  } else {
+    ctaSection = `
       <div class="cta-section">
         <h3>💡 Need Help with Applications?</h3>
         <p>Get professional assistance for just <strong>R179</strong> and let us handle your job applications!</p>
         <a href="https://remotejobs-sa-i11c.vercel.app/?page=job-assistant" class="cta-button">Get Job Assistant</a>
       </div>
     `;
+  }
 
   return `
     <!DOCTYPE html>
