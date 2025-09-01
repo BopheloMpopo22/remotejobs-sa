@@ -111,6 +111,9 @@ export default async function handler(req, res) {
           success: true,
           userType: isPaidUser ? "paid" : "free",
         });
+
+        // Add delay to avoid rate limiting (1 second between emails)
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (userError) {
         console.error(`❌ Error processing user ${user.email}:`, userError);
         results.push({
@@ -218,22 +221,36 @@ async function fetchJobsFromAdzuna(searchTerms) {
   try {
     const allJobs = [];
 
+    // Check if Adzuna credentials are available
+    if (!process.env.ADZUNA_APP_ID || !process.env.ADZUNA_APP_KEY) {
+      console.log("⚠️ Adzuna credentials not found, using fallback jobs");
+      return [];
+    }
+
     for (const term of searchTerms) {
-      const response = await fetch(
-        `https://api.adzuna.com/v1/api/jobs/za/search/1?app_id=${process.env.ADZUNA_APP_ID}&app_key=${process.env.ADZUNA_APP_KEY}&results_per_page=10&what=${encodeURIComponent(term)}&where=remote&content-type=application/json`
-      );
+      try {
+        const response = await fetch(
+          `https://api.adzuna.com/v1/api/jobs/za/search/1?app_id=${process.env.ADZUNA_APP_ID}&app_key=${process.env.ADZUNA_APP_KEY}&results_per_page=10&what=${encodeURIComponent(term)}&where=remote&content-type=application/json`
+        );
 
-      if (!response.ok) {
-        console.error(`❌ Adzuna API error for ${term}:`, response.status);
-        continue;
-      }
+        if (!response.ok) {
+          console.error(`❌ Adzuna API error for ${term}:`, response.status);
+          continue;
+        }
 
-      const data = await response.json();
-      if (data.results) {
-        allJobs.push(...data.results);
+        const data = await response.json();
+        if (data.results && data.results.length > 0) {
+          console.log(`✅ Found ${data.results.length} jobs for ${term}`);
+          allJobs.push(...data.results);
+        } else {
+          console.log(`⚠️ No jobs found for ${term}`);
+        }
+      } catch (termError) {
+        console.error(`❌ Error fetching jobs for ${term}:`, termError);
       }
     }
 
+    console.log(`📊 Total jobs fetched: ${allJobs.length}`);
     return allJobs;
   } catch (error) {
     console.error("❌ Error fetching from Adzuna:", error);
