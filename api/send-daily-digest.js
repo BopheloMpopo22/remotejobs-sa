@@ -319,10 +319,11 @@ function generateDailyDigestEmail({
         .category h3 { margin: 0 0 10px 0; color: #059669; }
         .category ul { margin: 0; padding-left: 20px; }
         .category li { margin-bottom: 10px; }
-        .cta-section { background: #fef3c7; padding: 20px; margin: 20px 0; border-radius: 5px; text-align: center; }
-        .cta-button { display: inline-block; background: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; }
-        .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
-        .preferences { background: #e0f2fe; padding: 15px; margin: 15px 0; border-radius: 5px; }
+                 .cta-section { background: #fef3c7; padding: 20px; margin: 20px 0; border-radius: 5px; text-align: center; }
+         .cta-button { display: inline-block; background: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; }
+         .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+         .preferences { background: #e0f2fe; padding: 15px; margin: 15px 0; border-radius: 5px; }
+         .community { background: #f3e8ff; padding: 15px; margin: 15px 0; border-radius: 5px; }
       </style>
     </head>
     <body>
@@ -344,7 +345,13 @@ function generateDailyDigestEmail({
                       <div class="preferences">
               <h3>📋 Help Us Send Better Jobs</h3>
               <p>Tell us which job categories interest you most:</p>
-              <a href="https://forms.gle/YOUR_ACTUAL_FORM_ID" class="cta-button">Update Preferences</a>
+              <a href="https://docs.google.com/forms/d/e/1FAIpQLSfY2EwF975bdXzKYYCLRUNK4fH5UJt73eT92X0kIgRYLji6xg/viewform?usp=header" class="cta-button">Update Preferences</a>
+            </div>
+            
+            <div class="community">
+              <h3>👥 Join Our Remote Jobs Community</h3>
+              <p>Connect with other remote job seekers, share opportunities, and get support:</p>
+              <a href="https://www.facebook.com/share/g/1C2gFwgVRH/" class="cta-button" style="background: #1877f2;">Join Facebook Group</a>
             </div>
           
           <p>See all available jobs: <a href="https://remotejobs-sa-i11c.vercel.app/?page=job-search">Browse All Jobs</a></p>
