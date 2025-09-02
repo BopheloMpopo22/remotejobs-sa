@@ -51,6 +51,24 @@ const Auth: React.FC<AuthProps> = ({ onAuthChange }) => {
         onAuthChange(data.user);
         setShowConfirmMessage(true);
 
+        // Save user to users table for daily digest
+        try {
+          const { error: userError } = await supabase.from("users").insert({
+            email: data.user.email,
+            full_name: fullName,
+            email_preferences: { daily_digest: true },
+            is_active: true,
+          });
+
+          if (userError) {
+            console.error("Failed to save user to users table:", userError);
+          } else {
+            console.log("User saved to users table for daily digest");
+          }
+        } catch (userError) {
+          console.error("Error saving user to users table:", userError);
+        }
+
         // Send welcome email
         try {
           await fetch("/api/send-welcome-email", {

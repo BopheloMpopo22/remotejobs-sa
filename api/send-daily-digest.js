@@ -23,27 +23,28 @@ export default async function handler(req, res) {
 
     console.log("📅 Processing for date:", todayString);
 
-    // Get all users from authentication table using a different approach
-    // First, let's get users from job_assistant_applications table (paid users)
-    const { data: jobAssistantUsers, error: jobError } = await supabase
-      .from("job_assistant_applications")
-      .select("email, full_name")
-      .not("email", "is", null);
+    // Get all users from users table (daily digest recipients)
+    const { data: dailyDigestUsers, error: usersError } = await supabase
+      .from("users")
+      .select("email, full_name, email_preferences")
+      .eq("is_active", true)
+      .eq("email_preferences->daily_digest", true);
 
-    if (jobError) {
-      console.error("❌ Error fetching job assistant users:", jobError);
+    if (usersError) {
+      console.error("❌ Error fetching daily digest users:", usersError);
       return res.status(500).json({ error: "Database error" });
     }
 
-    // For now, let's use the job_assistant_applications table
-    // In production, you'd want to get ALL auth users
-    const allUsers = jobAssistantUsers.map((user) => ({
-      email: user.email,
-      full_name: user.full_name || user.email.split("@")[0],
-    }));
+    // Filter users who want daily digest emails
+    const allUsers = dailyDigestUsers
+      .filter((user) => user.email_preferences?.daily_digest)
+      .map((user) => ({
+        email: user.email,
+        full_name: user.full_name || user.email.split("@")[0],
+      }));
 
     console.log(
-      `✅ Found ${allUsers.length} users from job_assistant_applications table`
+      `✅ Found ${allUsers.length} users from users table for daily digest`
     );
 
     console.log(`✅ Found ${allUsers.length} users to send emails to`);
