@@ -112,6 +112,7 @@ export default async function handler(req, res) {
           });
 
           // Send email
+          console.log(`📧 Attempting to send email to: ${userEmail}`);
           const { data: emailData, error: emailError } =
             await resend.emails.send({
               from: "RemoteJobs SA <onboarding@resend.dev>",
@@ -123,14 +124,20 @@ export default async function handler(req, res) {
           if (emailError) {
             console.error(
               `❌ Error sending email to ${userEmail}:`,
-              emailError
+              JSON.stringify(emailError, null, 2)
             );
             return {
               email: userEmail,
               success: false,
-              error: emailError.message || "Email sending failed",
+              error:
+                emailError.message ||
+                `Email sending failed: ${JSON.stringify(emailError)}`,
             };
           }
+
+          console.log(
+            `✅ Email sent successfully to ${userEmail}, ID: ${emailData?.id}`
+          );
 
           console.log(
             `✅ Email sent successfully to ${userEmail} (${isPaidUser ? "Paid" : "Free"})`
