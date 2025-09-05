@@ -64,76 +64,95 @@ export default async function handler(req, res) {
     let emailsSent = 0;
     const results = [];
 
-    // Process each user
-    for (const user of allUsers) {
-      try {
-        const userEmail = user.email;
-        const userName = user.full_name || userEmail.split("@")[0];
+    // Process users in batches to avoid timeout
+    const batchSize = 10;
+    const batches = [];
+    for (let i = 0; i < allUsers.length; i += batchSize) {
+      batches.push(allUsers.slice(i, i + batchSize));
+    }
 
-        console.log(`📧 Processing user: ${userEmail}`);
+    console.log(`📦 Processing ${allUsers.length} users in ${batches.length} batches of ${batchSize}`);
 
-        // Check if user is paid (has payment confirmation)
-        const { data: paymentLog } = await supabase
-          .from("payment_email_logs")
-          .select("user_email")
-          .eq("user_email", userEmail)
-          .eq("email_status", "sent")
-          .gte(
-            "sent_at",
-            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-          )
-          .single();
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const batch = batches[batchIndex];
+      console.log(`🔄 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} users)`);
 
-        const isPaidUser = !!paymentLog;
+      // Process batch in parallel
+      const batchPromises = batch.map(async (user) => {
+        try {
+          const userEmail = user.email;
+          const userName = user.full_name || userEmail.split("@")[0];
 
-        // Generate email content based on user type
-        const emailContent = generateDailyDigestEmail({
-          userName,
-          topJobs,
-          isPaidUser,
-          todayString,
-        });
+          console.log(`📧 Processing user: ${userEmail}`);
 
-        // Send email
-        const { data: emailData, error: emailError } = await resend.emails.send(
-          {
-            from: "RemoteJobs SA <onboarding@resend.dev>",
-            to: [userEmail],
-            subject: `🚀 Top Remote Jobs Today - ${todayString}`,
-            html: emailContent,
-          }
-        );
+          // Check if user is paid (has payment confirmation)
+          const { data: paymentLog } = await supabase
+            .from("payment_email_logs")
+            .select("user_email")
+            .eq("user_email", userEmail)
+            .eq("email_status", "sent")
+            .gte(
+              "sent_at",
+              new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+            )
+            .single();
 
-        if (emailError) {
-          console.error(`❌ Error sending email to ${userEmail}:`, emailError);
-          results.push({
-            email: userEmail,
-            success: false,
-            error: emailError.message,
+          const isPaidUser = !!paymentLog;
+
+          // Generate email content based on user type
+          const emailContent = generateDailyDigestEmail({
+            userName,
+            topJobs,
+            isPaidUser,
+            todayString,
           });
-          continue;
+
+          // Send email
+          const { data: emailData, error: emailError } = await resend.emails.send(
+            {
+              from: "RemoteJobs SA <onboarding@resend.dev>",
+              to: [userEmail],
+              subject: `🚀 Top Remote Jobs Today - ${todayString}`,
+              html: emailContent,
+            }
+          );
+
+          if (emailError) {
+            console.error(`❌ Error sending email to ${userEmail}:`, emailError);
+            return {
+              email: userEmail,
+              success: false,
+              error: emailError.message,
+            };
+          }
+
+          console.log(
+            `✅ Email sent successfully to ${userEmail} (${isPaidUser ? "Paid" : "Free"})`
+          );
+          emailsSent++;
+
+          return {
+            email: userEmail,
+            success: true,
+            userType: isPaidUser ? "paid" : "free",
+          };
+        } catch (userError) {
+          console.error(`❌ Error processing user ${user.email}:`, userError);
+          return {
+            email: user.email,
+            success: false,
+            error: userError.message,
+          };
         }
+      });
 
-        console.log(
-          `✅ Email sent successfully to ${userEmail} (${isPaidUser ? "Paid" : "Free"})`
-        );
-        emailsSent++;
+      // Wait for batch to complete
+      const batchResults = await Promise.all(batchPromises);
+      results.push(...batchResults);
 
-        results.push({
-          email: userEmail,
-          success: true,
-          userType: isPaidUser ? "paid" : "free",
-        });
-
-        // Add delay to avoid rate limiting (1 second between emails)
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      } catch (userError) {
-        console.error(`❌ Error processing user ${user.email}:`, userError);
-        results.push({
-          email: user.email,
-          success: false,
-          error: userError.message,
-        });
+      // Small delay between batches to avoid overwhelming the system
+      if (batchIndex < batches.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }
 

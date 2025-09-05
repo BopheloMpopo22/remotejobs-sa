@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/send-daily-digest.js": {
-      "maxDuration": 30
-    }
-  }
-}
