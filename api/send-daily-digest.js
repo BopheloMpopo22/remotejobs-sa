@@ -128,7 +128,7 @@ export default async function handler(req, res) {
             return {
               email: userEmail,
               success: false,
-              error: emailError.message,
+              error: emailError.message || "Email sending failed",
             };
           }
 
@@ -147,7 +147,7 @@ export default async function handler(req, res) {
           return {
             email: user.email,
             success: false,
-            error: userError.message,
+            error: userError.message || "Unknown error occurred",
           };
         }
       });
