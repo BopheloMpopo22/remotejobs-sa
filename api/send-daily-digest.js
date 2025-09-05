@@ -64,20 +64,24 @@ export default async function handler(req, res) {
     let emailsSent = 0;
     const results = [];
 
-    // Process users in batches to avoid timeout
-    const batchSize = 10;
+    // Process users in batches to avoid timeout and respect Resend rate limits
+    const batchSize = 2; // Reduced to respect Resend's 2 requests per second limit
     const batches = [];
     for (let i = 0; i < allUsers.length; i += batchSize) {
       batches.push(allUsers.slice(i, i + batchSize));
     }
 
-    console.log(`📦 Processing ${allUsers.length} users in ${batches.length} batches of ${batchSize}`);
+    console.log(
+      `📦 Processing ${allUsers.length} users in ${batches.length} batches of ${batchSize}`
+    );
 
     for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
       const batch = batches[batchIndex];
-      console.log(`🔄 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} users)`);
+      console.log(
+        `🔄 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} users)`
+      );
 
-      // Process batch in parallel
+      // Process batch in parallel (but only 2 at a time to respect rate limits)
       const batchPromises = batch.map(async (user) => {
         try {
           const userEmail = user.email;
@@ -108,17 +112,19 @@ export default async function handler(req, res) {
           });
 
           // Send email
-          const { data: emailData, error: emailError } = await resend.emails.send(
-            {
+          const { data: emailData, error: emailError } =
+            await resend.emails.send({
               from: "RemoteJobs SA <onboarding@resend.dev>",
               to: [userEmail],
               subject: `🚀 Top Remote Jobs Today - ${todayString}`,
               html: emailContent,
-            }
-          );
+            });
 
           if (emailError) {
-            console.error(`❌ Error sending email to ${userEmail}:`, emailError);
+            console.error(
+              `❌ Error sending email to ${userEmail}:`,
+              emailError
+            );
             return {
               email: userEmail,
               success: false,
@@ -150,9 +156,9 @@ export default async function handler(req, res) {
       const batchResults = await Promise.all(batchPromises);
       results.push(...batchResults);
 
-      // Small delay between batches to avoid overwhelming the system
+      // Delay between batches to respect Resend rate limits (2 requests per second)
       if (batchIndex < batches.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay between batches
       }
     }
 
