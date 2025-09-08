@@ -115,7 +115,7 @@ export default async function handler(req, res) {
           console.log(`📧 Attempting to send email to: ${userEmail}`);
           const { data: emailData, error: emailError } =
             await resend.emails.send({
-              from: "RemoteJobs SA <onboarding@resend.dev>",
+              from: "RemoteJobs SA <noreply@remotejobs-sa.com>",
               to: [userEmail],
               subject: `🚀 Top Remote Jobs Today - ${todayString}`,
               html: emailContent,
