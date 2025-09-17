@@ -34,9 +34,8 @@ export default async function handler(req, res) {
       console.error("❌ Error fetching daily digest users:", usersError);
       return res.status(500).json({ error: "Database error" });
     }
-
     // Filter users who want daily digest emails
-    const allUsers = dailyDigestUsers
+    const allEligibleUsers = dailyDigestUsers
       .filter((user) => user.email_preferences?.daily_digest)
       .map((user) => ({
         email: user.email,
@@ -44,20 +43,49 @@ export default async function handler(req, res) {
       }));
 
     console.log(
-      `✅ Found ${allUsers.length} users from users table for daily digest`
+      `✅ Found ${allEligibleUsers.length} total users eligible for daily digest`
     );
 
-    console.log(`✅ Found ${allUsers.length} users to send emails to`);
+    // ROTATION SYSTEM: Send to ~50 users per day to stay within Resend limits
+    const DAILY_EMAIL_LIMIT = 50; // Leave 50 emails for welcome/payment emails
 
-    if (allUsers.length === 0) {
+    // Create a deterministic rotation based on today's date
+    const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+
+    // Sort users by email to ensure consistent ordering
+    allEligibleUsers.sort((a, b) => a.email.localeCompare(b.email));
+
+    // Calculate rotation parameters
+    const totalUsers = allEligibleUsers.length;
+    const rotationCycles = Math.ceil(totalUsers / DAILY_EMAIL_LIMIT);
+    const currentCycle = daysSinceEpoch % rotationCycles;
+
+    // Select users for today's batch
+    const startIndex = currentCycle * DAILY_EMAIL_LIMIT;
+    const endIndex = Math.min(startIndex + DAILY_EMAIL_LIMIT, totalUsers);
+    const todaysUsers = allEligibleUsers.slice(startIndex, endIndex);
+
+    console.log(
+      `🔄 Rotation System: Cycle ${currentCycle + 1}/${rotationCycles}, sending to users ${startIndex + 1}-${endIndex} of ${totalUsers}`
+    );
+    console.log(`�� Sending to ${todaysUsers.length} users today`);
+
+    if (todaysUsers.length === 0) {
       return res.status(200).json({
         success: true,
-        message: "No users found",
+        message: "No users selected for today's rotation",
         date: todayString,
         emailsSent: 0,
+        rotationInfo: {
+          cycle: currentCycle + 1,
+          totalCycles: rotationCycles,
+          totalUsers: totalUsers,
+        },
       });
     }
 
+    // Use todaysUsers instead of allUsers for the rest of the function
+    const allUsers = todaysUsers;
     // Get top jobs from each category
     const topJobs = await getTopJobsByCategory();
 
@@ -168,7 +196,6 @@ export default async function handler(req, res) {
         await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay between batches
       }
     }
-
     console.log(`🎉 Daily digest completed. ${emailsSent} emails sent.`);
 
     return res.status(200).json({
@@ -177,6 +204,13 @@ export default async function handler(req, res) {
       date: todayString,
       emailsSent,
       results,
+      rotationInfo: {
+        cycle: currentCycle + 1,
+        totalCycles: rotationCycles,
+        totalEligibleUsers: totalUsers,
+        usersInTodaysBatch: todaysUsers.length,
+        userRange: `${startIndex + 1}-${endIndex}`,
+      },
     });
   } catch (error) {
     console.error("❌ Daily digest error:", error);
