@@ -2,6 +2,7 @@
   "name": "remotejobssa",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "server": "node server.js",
@@ -19,6 +20,7 @@
     "express": "^4.21.2",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
+    "jsdom": "^24.0.0",
     "node-fetch": "^3.3.2",
     "puppeteer": "^24.12.1",
     "react": "^19.1.0",

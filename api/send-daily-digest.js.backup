@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
-import { fetchJobsFromMultipleSources } from "./services/jobApiService.js";
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -35,8 +34,9 @@ export default async function handler(req, res) {
       console.error("❌ Error fetching daily digest users:", usersError);
       return res.status(500).json({ error: "Database error" });
     }
+
     // Filter users who want daily digest emails
-    const allEligibleUsers = dailyDigestUsers
+    const allUsers = dailyDigestUsers
       .filter((user) => user.email_preferences?.daily_digest)
       .map((user) => ({
         email: user.email,
@@ -44,49 +44,20 @@ export default async function handler(req, res) {
       }));
 
     console.log(
-      `✅ Found ${allEligibleUsers.length} total users eligible for daily digest`
+      `✅ Found ${allUsers.length} users from users table for daily digest`
     );
 
-    // ROTATION SYSTEM: Send to ~50 users per day to stay within Resend limits
-    const DAILY_EMAIL_LIMIT = 50; // Leave 50 emails for welcome/payment emails
+    console.log(`✅ Found ${allUsers.length} users to send emails to`);
 
-    // Create a deterministic rotation based on today's date
-    const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
-
-    // Sort users by email to ensure consistent ordering
-    allEligibleUsers.sort((a, b) => a.email.localeCompare(b.email));
-
-    // Calculate rotation parameters
-    const totalUsers = allEligibleUsers.length;
-    const rotationCycles = Math.ceil(totalUsers / DAILY_EMAIL_LIMIT);
-    const currentCycle = daysSinceEpoch % rotationCycles;
-
-    // Select users for today's batch
-    const startIndex = currentCycle * DAILY_EMAIL_LIMIT;
-    const endIndex = Math.min(startIndex + DAILY_EMAIL_LIMIT, totalUsers);
-    const todaysUsers = allEligibleUsers.slice(startIndex, endIndex);
-
-    console.log(
-      `🔄 Rotation System: Cycle ${currentCycle + 1}/${rotationCycles}, sending to users ${startIndex + 1}-${endIndex} of ${totalUsers}`
-    );
-    console.log(`�� Sending to ${todaysUsers.length} users today`);
-
-    if (todaysUsers.length === 0) {
+    if (allUsers.length === 0) {
       return res.status(200).json({
         success: true,
-        message: "No users selected for today's rotation",
+        message: "No users found",
         date: todayString,
         emailsSent: 0,
-        rotationInfo: {
-          cycle: currentCycle + 1,
-          totalCycles: rotationCycles,
-          totalUsers: totalUsers,
-        },
       });
     }
 
-    // Use todaysUsers instead of allUsers for the rest of the function
-    const allUsers = todaysUsers;
     // Get top jobs from each category
     const topJobs = await getTopJobsByCategory();
 
@@ -197,6 +168,7 @@ export default async function handler(req, res) {
         await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay between batches
       }
     }
+
     console.log(`🎉 Daily digest completed. ${emailsSent} emails sent.`);
 
     return res.status(200).json({
@@ -205,13 +177,6 @@ export default async function handler(req, res) {
       date: todayString,
       emailsSent,
       results,
-      rotationInfo: {
-        cycle: currentCycle + 1,
-        totalCycles: rotationCycles,
-        totalEligibleUsers: totalUsers,
-        usersInTodaysBatch: todaysUsers.length,
-        userRange: `${startIndex + 1}-${endIndex}`,
-      },
     });
   } catch (error) {
     console.error("❌ Daily digest error:", error);
@@ -221,71 +186,39 @@ export default async function handler(req, res) {
 
 async function getTopJobsByCategory() {
   try {
-    // Define job categories and their search terms for multiple APIs
+    // Define job categories and their Adzuna category mappings (using actual Adzuna category values)
     const categoryMappings = {
       "Software Development": [
         "it-jobs",
         "engineering-jobs",
         "scientific-qa-jobs",
-        "developer",
-        "programmer",
-        "software engineer",
       ],
-      "Data & Analytics": [
-        "it-jobs",
-        "scientific-qa-jobs",
-        "consultancy-jobs",
-        "data analyst",
-        "data scientist",
-        "analytics",
-      ],
+      "Data & Analytics": ["it-jobs", "scientific-qa-jobs", "consultancy-jobs"],
       "Design & Creative": [
         "creative-design-jobs",
         "it-jobs",
         "pr-advertising-marketing-jobs",
-        "designer",
-        "ui/ux",
-        "graphic design",
       ],
       "Marketing & Sales": [
         "pr-advertising-marketing-jobs",
         "sales-jobs",
         "consultancy-jobs",
-        "marketing",
-        "digital marketing",
-        "sales",
       ],
       "Customer Support": [
         "customer-services-jobs",
         "admin-jobs",
         "retail-jobs",
-        "customer support",
-        "customer service",
-        "support",
       ],
-      "Project Management": [
-        "admin-jobs",
-        "consultancy-jobs",
-        "hr-jobs",
-        "project manager",
-        "project management",
-        "scrum master",
-      ],
+      "Project Management": ["admin-jobs", "consultancy-jobs", "hr-jobs"],
       "Writing & Content": [
         "creative-design-jobs",
         "pr-advertising-marketing-jobs",
         "other-general-jobs",
-        "writer",
-        "content creator",
-        "copywriter",
       ],
       "Finance & Accounting": [
         "accounting-finance-jobs",
         "admin-jobs",
         "consultancy-jobs",
-        "accountant",
-        "financial analyst",
-        "bookkeeper",
       ],
     };
 
@@ -293,33 +226,8 @@ async function getTopJobsByCategory() {
 
     for (const [category, searchTerms] of Object.entries(categoryMappings)) {
       try {
-        console.log(
-          `🔍 Fetching jobs for ${category} from multiple sources...`
-        );
-
-        // Fetch jobs from multiple APIs
-        const { jobs, sources, errors } = await fetchJobsFromMultipleSources(
-          searchTerms,
-          {
-            maxJobsPerSource: 15,
-            includeAdzuna: true,
-            includeRemoteCo: true,
-            includeGitHubJobs: true,
-            includeWeWorkRemotely: true,
-            includeRemoteOK: true,
-            includeJobsPresso: true,
-            country: "za",
-          }
-        );
-
-        if (errors.length > 0) {
-          console.log(`⚠️ API errors for ${category}:`, errors);
-        }
-
-        console.log(
-          `📊 Found ${jobs.length} total jobs for ${category} from sources:`,
-          sources
-        );
+        // Fetch jobs from Adzuna API for this category
+        const jobs = await fetchJobsFromAdzuna(searchTerms);
 
         // Get top 2 jobs (highest salary or most recent)
         const top2Jobs = jobs
@@ -333,16 +241,14 @@ async function getTopJobsByCategory() {
           .slice(0, 2)
           .map((job) => ({
             title: job.title,
-            company: job.company,
-            salary: job.salary,
-            location: job.location,
+            company: job.company.display_name,
+            salary: formatSalary(job.salary_min, job.salary_max),
+            location: job.location.display_name,
             description: job.description.substring(0, 100) + "...",
-            url: job.url,
-            source: job.source, // Add source info for transparency
+            url: job.redirect_url,
           }));
 
         topJobs[category] = top2Jobs;
-        console.log(`✅ Selected ${top2Jobs.length} top jobs for ${category}`);
       } catch (error) {
         console.error(`❌ Error fetching jobs for ${category}:`, error);
         // Fallback to placeholder jobs
@@ -353,7 +259,6 @@ async function getTopJobsByCategory() {
             salary: "R35,000 - R45,000/month",
             location: "Remote",
             description: `Exciting opportunity for a ${category} professional`,
-            source: "Fallback",
           },
           {
             title: `${category.split(" ")[0]} Manager`,
@@ -361,7 +266,6 @@ async function getTopJobsByCategory() {
             salary: "R40,000 - R50,000/month",
             location: "Remote",
             description: `Lead ${category} initiatives in a growing company`,
-            source: "Fallback",
           },
         ];
       }
@@ -445,7 +349,7 @@ function generateDailyDigestEmail({
         .map(
           (job) =>
             `<li><strong>${job.title}</strong> at <strong>${job.company}</strong><br>
-       💰 ${job.salary} | 📍 ${job.location} | 📊 ${job.source}<br>
+       💰 ${job.salary} | 📍 ${job.location}<br>
        <small>${job.description}</small><br>
        <a href="${job.url}" style="color: #059669; font-size: 12px;">View Job →</a></li>`
         )
