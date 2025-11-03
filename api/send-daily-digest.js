@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
-import { fetchJobsFromMultipleSources } from "./services/jobApiService.js";
+import { fetchJobsFromMultipleSources } from "../services/jobApiService.js";
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
