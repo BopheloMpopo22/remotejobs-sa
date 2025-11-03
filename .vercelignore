@@ -1,0 +1,7 @@
+# Exclude test files from Vercel deployment
+api/test-*.js
+api/debug-*.js
+api/*.backup
+
+# Exclude development files
+api/send-daily-digest.js.backup

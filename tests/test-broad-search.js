@@ -1,5 +1,5 @@
 // Test script with broader search terms to catch more jobs
-import { fetchJobsFromMultipleSources } from "./services/jobApiService.js";
+import { fetchJobsFromMultipleSources } from "../api/services/jobApiService.js";
 
 async function testBroadSearch() {
   console.log("🧪 Testing Multi-API with Broad Search Terms...\n");

@@ -1,5 +1,5 @@
 // Test script for multi-API job fetching
-import { fetchJobsFromMultipleSources } from "./services/jobApiService.js";
+import { fetchJobsFromMultipleSources } from "../api/services/jobApiService.js";
 
 async function testMultiAPI() {
   console.log("🧪 Testing Multi-API Job Fetching...\n");
